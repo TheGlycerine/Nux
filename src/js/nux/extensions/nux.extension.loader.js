@@ -188,11 +188,11 @@ loader.run = function(config) {
     // Begin by loading the extension module.
     var spaceMethods = Import(Nux.defaultConfiguration.extensionNamespace);
 
-    Nux.slog('RUN', Nux.space('loader'))
+    Nux.slog('\'lo :)', Nux.space('loader'))
     // debugger
 
     Nux.use('packager', function(listener){
-        Nux.slog("RUN", listener.name, 'for loader')
+        Nux.slog("Sup :|", listener.name)
         // Load the original methods implemented from the given space
         // ('core' probably)
         // debugger
