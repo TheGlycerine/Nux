@@ -420,6 +420,7 @@
 					
 				}
 
+
 				var run = (runMethod)? runMethod(defAppConfig): listenerObject.item.run(defAppConfig);
 				Nux.signature.run(listenerObject.name, run || true);
 
@@ -483,7 +484,7 @@
 
 				callHandler(listener)
 
-				
+
 				if(required && required.length>0) {
 					
 					if( Nux.assets.allow(required) ) {
@@ -509,8 +510,13 @@
 						Nux.core.slog('DISALLOW', required);
 					}
 
-				}
+				} else {
+
+					if( Nux.signature.expected().length <= 0 ) {
+						Nux.events.callEvent('allAxpected')
+					}
 					// No requirements	
+				}
 			}
 		},
 
@@ -730,8 +736,8 @@
 							// would mangle the callback scope and any event would reference the
 							// eventName last indexed in the looping 'events' creation.
 							var name = eventName;
+							if(!Nux.booted || !Nux.events.passThrough(eventName)) {
 
-							if(!Nux.booted) {
 								context.callbacks[name].push(callback);
 								return context.callbacks[name];
 							} else {
@@ -753,7 +759,11 @@
 
 				// Arguments passed to the event handler (flattened as apply() )
 				var args = arg(arguments, 1, [Nux]);
-
+				var passThrough = false;
+				if(Themis.of(args, Boolean)) {
+					passThrough = args;
+					args = [Nux];
+				}
 				// Scope of the event (this)
 				var scope = arg(arguments, 2, this);
 				
@@ -764,8 +774,26 @@
 				}
 
 				for (var i = 0; i < Nux.events.callbacks[name].length; i++) {
+					if(passThrough) {
+						Nux.events.passThrough(name, passThrough)
+					}
 					Nux.events.callbacks[name][i].apply(scope, args);
 				};
+			},
+			passThrough: function(name, toPass) {
+				/* activate a passthrough on an event, When the event is
+				called whilst passThrough is True, the callback will be immediately
+				called. If passthrough is false or Nux is not booted, the 
+				method will by stacked normally.*/ 
+				if(!this.hasOwnProperty('passed')) {
+					this.passed = {};
+				}
+
+				if(toPass) {
+					this.passed[name] = toPass;
+				} else {
+					return this.passed[name] || false;
+				}
 			}
 		})
 		
@@ -802,8 +830,8 @@
 
 				if(booted && Nux.defaultConfiguration.runOnce) return booted;
 				Nux.booted = true;
-				Nux.events.callEvent('ready')
-				Nux.core.slog("START","Nux core has booted.");
+				Nux.events.callEvent('ready', true)
+				Nux.core.slog("READY","Nux core has booted.");
 			});
 	};
 
@@ -835,15 +863,13 @@
 	]);
 
 	Nux.use('core', function(extension){
-		Nux.core.slog("BOOTED", extension.name + ' (expecting next)');
 	}).then('loader', function(extension){
-		Nux.core.slog('BOOTED', 'THEN ' + extension.name);
 		// stack overload.
 		if(cc>10) { cc++; debugger;  };
-		debugger;
+		
 		// Wait for all expected packages (as required via the imported packages)
 		// to import.
-		Nux.onAllExpected(function(){
+		Nux.onAllExpected(function(){ 
 			Nux.core.slog('FINISH', 'Nux');
 		})
 	});
