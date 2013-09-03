@@ -1,0 +1,53 @@
+{
+  "name": "majax",
+  "version": "0.2.6",
+  "author": {
+    "name": "Simon Waldherr",
+    "email": "contact@simonwaldherr.de",
+    "url": "http://simon.waldherr.eu/"
+  },
+  "description": "majaX stands for micro asynchronous javascript and X (X stands for XML, JSON, CSV, Plaintext, ...)",
+  "homepage": "https://github.com/SimonWaldherr/majaX.js",
+  "maintainers": [
+    {
+      "name": "Simon Waldherr",
+      "email": "contact@simonwaldherr.de",
+      "web": "http://simon.waldherr.eu/"
+    }
+  ],
+  "contributors": [
+    {
+      "name": "Simon Waldherr",
+      "email": "contact@simonwaldherr.de",
+      "url": "http://simon.waldherr.eu/"
+    }
+  ],
+  "demos": [
+    "./index.html"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/SimonWaldherr/majaX.js.git"
+  },
+  "bugs": {
+    "url": "https://github.com/SimonWaldherr/majaX.js/issues",
+    "email": "contact@simonwaldherr.de"
+  },
+  "main": "majax.js",
+  "keywords": [
+    "ajax",
+    "http",
+    "xml",
+    "csv",
+    "json",
+    "binary"
+  ],
+  "devDependencies": {
+    "grunt": ">= 0.4.1",
+    "gzip-js": ">= 0.3.1",
+    "grunt-contrib-jshint": ">= 0.6.0",
+    "grunt-contrib-uglify": ">= 0.2.2",
+    "grunt-compare-size": ">= 0.0.0"
+  },
+  "license": "MIT"
+}
