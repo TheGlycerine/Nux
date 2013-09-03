@@ -27,7 +27,7 @@
 		// core loaders and baked
 		// objects
 		allowed: [],
-
+		events:  ['ready', 'allAxpected'],
 		// independant file assets  used for Nux.
 		assets: {
 			'agile': "js/vendor/com.iskitz.ajile.src.js?mvcoff,mvcshareoff",			
@@ -318,6 +318,39 @@
 				var cb = arg(arguments, 1, null);
 				//this.importCallbacks.append(name, cb);
 				Import( name, path || Nux.defaultConfiguration.extensionPath)		
+			}
+		},
+
+		errors: {
+			Exception: function(errorCode, val, message) {
+				this.value = val;
+				this.message = message;
+				this.errorCode = errorCode;
+				this.toString = function(){
+					return 'NuxError: ' + this.errorCode + ' "' + this.message + '": ' + this.value;
+				}
+
+				return this;
+			},
+			errors: {
+				20: 'Missing callback',
+			},
+			errorMap: function(errorCode) {
+				return {
+					errorCode: errorCode,
+					message: this.errors[errorCode]
+				}
+			},
+			error: function(errorCode){
+				// Pass an identifier to 
+				// produce an error.
+				var em = this.errorMap(errorCode);
+				
+				var exception = new this.Exception(errorCode, arg(arguments, 1, null), em.message);
+				return exception;
+			},
+			throw: function(errorCode, value) {
+				throw this.error(errorCode, value);
 			}
 		},
 
@@ -713,7 +746,7 @@
 		})({ 
 			/* the list of events the system will register for callbacks.
 			Probably, not best to mess with these */
-			events: ['ready', 'allAxpected'],
+			events: NuxConfig.events,
 			callbacks: {},
 			callEvent: function(name){
 				/* call an event, optionally passing args and scope */
@@ -725,6 +758,11 @@
 				var scope = arg(arguments, 2, this);
 				
 				/* Call a chained event with passed information */
+				if(!Nux.events.callbacks.hasOwnProperty(name) ) {
+					// throw Nux.errors.error(20, name)
+					Nux.errors.throw(20, name)
+				}
+
 				for (var i = 0; i < Nux.events.callbacks[name].length; i++) {
 					Nux.events.callbacks[name][i].apply(scope, args);
 				};
