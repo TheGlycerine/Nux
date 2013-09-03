@@ -208,7 +208,7 @@
 
 		config: {
 
-			default: NuxConfig,
+			'default': NuxConfig,
 
 			merge: function(){
 				/* Merge config passed with default config space */
@@ -224,7 +224,7 @@
 			addAllowed: function(paths){
 				
 				return zoe.extend(Nux.defaultConfiguration.allowed, paths, Nux.config.rules);
-			},
+			}
 		},	
 
 		assets: {
@@ -671,22 +671,66 @@
 			return hook
 		},
 
-		events: {
+		// A list of all events to be exposed and captured 
+		// through the interface. These are implemented as 
+		// stacking functions for chaining callback methods.
+		events: (function(context){
 
-			callbacks: {
-				'ready': []
-			},
 
-			ready: function(callback){
-				/*  add a method to be called when the application is ready.
-				If the assets are ready, the function will be called immediately. */
-				if(!Nux.booted) {
-					Nux.events.callbacks.ready.push(callback)
-				} else {
-					callback(Nux)
+			/* create the event handlers for each event type*/
+			for (var i = 0; i < context.events.length; i++) {
+				var eventName = context.events[i];
+				if(! context.callbacks.hasOwnProperty(eventName)) {
+					 context.callbacks[eventName] = [];
 				}
+
+				if(!context.hasOwnProperty(eventName)) {
+					context[eventName] = (function(eventName){ 
+
+						return function(callback){
+							/*  add a method to be called when the application is ready.
+							If the assets are ready, the function will be called immediately. */
+
+							// By referencing the eventName within the callback, we apply it
+							// to the functional scope - keeping the value when the method is
+							// called. Without this (thusly returning a function without the closure)
+							// would mangle the callback scope and any event would reference the
+							// eventName last indexed in the looping 'events' creation.
+							var name = eventName;
+
+							if(!Nux.booted) {
+								context.callbacks[name].push(callback);
+								return context.callbacks[name];
+							} else {
+								return callback(Nux)
+							}
+						}
+					})(eventName)
+				}
+			};
+
+			return context;
+		})({ 
+			/* the list of events the system will register for callbacks.
+			Probably, not best to mess with these */
+			events: ['ready', 'allAxpected'],
+			callbacks: {},
+			callEvent: function(name){
+				/* call an event, optionally passing args and scope */
+
+				// Arguments passed to the event handler (flattened as apply() )
+				var args = arg(arguments, 1, [Nux]);
+
+				// Scope of the event (this)
+				var scope = arg(arguments, 2, this);
+				
+				/* Call a chained event with passed information */
+				for (var i = 0; i < Nux.events.callbacks[name].length; i++) {
+					Nux.events.callbacks[name][i].apply(scope, args);
+				};
 			}
-		}
+		})
+		
 	};
 
 	/** legacy and shortcut additions. **/
@@ -699,6 +743,7 @@
 	Nux.slog 			= Nux.core.slog;
 	Nux.log 			= Nux.core.log;
 	Nux.onReady 		= Nux.events.ready;
+	Nux.onAllExpected 	= Nux.events.allAxpected;
 	Nux.addAllowed 		= Nux.config.addAllowed;
 
 	var init = function(config) {
@@ -719,12 +764,7 @@
 
 				if(booted && Nux.defaultConfiguration.runOnce) return booted;
 				Nux.booted = true;
-				
-				for (var i = 0; i < Nux.events.callbacks.ready.length; i++) {
-					
-					Nux.events.callbacks.ready[i](Nux);
-				};
-
+				Nux.events.callEvent('ready')
 				Nux.core.slog("START","Nux core has booted.");
 			});
 	};
@@ -762,7 +802,12 @@
 		Nux.core.slog('BOOTED', 'THEN ' + extension.name);
 		// stack overload.
 		if(cc>10) { cc++; debugger;  };
-		Nux.core.slog('FINISH', 'Nux');
+		debugger;
+		// Wait for all expected packages (as required via the imported packages)
+		// to import.
+		Nux.onAllExpected(function(){
+			Nux.core.slog('FINISH', 'Nux');
+		})
 	});
 
 });
