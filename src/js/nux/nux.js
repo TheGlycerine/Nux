@@ -61,7 +61,9 @@
 				*/
 				if (name) {
 					var space = Namespace( Nux.space(name));
-					space._meta = {}
+					space._meta = {
+						nux: Nux
+					}
 				} else {
 					return Import(Nux.defaultConfiguration.extensionNamespace);
 				}
@@ -396,7 +398,7 @@
 				// defAppConfig.namespace = Namespace(defAppConfig.extensionNamespace)
 				// Collect the run method from the _meta data or
 				// default to the .run() method
-				var runMethodName = 'run';
+				var runMethodName = 'main';
 				var runMethod;
 
 				if(listenerObject.item.hasOwnProperty('_meta') &&
@@ -409,13 +411,17 @@
 					if(typeof(runMethodName) == 'string') {
 						if( listenerObject.item.hasOwnProperty(runMethodName) ) {
 							// call string defined extension run method
-							runMethod = extension.item[v];
+							runMethod = listenerObject.item[v];
 						} else {
-							var s = extension.name + '._meta.main defines missing method' + runMethodName
+							var s = listenerObject.name + '._meta.main defines missing method ' + runMethodName
 							throw new Error(s);
 						}
 					} else {
-						runMethod = extension.item[runMethodName];
+						if(Themis.of(runMethodName, Function)) {
+							runMethod = runMethodName;
+						} else {
+							if(!runMethod) runMethod = listenerObject.item[runMethodName];
+						}
 					}
 					
 				}
@@ -550,7 +556,7 @@
 				var name = arg(a, 0, null);
 				
 				if(Nux.signature.expected(name)) {
-					Nux.core.slog('RECEIVE', name)
+					// Nux.core.slog('RECEIVE', name)
 					Nux.signature.signatures[name]['received'] = true;
 				} else {
 
@@ -566,7 +572,7 @@
  				// occured
  				if(Nux.signature.exists(name)) {
  					Nux.signature.signatures[name]['run'] = runValue;
-    				Nux.slog("RUN", name)
+    				// Nux.slog("RUN", name)
  				} else {
 
 					Nux.signature.allowed(name, function(){
@@ -600,7 +606,7 @@
 				
 						if( Nux.signature.exists(name) ) {
 							Nux.signature.signatures[name]['expected'] = v;
-							Nux.core.slog("EXPECTED", name)
+							// Nux.core.slog("EXPECTED", name)
 						} 
 
 					} else {
@@ -670,15 +676,35 @@
 			}
 		},
 
-		use: function(name){
+		use: function(obj){
+			/* provide array or string of assets to import */
+			var handler = arg(arguments, 1, Nux._F);
+			var path = arg(arguments, 2, Nux.defaultConfiguration.extensionPath);
+			
+			var multiplexHandler = function(){
+				debugger;
+			}
+
+			if(Themis.of(obj, String)) {
+				return this._use(obj, handler, path)
+			} else if(Themis.of(obj, Array)) {
+				for (var i = 0; i < obj.length; i++) {
+					var p = obj[i];
+					var hook = this._use(p, handler, path);
+				};
+
+				return hook;
+			}
+		},
+		_use: function(name){
 			var handler = arg(arguments, 1, Nux._F);
 			var path = arg(arguments, 2, Nux.defaultConfiguration.extensionPath);
 			this.listener.add(name, handler)
 			
-			console.time("IMPORT " +  name)
+			console.time("IMPORT " +  name.path || name)
 
 			this.fetch.get( this.space(name), path, function(){
-				console.timeEnd("IMPORT " +  name)
+				console.timeEnd("IMPORT " +  name.path || name)
 			});
 
 			var chain = this.fetch.chain;
@@ -716,128 +742,133 @@
 		events: (function(context){
 
 
-			/* create the event handlers for each event type*/
-			for (var i = 0; i < context.events.length; i++) {
-				var eventName = context.events[i];
-				if(! context.callbacks.hasOwnProperty(eventName)) {
-					 context.callbacks[eventName] = [];
-				}
-
-				if(!context.hasOwnProperty(eventName)) {
-					context[eventName] = (function(eventName){ 
-
-						return function(callback){
-							/*  add a method to be called when the application is ready.
-							If the assets are ready, the function will be called immediately. */
-
-							// By referencing the eventName within the callback, we apply it
-							// to the functional scope - keeping the value when the method is
-							// called. Without this (thusly returning a function without the closure)
-							// would mangle the callback scope and any event would reference the
-							// eventName last indexed in the looping 'events' creation.
-							var name = eventName;
-							if(!Nux.booted || !Nux.events.passThrough(eventName)) {
-
-								context.callbacks[name].push(callback);
-								return context.callbacks[name];
-							} else {
-								return callback(Nux)
-							}
-						}
-					})(eventName)
-				}
-			};
-
-			return context;
-		})({ 
-			/* the list of events the system will register for callbacks.
-			Probably, not best to mess with these */
-			events: NuxConfig.events,
-			callbacks: {},
-			callEvent: function(name){
-				/* call an event, optionally passing args and scope */
-
-				// Arguments passed to the event handler (flattened as apply() )
-				var args = arg(arguments, 1, [Nux]);
-				var passThrough = false;
-				if(Themis.of(args, Boolean)) {
-					passThrough = args;
-					args = [Nux];
-				}
-				// Scope of the event (this)
-				var scope = arg(arguments, 2, this);
-				
-				/* Call a chained event with passed information */
-				if(!Nux.events.callbacks.hasOwnProperty(name) ) {
-					// throw Nux.errors.error(20, name)
-					Nux.errors.throw(20, name)
-				}
-
-				for (var i = 0; i < Nux.events.callbacks[name].length; i++) {
-					if(passThrough) {
-						Nux.events.passThrough(name, passThrough)
+				/* create the event handlers for each event type*/
+				for (var i = 0; i < context.events.length; i++) {
+					var eventName = context.events[i];
+					if(! context.callbacks.hasOwnProperty(eventName)) {
+						 context.callbacks[eventName] = [];
 					}
-					Nux.events.callbacks[name][i].apply(scope, args);
+
+					if(!context.hasOwnProperty(eventName)) {
+						context[eventName] = (function(eventName){ 
+
+							return function(callback){
+								/*  add a method to be called when the application is ready.
+								If the assets are ready, the function will be called immediately. */
+
+								// By referencing the eventName within the callback, we apply it
+								// to the functional scope - keeping the value when the method is
+								// called. Without this (thusly returning a function without the closure)
+								// would mangle the callback scope and any event would reference the
+								// eventName last indexed in the looping 'events' creation.
+								var name = eventName;
+								if(!Nux.booted || !Nux.events.passThrough(eventName)) {
+
+									context.callbacks[name].push(callback);
+									return context.callbacks[name];
+								} else {
+									return callback(Nux)
+								}
+							}
+						})(eventName)
+					}
 				};
-			},
-			passThrough: function(name, toPass) {
-				/* activate a passthrough on an event, When the event is
-				called whilst passThrough is True, the callback will be immediately
-				called. If passthrough is false or Nux is not booted, the 
-				method will by stacked normally.*/ 
-				if(!this.hasOwnProperty('passed')) {
-					this.passed = {};
-				}
 
-				if(toPass) {
-					this.passed[name] = toPass;
-				} else {
-					return this.passed[name] || false;
+				return context;
+			})({ 
+				/* the list of events the system will register for callbacks.
+				Probably, not best to mess with these */
+				events: NuxConfig.events,
+				callbacks: {},
+				callEvent: function(name){
+					/* call an event, optionally passing args and scope */
+
+					// Arguments passed to the event handler (flattened as apply() )
+					var args = arg(arguments, 1, [Nux]);
+					var passThrough = false;
+					if(Themis.of(args, Boolean)) {
+						passThrough = args;
+						args = [Nux];
+					}
+					// Scope of the event (this)
+					var scope = arg(arguments, 2, this);
+					
+					/* Call a chained event with passed information */
+					if(!Nux.events.callbacks.hasOwnProperty(name) ) {
+						// throw Nux.errors.error(20, name)
+						Nux.errors.throw(20, name)
+					}
+
+					for (var i = 0; i < Nux.events.callbacks[name].length; i++) {
+						if(passThrough) {
+							Nux.events.passThrough(name, passThrough)
+						}
+						Nux.events.callbacks[name][i].apply(scope, args);
+					};
+				},
+				passThrough: function(name, toPass) {
+					/* activate a passthrough on an event, When the event is
+					called whilst passThrough is True, the callback will be immediately
+					called. If passthrough is false or Nux is not booted, the 
+					method will by stacked normally.*/ 
+					if(!this.hasOwnProperty('passed')) {
+						this.passed = {};
+					}
+
+					if(toPass) {
+						this.passed[name] = toPass;
+					} else {
+						return this.passed[name] || false;
+					}
 				}
-			}
-		})
+			})
 		
 	};
 
-	/** legacy and shortcut additions. **/
-	Nux['import']  		= Nux.fetch.get;
-	Nux.load 			= Nux.fetch.load;
-	Nux.booted 			= false;
-	Nux.NS 				= Nux.core.namespace;
-	Nux.space 			= Nux.core.space;
-	Nux.makeGlobal 		= Nux.core.makeGlobal;
-	Nux.slog 			= Nux.core.slog;
-	Nux.log 			= Nux.core.log;
-	Nux.onReady 		= Nux.events.ready;
-	Nux.onAllExpected 	= Nux.events.allAxpected;
-	Nux.addAllowed 		= Nux.config.addAllowed;
+	var NuxLoader = function(){
+		var self = this
+		/** legacy and shortcut additions. **/
+		self['import']  	= self.fetch.get;
+		self.load 			= self.fetch.load;
+		self.booted 		= false;
+		self.NS 			= self.core.namespace;
+		self.space 			= self.core.space;
+		self.makeGlobal 	= self.core.makeGlobal;
+		self.slog 			= self.core.slog;
+		self.log 			= self.core.log;
+		self.onReady 		= self.events.ready;
+		self.onAllExpected 	= self.events.allAxpected;
+		self.addAllowed 	= self.config.addAllowed;
 
-	var init = function(config) {
-		
-		Nux.core.globalise();
-
-		Nux.assets.add(Nux.defaultConfiguration.assets)
-			.load(['required', 'nux'], function(){
-				
-				// Init assets is called from nux core js
-				// at this point all defined required assets
-				// have been loaded.
-				Nux.config.merge(config)
+		var init = function(config) {
 			
-				// Booted flag for call once.
-				var booted = Nux.booted,
-					cc = 0;
+			self.core.globalise();
+			console.time('Full load')
+			self.assets.add(self.defaultConfiguration.assets)
+				.load(['required', 'nux'], function(){
+					
+					// Init assets is called from self core js
+					// at this point all defined required assets
+					// have been loaded.
+					self.config.merge(config)
+				
+					// Booted flag for call once.
+					var booted = self.booted,
+						cc = 0;
 
-				if(booted && Nux.defaultConfiguration.runOnce) return booted;
-				Nux.booted = true;
-				Nux.events.callEvent('ready', true)
-				Nux.core.slog("READY","Nux core has booted.");
-			});
-	};
+					if(booted && self.defaultConfiguration.runOnce) return booted;
+					self.booted = true;
+					console.time('Nux')
+					self.core.slog("READY","Nux booted.");
 
-	init.apply(this, arguments)
+					self.events.callEvent('ready', true)
+				});
+		};
 
-	return Nux;
+		return init.apply(this, arguments)
+	}
+
+	return NuxLoader.apply(Nux, this);
 })({
 	name: "Foo",
 	debug: true,
@@ -852,28 +883,4 @@
 	// objects
 	allowed: [
 	]
-}).onReady(function(Nux){
-	
-	Nux.addAllowed([
-		"nux.extension.core",
-		"nux.extension.error",
-		"nux.extension.loader",
-		"nux.extension.packager",
-		"nux.extension.alpha.signals"
-	]);
-
-	Nux.use('core', function(extension){
-	}).then('loader', function(extension){
-		// stack overload.
-		if(cc>10) { cc++; debugger;  };
-		
-		// Wait for all expected packages (as required via the imported packages)
-		// to import.
-		Nux.onAllExpected(function(){ 
-			Nux.core.slog('FINISH', 'Nux');
-		})
-	});
-
-});
-
-var cc = 0;
+})
