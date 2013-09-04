@@ -225,7 +225,16 @@
 
 			addAllowed: function(paths){
 				
-				return zoe.extend(Nux.defaultConfiguration.allowed, paths, Nux.config.rules);
+				if(paths) {
+					if(Themis.of(paths, String)) {
+						paths = [Nux.space(paths)];
+					} 
+
+					var merge = zoe.extend(Nux.defaultConfiguration.allowed, paths, Nux.config.rules);
+
+				}
+
+				return Nux;
 			}
 		},	
 
@@ -403,31 +412,38 @@
 
 				if(listenerObject.item.hasOwnProperty('_meta') &&
 					listenerObject.item._meta.hasOwnProperty('main') ) {
+	
+					var runMethodName = listenerObject.item._meta.main;
 					
-					if( listenerObject.item._meta.hasOwnProperty('main') ) {
-						var runMethodName = listenerObject.item._meta.main;
-					}
 
-					if(typeof(runMethodName) == 'string') {
+					if( Themis.of(runMethodName, String) ) {
 						if( listenerObject.item.hasOwnProperty(runMethodName) ) {
 							// call string defined extension run method
-							runMethod = listenerObject.item[v];
+							
+							runMethod = listenerObject.item[runMethodName];
 						} else {
 							var s = listenerObject.name + '._meta.main defines missing method ' + runMethodName
 							throw new Error(s);
 						}
+					} else if( Themis.of(runMethodName, Function) ) {
+						runMethod = runMethodName;
 					} else {
-						if(Themis.of(runMethodName, Function)) {
-							runMethod = runMethodName;
-						} else {
-							if(!runMethod) runMethod = listenerObject.item[runMethodName];
+						if(!runMethod) {
+							runMethod = listenerObject.item[runMethodName];
 						}
-					}
-					
+					}					
 				}
 
 
-				var run = (runMethod)? runMethod(defAppConfig): listenerObject.item.run(defAppConfig);
+				var run;
+				if(runMethod){ 
+					run = runMethod(defAppConfig)
+				} else {
+					if(listenerObject.item.hasOwnProperty('run')) {
+						run = listenerObject.item.run(defAppConfig);	
+					}
+				} 
+
 				Nux.signature.run(listenerObject.name, run || true);
 
 				for (var i = 0; i < listeners.length; i++) {
@@ -469,7 +485,7 @@
 					// Nux.signature.expected(listener.name, true)
 				}
 
-				// Nux.log('importHandler', listener.name)
+				Nux.slog('IMPORTED', listener.name)
 				
 				var callHandler = function(_listener){
 
@@ -556,7 +572,7 @@
 				var name = arg(a, 0, null);
 				
 				if(Nux.signature.expected(name)) {
-					// Nux.core.slog('RECEIVE', name)
+					Nux.core.slog('RECEIVE', name)
 					Nux.signature.signatures[name]['received'] = true;
 				} else {
 
@@ -572,7 +588,7 @@
  				// occured
  				if(Nux.signature.exists(name)) {
  					Nux.signature.signatures[name]['run'] = runValue;
-    				// Nux.slog("RUN", name)
+    				Nux.slog("RUN", name)
  				} else {
 
 					Nux.signature.allowed(name, function(){
@@ -606,7 +622,7 @@
 				
 						if( Nux.signature.exists(name) ) {
 							Nux.signature.signatures[name]['expected'] = v;
-							// Nux.core.slog("EXPECTED", name)
+							Nux.core.slog("EXPECTED", name)
 						} 
 
 					} else {

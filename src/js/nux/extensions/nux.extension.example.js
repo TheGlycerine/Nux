@@ -3,7 +3,7 @@
 // extension
 
 // define your extension namespace.
-var myExt = Nux.NS('myextension')
+var myExt = Nux.NS('example')
 
 // Optional run method called when your
 // extension is implemented
@@ -21,4 +21,4 @@ or a function to call.
 If an alternative method is referenced run()
 will not be called.
 */
-myExt._meta.main = 'metaRun'
+// myExt._meta.main = 'metaRun'
