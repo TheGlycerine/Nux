@@ -323,12 +323,36 @@
 			load: function() {
 				return Load.apply(this, arguments);
 			},
-		
+			
+			next: function(){
+
+				var next = Nux.fetch.chain.shift();
+
+				if(next) {
+					return Nux.use.apply(Nux, next)
+				}
+			},
+
 			_import: function(name, path){
 			
 				var cb = arg(arguments, 1, null);
 				//this.importCallbacks.append(name, cb);
 				Import( name, path || Nux.defaultConfiguration.extensionPath)		
+			},
+
+			registerListener: function(listener) {
+				/*
+				Method is called before the importHandler applys the extension
+				 */
+				Nux.fetch.imported.push(listener.name);
+				io = Nux.fetch.expected.indexOf(listener.name);
+
+				if (io > -1) { 
+					Nux.fetch.expected.splice(io, 1) 
+					// Nux.signature.expected(listener.name, true)
+					return true;
+				}
+
 			}
 		},
 
@@ -385,8 +409,14 @@
 
 			call: function(listenerObject) {
 				// debugger;
-				var space = Nux.space(listenerObject.name || listenerObject)
+				var listenerName = listenerObject.name || listenerObject
+				
+				Nux.signature.receive(listenerName);
+
+				var space = Nux.space(listenerName)
 				var listeners = Nux.fetch.listeners[space];
+				
+				
 				if(!listeners) {
 					Nux.log("No listener for ", space)
 					return
@@ -410,30 +440,31 @@
 				var runMethodName = 'main';
 				var runMethod;
 
-				if(listenerObject.item.hasOwnProperty('_meta') &&
-					listenerObject.item._meta.hasOwnProperty('main') ) {
-	
-					var runMethodName = listenerObject.item._meta.main;
+				if(listenerObject.item.hasOwnProperty('_meta') )
+				{
+					var  meta = listenerObject.item._meta;
 					
+					var runMethodName = 'run';
+					
+					if( meta.hasOwnProperty('main') ) {
+						runMethodName = 'main';
+					}
 
-					if( Themis.of(runMethodName, String) ) {
+					var metaValue = listenerObject.item[runMethodName];
+
+					if(Themis.of(metaValue, String)) {
 						if( listenerObject.item.hasOwnProperty(runMethodName) ) {
 							// call string defined extension run method
-							
-							runMethod = listenerObject.item[runMethodName];
+							runMethod = listenerObject.item[metaValue];
 						} else {
 							var s = listenerObject.name + '._meta.main defines missing method ' + runMethodName
 							throw new Error(s);
 						}
-					} else if( Themis.of(runMethodName, Function) ) {
-						runMethod = runMethodName;
-					} else {
-						if(!runMethod) {
-							runMethod = listenerObject.item[runMethodName];
-						}
-					}					
+					} else if(Themis.of(metaValue, Function)) { 
+						runMethod = metaValue;
+					}
+					
 				}
-
 
 				var run;
 				if(runMethod){ 
@@ -474,34 +505,19 @@
 				
 				// ensure all imports have occured before we
 				// call the handler
-				var required = listener.item._meta.extensions;
+				var required 	= listener.item._meta.extensions;
+				var overrides 	= listener.item._meta.overrides;
 				
-				Nux.fetch.imported.push(listener.name);
-
-				io = Nux.fetch.expected.indexOf(listener.name);
-
-				if (io > -1) { 
-					Nux.fetch.expected.splice(io, 1) 
-					// Nux.signature.expected(listener.name, true)
-				}
+				Nux.fetch.registerListener(listener);
 
 				Nux.slog('IMPORTED', listener.name)
 				
 				var callHandler = function(_listener){
-
-					Nux.signature.receive(_listener.name || _listener);
 					// Nux.core.slog("RECEIVE", _listener.name || _listener);
 					Nux.listener.call.apply(Nux, [_listener]);
-			
 					// Ensure the entire service is only booted once.
 					Nux.listener.remove(listener.name, _listener);
-					
-					var next = Nux.fetch.chain.shift();
-
-					if(next) {
-						Nux.use.apply(Nux, next)
-					}
-
+					Nux.fetch.next();
 				}
 
 				callHandler(listener)
