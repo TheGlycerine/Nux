@@ -21,7 +21,7 @@
 		// Call once, if only once instance of the 
 		// Nux can be booted at any given time.
 		runOnce: true,
-		
+		overrideSpace: 'override',
 		// Extensions allowed to be executed and implemenred
 		// This should only exist in
 		// core loaders and baked
@@ -53,21 +53,78 @@
 		defaultConfiguration: NuxConfig,
 
 		core: {
+			spaceDefinitions: [],
+			newSpace: function(name, space) {
+				
+				space['name'] = name;
+				space['created'] = +(new Date);
+				space['_meta'] = {
+						Nux: Nux
+					}
+				
+
+				var overrides = Nux.signature.overridesAllowed(name);
+				// Overrides will have been previously
+				// applied through the allowed permissions
+				if( overrides ) {	
+					// a list of extensions
+					// should exist if they have been correctly
+					//  
+					// applied at addAllowed() passing
+					// a config object with 'overrides' defined
+
+					var overrideSpace = {};
+				
+					if(!space.hasOwnProperty(Nux.defaultConfiguration.overrideSpace)) {
+						overrideSpace = space[Nux.defaultConfiguration.overrideSpace];
+					}
+					
+					for( var i = 0; i < overrides.length; i++ ) {
+						var path = Nux.space( overrides[i] );
+						var objName = path.replace(Nux.space(), '');
+						// Every method is marked for override of the
+						// original
+						overrideSpace[objName] = {}
+					};
+					
+					space[Nux.defaultConfiguration.overrideSpace] = overrideSpace;
+				}
+				/*
+				Return a new base space object for the name provided.
+				*/
+				return space
+			},
+
 			namespace: function(name){
+				var space = arg(arguments, 1, null);
+				// To be returned.
+				var _space;
 				/*
 				Return a namespace. If the namespace
-				does not exist a new emtpy object will
+				does not exist a new empty object will
 				be returned.
 				*/
-				if (name) {
-					var space = Namespace( Nux.space(name));
-					space._meta = {
-						nux: Nux
+				
+				if( name ) {
+
+					var _name = Nux.space(name);
+
+					if( space ) {
+						var _space = Namespace( _name );
+						_space = space;
+					} else {
+						var __space = Namespace( _name );
+						var _space = Nux.core.newSpace(_name, __space);
 					}
+
+					for( var i = 0; i < Nux.core.spaceDefinitions.length; i++ ) {
+					 	var definition = Nux.core.spaceDefinitions[i];
+					};
 				} else {
 					return Import(Nux.defaultConfiguration.extensionNamespace);
 				}
-				return space;	
+				
+				return _space;	
 			},
 
 			space: function(name) {
@@ -222,17 +279,47 @@
 				'*': 'REPLACE',
 				'allowed': 'ARR_APPEND'
 			},
+			permit: function(path){
+				var overrides = null;
+				var mp;
 
-			addAllowed: function(paths){
-				
-				if(paths) {
-					if(Themis.of(paths, String)) {
-						paths = [Nux.space(paths)];
-					} 
+				if( Themis.of(path, String) ) {
+						mp = [Nux.space(path)];
+					} else if( Themis.of(path, Object) ) {
+						mp = [Nux.space(path.name)];
+						
+						// object should be mapped to
+						// path and overrides
+						//var allowed = Nux.signature.overridesAllowed(path, path.overrides)
+						overrides = path.overrides
+					} else if( Themis.of(path, Array) ) {
+						
+						mp = [Nux.space(path[0])];
+						overrides = path[1];
 
-					var merge = zoe.extend(Nux.defaultConfiguration.allowed, paths, Nux.config.rules);
+					}
 
-				}
+					if( overrides ) {
+						
+						Nux.signature.overrides[mp[0]] = overrides
+					}
+					var merge = zoe.extend(Nux.defaultConfiguration, { allowed: mp }, Nux.config.rules);
+					return merge
+			},
+
+			addAllowed: function(path){
+			
+				if(path) {
+					if( Themis.of(path, String) ) {
+						Nux.config.permit(path);
+					} else if( Themis.of(path, Object) ) {
+ 						Nux.errors.throw(04, 'addAllowed accepts String or Array')
+					} else if( Themis.of(path, Array) ) {
+						for (var i = 0; i < path.length; i++) {
+							Nux.config.permit(path[i])
+						};
+					};
+				};
 
 				return Nux;
 			}
@@ -254,7 +341,7 @@
 
 				var inExtensions = false;
 
-				name.forEach(function(_name, i, a){
+ 				name.forEach(function(_name, i, a){
 					Nux.defaultConfiguration.allowed.forEach(function(s,j,b){
 						if(s == name || Nux.space(s) == _name) {
 							inExtensions = true;
@@ -344,15 +431,15 @@
 				/*
 				Method is called before the importHandler applys the extension
 				 */
+
 				Nux.fetch.imported.push(listener.name);
 				io = Nux.fetch.expected.indexOf(listener.name);
 
-				if (io > -1) { 
+				if( io > -1) { 
 					Nux.fetch.expected.splice(io, 1) 
 					// Nux.signature.expected(listener.name, true)
 					return true;
-				}
-
+				};
 			}
 		},
 
@@ -368,7 +455,8 @@
 				return this;
 			},
 			errors: {
-				20: 'Missing callback',
+				04: 'not implemented',
+				20: 'missing callback',
 			},
 			errorMap: function(errorCode) {
 				return {
@@ -422,7 +510,7 @@
 					return
 				}
 
-				var defAppConfig = core._meta.applicationConfig || {};
+				var defAppConfig = (core.hasOwnProperty('_meta'))? core._meta.applicationConfig || {}: {};
 
 				// Cannnot use preferable loader components loader.Import/loader.Load
 				// as they haven't been imported yet.
@@ -440,8 +528,7 @@
 				var runMethodName = 'main';
 				var runMethod;
 
-				if(listenerObject.item.hasOwnProperty('_meta') )
-				{
+				if( listenerObject.item.hasOwnProperty('_meta') ) {
 					var  meta = listenerObject.item._meta;
 					
 					var runMethodName = 'run';
@@ -505,13 +592,18 @@
 				
 				// ensure all imports have occured before we
 				// call the handler
-				var required 	= listener.item._meta.extensions;
-				var overrides 	= listener.item._meta.overrides;
+				
+				var required 	= {}
+
+				if( listener.item.hasOwnProperty('_meta') ) {
+					required = ( listener.item._meta.hasOwnProperty('extensions') )? listener.item._meta.extensions: {};
+					var overrides 	= listener.item._meta.overrides;
+				};
+				
 				
 				Nux.fetch.registerListener(listener);
 
 				Nux.slog('IMPORTED', listener.name)
-				
 				var callHandler = function(_listener){
 					// Nux.core.slog("RECEIVE", _listener.name || _listener);
 					Nux.listener.call.apply(Nux, [_listener]);
@@ -560,11 +652,14 @@
 
 		signature: {
 			signatures: {},
+			overrides: {},
+
 			state: function(name){
 				// return the state of an entity;
 				var _n = Nux.space(name);
 				return Nux.signature.signatures[_n];
 			},
+
 			add: function(obj){
 				/*
 				Add a signature to the map to check 
@@ -579,10 +674,12 @@
 				return Nux.signature.signatures[obj];
 
 			},
+
 			exists: function(obj) {
 				// A config has loaded itself.
 				return Nux.signature.signatures.hasOwnProperty(obj)
 			},
+
 			receive: function(){
 				var a = arguments;
 				var name = arg(a, 0, null);
@@ -599,10 +696,11 @@
 					})
 				}
 			},
+
  			run: function(name, runValue) {
  				// the imported object's run procedure has
  				// occured
- 				if(Nux.signature.exists(name)) {
+ 				if( Nux.signature.exists(name)) {
  					Nux.signature.signatures[name]['run'] = runValue;
     				Nux.slog("RUN", name)
  				} else {
@@ -616,6 +714,7 @@
 
  				return Nux.signature.signatures[name];
  			},
+
 			expected: function(){
 				/**
 				 * return if the package name is expecting to load.
@@ -655,15 +754,16 @@
 				// Nux.signature.signatures[name]['expected'] = v
 				return exp;
 			},
+
 			allowed: function(name) {
-				var cb = arg(arguments, 1, null)
-				var cbf = arg(arguments, 2, null)
 				// returns true/false if the passed sig is
 				// allowed. Pass a callback method to call 
 				// in async request methods; i.e User input 
-				if(cb) {
-					var r = Nux.assets.allow(name);
-					if(r) {
+				var cb = arg(arguments, 1, null);
+				var cbf = arg(arguments, 2, null);
+				if( cb ) {
+ 					var r = Nux.assets.allow(name);
+					if( r ) {
 						return cb(name) || r;
 					} else {
 						return cbf(name) || r;
@@ -672,6 +772,61 @@
 				} else {
 					return Nux.assets.allow(name)
 				}
+			},
+
+			overridesAllowed: function(name, overrides) {
+				var allows = {}
+
+				if( overrides ) {	
+					for( var i = 0; i < overrides.length; i++ ) {
+						var override = overrides[i];
+						allows[override] = Nux.signature.overrideAllowed(name, override)
+					};
+				} else {
+					if(name) {
+						allows = Nux.signature.overrides[name];
+					}
+				}
+
+				// how many? return false;
+				return allows;
+			},
+
+			overrideAllowed: function(name, override) {
+				/* Pass an override string 
+
+				 	overrideAllowed()
+				 	    returns the overrides allowed.
+				 	    
+				 	overrideAllowed(name)
+				 		return a list of overrides for this name
+				 		
+				 	overrideAllowed(name, override)
+				 		returns boolean if this override is allowed.
+				 	
+				 returning bool if this application
+				 is allowed to override this method
+				*/
+				if( Nux.signature.exists(name) ) {
+					
+					if( override ) {
+						if( Nux.signature.overrides.hasOwnProperty(name) ) {
+							var value = Nux.signature.overrides[name][override];
+							if( Themis.of(value, Boolean)) {
+								return value;
+							} else if( Themis.of(value, Object) ) {
+								return value.allowed;
+							}
+						} else {
+							return false;
+						}
+					
+					} else {
+						return Nux.signature.overrides[name]
+					}
+				}
+
+				return  Nux.signature.overrides
 			},
 
 			addFail: function(name){
