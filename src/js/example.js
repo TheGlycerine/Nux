@@ -1,7 +1,13 @@
 Nux.onReady(function(Nux){
 	 
 	Nux.addAllowed([
-		"nux.extension.core",
+		"nux.extension.core", 
+		/*{ 
+			name: "nux.extension.timer", 
+			// List of allows overrides this
+			// extension can extend
+			overrides: ['nux.extension.listener']
+		},*/
 		"nux.extension.timer",
 		"nux.extension.error",
 		"nux.extension.loader",
