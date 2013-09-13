@@ -27,7 +27,7 @@
 		// core loaders and baked
 		// objects
 		allowed: [],
-		events:  ['ready', 'allAxpected'],
+		events:  ['ready', 'allExpected'],
 		// independant file assets  used for Nux.
 		assets: {
 			'agile': "js/vendor/com.iskitz.ajile.src.js?mvcoff,mvcshareoff",			
@@ -337,6 +337,7 @@
 					name = [name]
 				}
 				if(!Nux.defaultConfiguration.hasOwnProperty('allowed')){
+					Nux.errors.throw(30, 'defaultConfiguration.allowed != []')
 					Nux.log("WHAT?   Missing access allowances for", name);
 					return false;
 				}
@@ -357,6 +358,7 @@
 					return true;
 				}
 
+				Nux.errors.throw(75, name)
 				Nux.log("REFUSE ASSET", name);
 				return false;
 			},
@@ -459,6 +461,8 @@
 			errors: {
 				04: 'not implemented',
 				20: 'missing callback',
+				30: 'Missing allowed',
+				75: 'refuse asset'
 			},
 			errorMap: function(errorCode) {
 				return {
@@ -512,7 +516,13 @@
 					return
 				}
 
-				var defAppConfig = (core.hasOwnProperty('_meta'))? core._meta.applicationConfig || {}: {};
+				var defAppConfig = {};
+
+				try{
+					defAppConfig = (core.hasOwnProperty('_meta'))? core._meta.applicationConfig || {}: {};
+				} catch(e) {
+
+				}
 
 				// Cannnot use preferable loader components loader.Import/loader.Load
 				// as they haven't been imported yet.
@@ -529,7 +539,7 @@
 				// default to the .run() method
 				var runMethodName = 'main';
 				var runMethod;
-				
+
 				if( listenerObject.item.hasOwnProperty('_meta') ) {
 					var  meta = listenerObject.item._meta;
 					var runMethodName = ( meta.hasOwnProperty('main') ) ? 'main' : 'run';
@@ -604,7 +614,7 @@
 
 				Nux.slog('IMPORTED', listener.name)
 				var callHandler = function(_listener){
-					// Nux.core.slog("RECEIVE", _listener.name || _listener);
+					Nux.core.slog("RECEIVE", _listener.name || _listener);
 					Nux.listener.call.apply(Nux, [_listener]);
 					// Ensure the entire service is only booted once.
 					Nux.listener.remove(listener.name, _listener);
@@ -642,7 +652,10 @@
 				} else {
 
 					if( Nux.signature.expected().length <= 0 ) {
-						Nux.events.callEvent('allAxpected')
+						Nux.events.callEvent('allExpected')
+						// Detach recently added
+						Nux.events.dieEvent('allExpected')
+
 					}
 					// No requirements	
 				}
@@ -684,7 +697,7 @@
 				var name = arg(a, 0, null);
 				
 				if(Nux.signature.expected(name)) {
-					Nux.core.slog('RECEIVE', name)
+					// Nux.core.slog('RECEIVE', name)
 					Nux.signature.signatures[name]['received'] = true;
 				} else {
 
@@ -992,6 +1005,15 @@
 						Nux.events.callbacks[name][i].apply(scope, args);
 					};
 				},
+				dieEvent: function(name) {
+					/*
+					Unhook and detach handlers mapped to this called event
+					name. Therefore any event handlers listening
+					will be disconnected and not called.
+					 */
+					delete Nux.events.callbacks[name]
+					Nux.events.callbacks[name] = []
+				},
 				passThrough: function(name, toPass) {
 					/* activate a passthrough on an event, When the event is
 					called whilst passThrough is True, the callback will be immediately
@@ -1023,7 +1045,7 @@
 		self.slog 			= self.core.slog;
 		self.log 			= self.core.log;
 		self.onReady 		= self.events.ready;
-		self.onAllExpected 	= self.events.allAxpected;
+		self.onAllExpected 	= self.events.allExpected;
 		self.addAllowed 	= self.config.addAllowed;
 
 		var init = function(config) {

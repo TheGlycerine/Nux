@@ -6,7 +6,5 @@
 var logger = Nux.NS('logger')
 
 logger._meta.main = function(config){
-	debugger
 	console.log('Loggo!')
 }
-

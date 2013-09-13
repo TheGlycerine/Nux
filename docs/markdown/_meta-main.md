@@ -29,3 +29,9 @@ Finally, if the _meta.main method is not implemented, a root method `run()` will
 	foo.run = function(config){
 	    Nux.slog("Hi :)", 'foo')
 	}
+
+or finally:
+
+	foo._meta.run = function(){
+		// run method.
+	}
