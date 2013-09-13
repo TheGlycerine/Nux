@@ -58,9 +58,11 @@
 				
 				space['name'] = name;
 				space['created'] = +(new Date);
-				space['_meta'] = {
-						Nux: Nux
-					}
+				if(!space.hasOwnProperty('_meta')) {
+					space['_meta'] = {
+							Nux: Nux
+						}
+				}
 				
 
 				var overrides = Nux.signature.overridesAllowed(name);
@@ -123,7 +125,7 @@
 				} else {
 					return Import(Nux.defaultConfiguration.extensionNamespace);
 				}
-				
+
 				return _space;	
 			},
 
@@ -527,26 +529,23 @@
 				// default to the .run() method
 				var runMethodName = 'main';
 				var runMethod;
-
+				
 				if( listenerObject.item.hasOwnProperty('_meta') ) {
 					var  meta = listenerObject.item._meta;
-					
-					var runMethodName = 'run';
-					
-					if( meta.hasOwnProperty('main') ) {
-						runMethodName = 'main';
-					}
-
-					var metaValue = listenerObject.item[runMethodName];
+					var runMethodName = ( meta.hasOwnProperty('main') ) ? 'main' : 'run';
+					var metaValue = listenerObject.item._meta[runMethodName];
 
 					if(Themis.of(metaValue, String)) {
 						if( listenerObject.item.hasOwnProperty(runMethodName) ) {
 							// call string defined extension run method
 							runMethod = listenerObject.item[metaValue];
+						} else if( listenerObject.item._meta.hasOwnProperty(runMethodName) ){
+							runMethod = listenerObject.item._meta[metaValue];
 						} else {
 							var s = listenerObject.name + '._meta.main defines missing method ' + runMethodName
 							throw new Error(s);
 						}
+
 					} else if(Themis.of(metaValue, Function)) { 
 						runMethod = metaValue;
 					}

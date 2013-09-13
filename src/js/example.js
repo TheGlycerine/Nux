@@ -11,6 +11,7 @@ Nux.onReady(function(Nux){
 		"nux.extension.timer",
 		"nux.extension.error",
 		"nux.extension.loader",
+		"nux.extension.logger",
 		"nux.extension.packager",
 		"nux.extension.alpha.signals"
 	]);
