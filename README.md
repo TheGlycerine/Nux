@@ -15,7 +15,8 @@ In any modern javascript application you tend to do:
 
 I also want:
 
-+ Flexible packaging via namespaced files and/or structured directories. easy testing
++ Flexible packaging via namespaced files.
++ easy testing
 + Namespace support for encapsulating.
 + Multiple inheritance based on object extension,
 + DRY logic
@@ -75,17 +76,17 @@ The file imported is `nux/extensions/nux.extension.foo.js`. The file is located 
 
 Providing us with the ability to cleanly divide complex objects into sub componenents
 
-Nux.use(['core', 'example'], function(){
-	// ... Perform logic
-	Nux.use(['foo', 'test'], function(){
-		// All loaded.
+	Nux.use(['core', 'example'], function(){
+		// ... Perform logic
+		Nux.use(['foo', 'test'], function(){
+			// All loaded.
+		})
 	})
-})
 
 
 ### Batteries included
 
-Nux wouldn't be complete without some features to make it work. Lcukily these features are loaded into Nux
+Nux wouldn't be complete without some features to make it work. Luckily these features are loaded into Nux
 in the same way the extensions are made.
 
 + signals - integrated web socket events
