@@ -98,7 +98,7 @@ GetterSetter = function getterSetter(){
             }
             return __get;
             
-        }, // if only getter - return getter;
+        } // if only getter - return getter;
 
         // For chaining
     }

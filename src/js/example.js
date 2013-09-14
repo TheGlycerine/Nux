@@ -25,6 +25,9 @@ Nux.onReady(function(Nux){
 		// Wait for all expected packages (as required via the imported packages)
 		// to import.
 		Nux.onAllExpected(function(){ 
+			// This should only be run once and 
+			// complete is defined by the extensions
+			// loaded in this chain.
 			console.timeEnd('Full load')
 			console.timeEnd('Nux')
 			Nux.core.slog('FINISH', 'Nux');
