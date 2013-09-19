@@ -45,44 +45,35 @@ When I’m at home; I want to hack my JS with all sorts of nonsense. Whilst at w
 
 Nux has been carefully crafted to be an asynchronous javascript loader, applying some clever tools to help make big javascript objects little.
 
-By applying one simply convention (file naming) we achieve the following:
+By applying one simple convention (file naming) we achieve the following:
 
-* Live load javascript module to create simple objects.
+### Live load javascript module to create simple objects.
 
 	Nux.use(‘core’);
 
-* Apply an easy naming convention for your files for automatic loading
+### Apply an easy naming convention for your files for automatic loading
 	
+
  	// Files
-	|- car.doors.js
-	|- car.wheels.js
+ 	|- car.doors.js
+ 	|- car.wheels.js
 	
 	// Importing
 	Nux.use([‘doors’, ‘wheels’], function(){
 		console.log(car.doors, car.wheels);
 	});
 
-* namespace encapsulation for factory style object design.
+### namespace encapsulation for factory style object design.
 
 	
 ## But… What? Why?
 
 Need to write something big or clever? Nux is designed to tackle one or all of these daily JS problems:
  
-* Realised at 1000 lines, it's just the start?
+* Realise at 1000 lines, it's just the start?
 * Wanted to reuse your own clever little code, to find it's stitched in too deep?
 * Use lots of open-source and always need to plug them together?
 * Using loadouts, frameworks and mvc is sometimes a bit too much?
-
-
-Writing javascript is fun! re-writing it is boring. Using frameworks is awesome, but hooking them up can be tedious.
-In any modern javascript application you tend to want:
-
-+ Flexible packaging via namespaced files.
-+ easy testing
-+ Namespace support for encapsulating.
-+ Multiple inheritance based on object extension,
-+ DRY logic
 
 To build a modern application using javascript, you need to write a large amount code. 
 As a modern developer, I'm hastily inviting OOP and DRY logic to everything I touch. 
