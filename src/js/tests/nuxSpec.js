@@ -110,13 +110,39 @@ describe('Handling events', function(){
 	})
 })
 
-describe('Implementing an extension', function(){
+describe('When implementing an extension', function(){
 
-	it('Add an allowed extension for later import', function(){
+	it('add an allowed extension for later import', function(){
 		var spaceName = 'nux.extension.test';
 		Nux.addAllowed(spaceName);
 		
 		expect(Nux.defaultConfiguration.allowed).toContain(spaceName);
+	})
+
+	it('_meta.allowed array is applied to defaultConfiguration', function(){
+		var spaceName = 'nux.extension.test';
+		
+		Nux.addAllowed(spaceName);
+		
+		var testAllowedHandler = function(){
+			//except(Nux.)
+		};
+
+		var useHandler = function(){
+			debugger
+			expect(Nux.defaultConfiguration.allowed).toContain('nux.extension.testAsset');	
+			Nux.use('testAllowed', testAllowedHandler);
+		};
+
+		Nux.use('test', useHandler);
+	})
+
+	it('automatically loads required extensions', function(){
+		var spaceName = 'nux.extension.test';
+		Nux.addAllowed(spaceName);
+		
+		expect(Nux.defaultConfiguration.allowed).toContain(spaceName);
+
 	})
  
 })
