@@ -54,8 +54,6 @@ e&&(f=e(g,c));return void 0!==f?f:b}},e=function(a){return function(a){b=a;f.val
 		// A funtion for callback defaults
 		_F: function(){},
 
-		// Default configuration for Nux.
-		defaultConfiguration: NuxConfig,
 
 		core: {
 			spaceDefinitions: [],
@@ -82,8 +80,8 @@ e&&(f=e(g,c));return void 0!==f?f:b}},e=function(a){return function(a){b=a;f.val
 
 					var overrideSpace = {};
 				
-					if(!space.hasOwnProperty(Nux.defaultConfiguration.overrideSpace)) {
-						overrideSpace = space[Nux.defaultConfiguration.overrideSpace];
+					if(!space.hasOwnProperty(Nux.config.def.overrideSpace)) {
+						overrideSpace = space[Nux.config.def.overrideSpace];
 					}
 					
 					for( var i = 0; i < overrides.length; i++ ) {
@@ -94,7 +92,7 @@ e&&(f=e(g,c));return void 0!==f?f:b}},e=function(a){return function(a){b=a;f.val
 						overrideSpace[objName] = {}
 					};
 					
-					space[Nux.defaultConfiguration.overrideSpace] = overrideSpace;
+					space[Nux.config.def.overrideSpace] = overrideSpace;
 				}
 				/*
 				Return a new base space object for the name provided.
@@ -128,7 +126,7 @@ e&&(f=e(g,c));return void 0!==f?f:b}},e=function(a){return function(a){b=a;f.val
 					 	var definition = Nux.core.spaceDefinitions[i];
 					};
 				} else {
-					return Import(Nux.defaultConfiguration.extensionNamespace);
+					return Import(Nux.config.def.extensionNamespace);
 				}
 
 				return _space;	
@@ -145,11 +143,11 @@ e&&(f=e(g,c));return void 0!==f?f:b}},e=function(a){return function(a){b=a;f.val
 					name = name
 				}
 
-				if( name.indexOf(Nux.defaultConfiguration.extensionNamespace) >= 0) {
+				if( name.indexOf(Nux.config.def.extensionNamespace) >= 0) {
 					return name
 				}
 
-				var str = Nux.defaultConfiguration.extensionNamespace + '.' + name;
+				var str = Nux.config.def.extensionNamespace + '.' + name;
 				return str;
 			},
 
@@ -164,9 +162,9 @@ e&&(f=e(g,c));return void 0!==f?f:b}},e=function(a){return function(a){b=a;f.val
 			},
 
 			globalise: function(){
-				if(Nux.defaultConfiguration.allowGlobals) {
-					Nux.core.makeGlobal(Nux.defaultConfiguration.globalConfigName, Nux.Config);
-					Nux.core.makeGlobal(Nux.defaultConfiguration.globalName, Nux);
+				if(Nux.config.def.allowGlobals) {
+					Nux.core.makeGlobal(Nux.config.def.globalConfigName, Nux.Config);
+					Nux.core.makeGlobal(Nux.config.def.globalName, Nux);
 				}
 			},
 
@@ -179,7 +177,7 @@ e&&(f=e(g,c));return void 0!==f?f:b}},e=function(a){return function(a){b=a;f.val
 			    var i = 0;
 			    while(arguments.length){
 			    	if(i == 0) { 
-			    		prefix = Nux.defaultConfiguration.prefix || Nux.defaultConfiguration.globalName;
+			    		prefix = Nux.config.def.prefix || Nux.config.def.globalName;
 			    		prefix += ': ';
 			    	} else { 
 			    		prefix = '';
@@ -213,11 +211,11 @@ e&&(f=e(g,c));return void 0!==f?f:b}},e=function(a){return function(a){b=a;f.val
 				}
 
 				var hidden = ['handle'];
-				if(!Nux.defaultConfiguration.debug) return 
+				if(!Nux.config.def.debug) return 
 				/* State log, for writing statement logs 
 				unique to Nux loading */
 				if(hidden.indexOf(state.toLowerCase()) == -1 ) {
-					Nux.log(rPad10(state), string);
+					Nux.core.log(rPad10(state), string);
 				}
 			}
 		}, 
@@ -274,12 +272,13 @@ e&&(f=e(g,c));return void 0!==f?f:b}},e=function(a){return function(a){b=a;f.val
 
 		config: {
 
-			'default': NuxConfig,
-
+			
+			// Default configuration for Nux.
+			def: NuxConfig,
 			merge: function(){
 				/* Merge config passed with default config space */
 				rules = Nux.config.rules;
-				return zoe.extend(Nux.defaultConfiguration, config, rules);
+				return zoe.extend(Nux.config.def, config, rules);
 			},
 
 			rules: {
@@ -310,7 +309,7 @@ e&&(f=e(g,c));return void 0!==f?f:b}},e=function(a){return function(a){b=a;f.val
 						
 						Nux.signature.overrides[mp[0]] = overrides
 					}
-					var merge = zoe.extend(Nux.defaultConfiguration, { allowed: mp }, Nux.config.rules);
+					var merge = zoe.extend(Nux.config.def, { allowed: mp }, Nux.config.rules);
 					return merge
 			},
 
@@ -341,30 +340,30 @@ e&&(f=e(g,c));return void 0!==f?f:b}},e=function(a){return function(a){b=a;f.val
 				if(!Themis.of(name, Array)) {
 					name = [name]
 				}
-				if(!Nux.defaultConfiguration.hasOwnProperty('allowed')){
-					Nux.errors.throw(30, 'defaultConfiguration.allowed != []')
-					Nux.log("WHAT?   Missing access allowances for", name);
+				if(!Nux.config.def.hasOwnProperty('allowed')){
+					Nux.errors.throw(30, 'config.def.allowed != []')
+					Nux.core.log("WHAT?   Missing access allowances for", name);
 					return false;
 				}
 
 				var inExtensions = false;
 
  				name.forEach(function(_name, i, a){
-					Nux.defaultConfiguration.allowed.forEach(function(s,j,b){
+					Nux.config.def.allowed.forEach(function(s,j,b){
 						if(s == name || Nux.space(s) == _name) {
 							inExtensions = true;
-							// Nux.log('ALLOW   ', _name)
+							// Nux.core.log('ALLOW   ', _name)
 						}
 					})
 				})
 
 				if(inExtensions) {
-					// Nux.log("Allow access:", name);
+					// Nux.core.log("Allow access:", name);
 					return true;
 				}
 
 				Nux.errors.throw(75, name)
-				Nux.log("REFUSE ASSET", name);
+				Nux.core.log("REFUSE ASSET", name);
 				return false;
 			},
 
@@ -401,7 +400,7 @@ e&&(f=e(g,c));return void 0!==f?f:b}},e=function(a){return function(a){b=a;f.val
 				Perform an import utilizing the 
 				namespace
 				*/
-				var path = arg(arguments, 1, Nux.defaultConfiguration.extensionPath);
+				var path = arg(arguments, 1, Nux.config.def.extensionPath);
 				var cb = arg(arguments, 2, Nux._F);
 				var fcb = arg(arguments, 3, null);
 
@@ -433,9 +432,48 @@ e&&(f=e(g,c));return void 0!==f?f:b}},e=function(a){return function(a){b=a;f.val
 			
 				var cb = arg(arguments, 1, null);
 				//this.importCallbacks.append(name, cb);
-				Import( name, path || Nux.defaultConfiguration.extensionPath)		
+				Import( name, path || Nux.config.def.extensionPath)		
 			},
 
+			use: function(name){
+				var handler = arg(arguments, 1, Nux._F);
+				var path = arg(arguments, 2, Nux.config.def.extensionPath);
+				Nux.listener.add(name, handler)
+				
+				console.time("IMPORT " +  name.path || name)
+
+				Nux.fetch.get( Nux.space(name), path, function(){
+					console.timeEnd("IMPORT " +  name.path || name)
+				});
+
+				var chain = Nux.fetch.chain;
+				// Import Chain
+				var hook = {
+					then: function(_name){
+						/*
+						Chaining imports can be a nasty business.
+						Use promise like then() method hooking to stop
+						nesting nightmares.
+
+						use('core').then('loader', function(){
+							// core and loader imported.
+						})
+						*/
+						var _n = Nux.space(_name);
+
+						if(Nux.space(name) in Nux.fetch.fails) {
+							Nux.core.slog("REFUSE", _n);
+						} else {
+							var _handler = arg(arguments, 1, Nux._F);
+							// debugger
+							var pri = chain.push([_n, _handler]);
+							// Nux.core.log("with  ", _n, 'handler:', Boolean(_handler));
+						}
+					}
+				}
+
+				return hook
+			},
 			registerListener: function(listener) {
 				/*
 				Method is called before the importHandler applys the extension
@@ -529,7 +567,7 @@ e&&(f=e(g,c));return void 0!==f?f:b}},e=function(a){return function(a){b=a;f.val
 				
 				
 				if(!listeners) {
-					Nux.log("No listener for ", space)
+					Nux.core.log("No listener for ", space)
 					return
 				}
 
@@ -543,7 +581,7 @@ e&&(f=e(g,c));return void 0!==f?f:b}},e=function(a){return function(a){b=a;f.val
 
 				// Cannnot use preferable loader components loader.Import/loader.Load
 				// as they haven't been imported yet.
-				zoe.extend(defAppConfig, Nux.defaultConfiguration, {
+				zoe.extend(defAppConfig, Nux.config.def, {
 					'*': zoe.extend.DFILL,
 					'extensions': zoe.extend.ARR_APPEND
 				})
@@ -605,7 +643,7 @@ e&&(f=e(g,c));return void 0!==f?f:b}},e=function(a){return function(a){b=a;f.val
 					var _listener = listeners[i];
 					if(_listener == listener) {
 						Nux.fetch.listeners[space][i] = null;
-						Nux.log("Listener removed", space, i);
+						Nux.core.log("Listener removed", space, i);
 					}
 				};
 				return Ajile.RemoveImportListener(name, Nux.listener.importHandler);
@@ -629,7 +667,7 @@ e&&(f=e(g,c));return void 0!==f?f:b}},e=function(a){return function(a){b=a;f.val
 				
 				Nux.fetch.registerListener(listener);
 
-				Nux.slog('IMPORTED', listener.name)
+				Nux.core.slog('IMPORTED', listener.name)
 				var callHandler = function(_listener){
 					Nux.core.slog("RECEIVE", _listener.name || _listener);
 					Nux.listener.call.apply(Nux, [_listener]);
@@ -649,16 +687,16 @@ e&&(f=e(g,c));return void 0!==f?f:b}},e=function(a){return function(a){b=a;f.val
 						forEachAsync(required, function(_next, el, i, arr) {
 							Nux.signature.add(el)
 							console.time('WANTED ' + el, arr)
-							Nux.log('ASYNCGET', el)
+							Nux.core.log('ASYNCGET', el)
 							debugger
 							Nux.use(el, function(){
-								Nux.log("Downloaded next item")
+								Nux.core.log("Downloaded next item")
 								console.timeEnd('WANTED ' + el)
 								
 							});
 
 						}).then(function(){
-							Nux.log("Pass listener", listener)
+							Nux.core.log("Pass listener", listener)
 							callHandler(handler, listener)
 						})
 
@@ -731,7 +769,7 @@ e&&(f=e(g,c));return void 0!==f?f:b}},e=function(a){return function(a){b=a;f.val
  				// occured
  				if( Nux.signature.exists(name)) {
  					Nux.signature.signatures[name]['run'] = runValue;
-    				Nux.slog("RUN", name)
+    				Nux.core.slog("RUN", name)
  				} else {
 
 					Nux.signature.allowed(name, function(){
@@ -895,57 +933,18 @@ e&&(f=e(g,c));return void 0!==f?f:b}},e=function(a){return function(a){b=a;f.val
 		use: function(obj){
 			/* provide array or string of assets to import */
 			var handler = arg(arguments, 1, Nux._F);
-			var path = arg(arguments, 2, Nux.defaultConfiguration.extensionPath);
+			var path = arg(arguments, 2, Nux.config.def.extensionPath);
 			
 			if(Themis.of(obj, String)) {
-				return this._use(obj, handler, path)
+				return Nux.fetch.use(obj, handler, path)
 			} else if(Themis.of(obj, Array)) {
 				for (var i = 0; i < obj.length; i++) {
 					var p = obj[i];
-					var hook = this._use(p, handler, path);
+					var hook = Nux.fetch.use(p, handler, path);
 				};
 
 				return hook;
 			}
-		},
-		_use: function(name){
-			var handler = arg(arguments, 1, Nux._F);
-			var path = arg(arguments, 2, Nux.defaultConfiguration.extensionPath);
-			this.listener.add(name, handler)
-			
-			console.time("IMPORT " +  name.path || name)
-
-			this.fetch.get( this.space(name), path, function(){
-				console.timeEnd("IMPORT " +  name.path || name)
-			});
-
-			var chain = this.fetch.chain;
-			// Import Chain
-			var hook = {
-				then: function(_name){
-					/*
-					Chaining imports can be a nasty business.
-					Use promise like then() method hooking to stop
-					nesting nightmares.
-
-					use('core').then('loader', function(){
-						// core and loader imported.
-					})
-					*/
-					var _n = Nux.space(_name);
-
-					if(Nux.space(name) in Nux.fetch.fails) {
-						Nux.core.slog("REFUSE", _n);
-					} else {
-						var _handler = arg(arguments, 1, Nux._F);
-						// debugger
-						var pri = chain.push([_n, _handler]);
-						// Nux.log("with  ", _n, 'handler:', Boolean(_handler));
-					}
-				}
-			}
-
-			return hook
 		},
 
 		// A list of all events to be exposed and captured 
@@ -1139,9 +1138,6 @@ e&&(f=e(g,c));return void 0!==f?f:b}},e=function(a){return function(a){b=a;f.val
 		self.booted 		= false;
 		self.NS 			= self.core.namespace;
 		self.space 			= self.core.space;
-		self.makeGlobal 	= self.core.makeGlobal;
-		self.slog 			= self.core.slog;
-		self.log 			= self.core.log;
 		self.onReady 		= self.events.ready;
 		self.onAllExpected 	= self.events.allExpected;
 		self.addAllowed 	= self.config.addAllowed;
@@ -1150,7 +1146,7 @@ e&&(f=e(g,c));return void 0!==f?f:b}},e=function(a){return function(a){b=a;f.val
 			
 			self.core.globalise();
 			console.time('Full load')
-			self.assets.add(self.defaultConfiguration.assets)
+			self.assets.add(self.config.def.assets)
 				.load(['required', 'nux'], function(){
 					
 					// Init assets is called from self core js
@@ -1162,7 +1158,7 @@ e&&(f=e(g,c));return void 0!==f?f:b}},e=function(a){return function(a){b=a;f.val
 					var booted = self.booted,
 						cc = 0;
 
-					if(booted && self.defaultConfiguration.runOnce) return booted;
+					if(booted && self.config.def.runOnce) return booted;
 					self.booted = true;
 					console.time('Nux')
 					self.core.slog("READY","Nux booted.");
