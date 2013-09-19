@@ -897,10 +897,6 @@ e&&(f=e(g,c));return void 0!==f?f:b}},e=function(a){return function(a){b=a;f.val
 			var handler = arg(arguments, 1, Nux._F);
 			var path = arg(arguments, 2, Nux.defaultConfiguration.extensionPath);
 			
-			var multiplexHandler = function(){
-				debugger;
-			}
-
 			if(Themis.of(obj, String)) {
 				return this._use(obj, handler, path)
 			} else if(Themis.of(obj, Array)) {
