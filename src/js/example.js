@@ -1,6 +1,6 @@
 Nux.onReady(function(Nux){
-	Nux.addAllowed(['nux.extension.kernal']).use('kernal', function() {
-		Nux.slog("Kernal", 'setup')
+	Nux.addAllowed(['nux.extension.kernel']).use('kernel', function() {
+		Nux.slog("Kernel", 'setup')
 	})
 });
 
