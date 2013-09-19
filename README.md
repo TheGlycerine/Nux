@@ -1,19 +1,82 @@
 Nux
 ===
 
-Asynchronous mvc module inheritance framework for complex object design.
+Asynchronous MVC Module Inheritance Framework.
 
-## Whut?
+Nux is an MIT licensed asynchronous javascript file loader incorporating an unobtrusive MVC style naming convention to create modular, readable, interchangeable code.
+
+Nux provides a namespaced module loader. Smaller files loaded from a specific directory, large javascript objects are created. By implementing:
+
+* asynchronous loading for javascript object
+* ‘dotted name syntax’ naming for javascript files
+* clever rules and chaining for overrides
+* modular methodology for javascript code design
+* multiple inheritance and chaining based on object extension
+
+Covering all bases, Nux sits as a tiny loadout building a larger more complex javascript object without you needing to code the ropes.
+
+## Simply put.
+
+We make a very complex object for our game. By using Nux, it all becomes easy to manage.
+
+**/root/js/game/objects/vehicles/** 
+
+	// Files:
+	* car.doors.js
+	* car.windows.js
+	* car.wheels.js
+
+Use:
+	
+	Nux.use([‘doors’, ‘windows’], function(){
+		// doors and windows loaded.
+		car.doors.lock();
+		car.windows.down();
+		car.use(‘wheels’, function(){
+			car.wheels.burn();
+		});
+	})
+
+
+## A better explanation.
+
+I don’t need a framework for everything. Additionally; I love all frameworks and try to incorporate the latest ideas whenever possible.
+When I’m at home; I want to hack my JS with all sorts of nonsense. Whilst at work; I want speed and simplicity and clarity.
+
+Nux has been carefully crafted to be an asynchronous javascript loader, applying some clever tools to help make big javascript objects little.
+
+By applying one simply convention (file naming) we achieve the following:
+
+* Live load javascript module to create simple objects.
+
+	Nux.use(‘core’);
+
+* Apply an easy naming convention for your files for automatic loading
+	
+ 	// Files
+	|- car.doors.js
+	|- car.wheels.js
+	
+	// Importing
+	Nux.use([‘doors’, ‘wheels’], function(){
+		console.log(car.doors, car.wheels);
+	});
+
+* namespace encapsulation for factory style object design.
+
+	
+## But… What? Why?
+
+Need to write something big or clever? Nux is designed to tackle one or all of these daily JS problems:
+ 
+* Realised at 1000 lines, it's just the start?
+* Wanted to reuse your own clever little code, to find it's stitched in too deep?
+* Use lots of open-source and always need to plug them together?
+* Using loadouts, frameworks and mvc is sometimes a bit too much?
+
 
 Writing javascript is fun! re-writing it is boring. Using frameworks is awesome, but hooking them up can be tedious.
-In any modern javascript application you tend to do:
-  
-+ Asynchronous script loading from any location.
-+ big objects
-+ interface stuff
-+ server loady stuff
-
-I also want:
+In any modern javascript application you tend to want:
 
 + Flexible packaging via namespaced files.
 + easy testing
@@ -21,24 +84,15 @@ I also want:
 + Multiple inheritance based on object extension,
 + DRY logic
 
-I also have a shed load of files I personally love:
-
-+ chosen.js, gridster, sockey.io .. jquery plugins ..
-
-Current tools tend to be:
-
-require, jquery, jasminejs, backbone, ember, .. list is forever ..
-
 To build a modern application using javascript, you need to write a large amount code. 
-As a modern developer, I'm hastly inviting OOP and DRY logic to everything I touch. 
+As a modern developer, I'm hastily inviting OOP and DRY logic to everything I touch. 
 
-By leveraging some excellent tools, Nux provides a light slimline extension, for you to create
-large or complex javscript objects with worrying about the foreplay.
+By leveraging some excellent tools, Nux provides a light slimline extension, for you to create large or complex javascript objects with worrying about the foreplay.
 
 + easy OOP style logic loading for framework level and application level object extension
 + simple and powerful method overrides for prototypal inheritance
 + easy asset loading for your other frameworks
-+ natively asynscronous 
++ natively asynchronous 
 + A single namespace
 
 Although very unfinished, some of the basic functionality is handled perfectly thanks to some brilliant open source work.
@@ -46,7 +100,7 @@ Although very unfinished, some of the basic functionality is handled perfectly t
 
 ## Example.
 
-**All code examples are subject to change; these examples are part pseudo code and future implementations (they should work ... )**
+**All code examples are subject to change; these examples are part pseudocode and future implementations (they should work ... )**
 
 Basic usage:
 
@@ -57,6 +111,33 @@ Basic usage:
 `use()` allows live import of code, kinda like RequireJS, LABjs or any other script loaders but with a significant difference.
 
 Unlike other script loaders, You're implementing a script designed to plug into a larger javascript object. 
+
+The end product is not your tiny bit of code you imported; It’s the larger entity you’re creating. 
+
+The smaller file you’ve loaded (named an `extensions`) contains code you’ve implemented to work within a larger parent entity. 
+
+	var _test = Nux.NS('test');
+
+	_test.moooCow = function() {
+		return ‘Cows do a mooo’;
+	}
+
+	// Urm… so ye - that’s pretty much a complete extension.
+
+This extension is written in a manner allowing it to be modular and easy to write.
+
+
+### Kernel
+
+To use nux as a core object, it needs other nux extensions. These are not loaded unless specified.
+
+	Nux.use('kernel', function(){
+		// import complete.
+	})
+
+This loads the kernel extension of which contains basic setup of nux.
+
+## Import location
 
 The file imported is `nux/extensions/nux.extension.foo.js`. The file is located within a script load area. Nux has an extension folder of which to load core extensions from. It looks something like this:
 
@@ -74,7 +155,7 @@ The file imported is `nux/extensions/nux.extension.foo.js`. The file is located 
 	|    // ... other dependencies ... 
 
 
-Providing us with the ability to cleanly divide complex objects into sub componenents
+Providing us with the ability to cleanly divide complex objects into sub components
 
 	Nux.use(['core', 'example'], function(){
 		// ... Perform logic
@@ -92,3 +173,5 @@ in the same way the extensions are made.
 + signals - integrated web socket events
 + factory - building many objects from a single component.
 + asset loader - Loading external files using the same event chain.
+
+
