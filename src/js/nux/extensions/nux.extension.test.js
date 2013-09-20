@@ -4,7 +4,7 @@ _test._meta.main = function(config){
 }
 
 _test._meta.allowed = [
-	"nux.extension.testAsset.js", 
+	"nux.extension.testAsset", 
 	/*{ 
 		name: "nux.extension.timer", 
 		// List of allows overrides this

@@ -58,7 +58,17 @@ e&&(f=e(g,c));return void 0!==f?f:b}},e=function(a){return function(a){b=a;f.val
 		core: {
 			spaceDefinitions: [],
 			newSpace: function(name, space) {
-				
+				/*
+				Write a new namespace for a preloading extension
+				 */
+
+				// If the name register is not in the expected
+				// namespace, and debug == true; raise error
+				if(Nux.config.def.debug) {
+					Nux.core.slog('register', name);
+
+				}
+
 				space['name'] = name;
 				space['created'] = +(new Date);
 				if(!space.hasOwnProperty('_meta')) {
@@ -66,6 +76,7 @@ e&&(f=e(g,c));return void 0!==f?f:b}},e=function(a){return function(a){b=a;f.val
 							Nux: Nux
 						}
 				}
+				
 				
 
 				var overrides = Nux.signature.overridesAllowed(name);
@@ -285,7 +296,20 @@ e&&(f=e(g,c));return void 0!==f?f:b}},e=function(a){return function(a){b=a;f.val
 				'*': 'REPLACE',
 				'allowed': 'ARR_APPEND'
 			},
-			permit: function(path){
+
+			permit: function(path, children){
+				/*
+				Permit a path to import with use().
+
+				pass children=true collects deep permissions from
+				extensions _meta.allowed. This data may exist 
+				outside the required extension. 
+
+				If the extension needs to be imported, the _meta.main
+				is not called therefore the extension should be inert.
+				 */
+				children = arg(arguments, 1, false);
+
 				var overrides = null;
 				var mp;
 
@@ -297,7 +321,7 @@ e&&(f=e(g,c));return void 0!==f?f:b}},e=function(a){return function(a){b=a;f.val
 						// object should be mapped to
 						// path and overrides
 						//var allowed = Nux.signature.overridesAllowed(path, path.overrides)
-						overrides = path.overrides
+						overrides = path.overrides;
 					} else if( Themis.of(path, Array) ) {
 						
 						mp = [Nux.space(path[0])];
@@ -305,24 +329,45 @@ e&&(f=e(g,c));return void 0!==f?f:b}},e=function(a){return function(a){b=a;f.val
 
 					}
 
-					if( overrides ) {
-						
-						Nux.signature.overrides[mp[0]] = overrides
+					if(mp[0])  {
+						debugger
+						Nux.signature.permit(path, children);
 					}
+
+					if( overrides ) {
+						Nux.signature.overrides[mp[0]] = overrides;
+					};
 					var merge = zoe.extend(Nux.config.def, { allowed: mp }, Nux.config.rules);
-					return merge
+					return merge;
 			},
 
-			addAllowed: function(path){
-			
-				if(path) {
+			addAllowed: function(path, parent){
+				/*
+				Add a path to allow for use(). If a path is not
+				allowed, the import will fail.
+				
+				When importing children the framework may load the
+				external file to read the _meta. The extensions _meta.main
+				method will not be called.
+
+				addAllowed(path, false)
+
+				Don't import _meta.allowed
+
+				addAllowed(path, true)
+
+				Import children.
+				 */
+				var getChildren = arg(arguments, 1, false);
+				
+				if( path ) {
 					if( Themis.of(path, String) ) {
-						Nux.config.permit(path);
+						Nux.config.permit(path, getChildren);
 					} else if( Themis.of(path, Object) ) {
- 						Nux.errors.throw(04, 'addAllowed accepts String or Array')
+ 						Nux.errors.throw(04, 'addAllowed accepts String or Array');
 					} else if( Themis.of(path, Array) ) {
-						for (var i = 0; i < path.length; i++) {
-							Nux.config.permit(path[i])
+						for( var i = 0; i < path.length; i++) {
+							Nux.config.permit(path[i]);
 						};
 					};
 				};
@@ -337,14 +382,15 @@ e&&(f=e(g,c));return void 0!==f?f:b}},e=function(a){return function(a){b=a;f.val
 				access - this is both user defined and blacklist. 
 				If an array is provided an object is returned.
 				Key is the name of the iterative, value is true/false */
-				if(!Themis.of(name, Array)) {
+				if( !Themis.of(name, Array) ) {
 					name = [name]
-				}
-				if(!Nux.config.def.hasOwnProperty('allowed')){
+				};
+
+				if( !Nux.config.def.hasOwnProperty('allowed') ){
 					Nux.errors.throw(30, 'config.def.allowed != []')
 					Nux.core.log("WHAT?   Missing access allowances for", name);
 					return false;
-				}
+				};
 
 				var inExtensions = false;
 
@@ -354,15 +400,15 @@ e&&(f=e(g,c));return void 0!==f?f:b}},e=function(a){return function(a){b=a;f.val
 							inExtensions = true;
 							// Nux.core.log('ALLOW   ', _name)
 						}
-					})
-				})
+					});
+				});
 
-				if(inExtensions) {
+				if( inExtensions ) {
 					// Nux.core.log("Allow access:", name);
 					return true;
-				}
+				};
 
-				Nux.errors.throw(75, name)
+				Nux.errors.throw(75, name);
 				Nux.core.log("REFUSE ASSET", name);
 				return false;
 			},
@@ -720,40 +766,73 @@ e&&(f=e(g,c));return void 0!==f?f:b}},e=function(a){return function(a){b=a;f.val
 		signature: {
 			signatures: {},
 			overrides: {},
+			// A space defines a signatures set and values.
+			space: function(){
+				var _space = {
+					allowed: false,
+					children: false,
+					expected: false,
+					/* The extension has loaded and the methods main
+					import has been run */
+					run: false,
+					received: false
+				}
 
+				return _space;
+			},
 			state: function(name){
 				// return the state of an entity;
 				var _n = Nux.space(name);
 				return Nux.signature.signatures[_n];
 			},
+			createSpace: function(obj){
+					return Nux.signature.signatures[obj] = (new Nux.signature.space);
+			},
+			getSpace: function(obj) {
 
-			add: function(obj){
+				if(!Nux.signature.exists(obj)) {
+					Nux.signature.createSpace(obj);
+				}
+
+				return Nux.signature.signatures[obj]
+			},
+
+
+			exists: function(name) {
+				// A config has loaded itself.
+				return Nux.signature.signatures.hasOwnProperty(name)
+			},
+			
+			add: function(name){
 				/*
 				Add a signature to the map to check 
 				when the extension is loading.
 				 */
 				// A config has loaded itself.
-				if(!Nux.signature.exists(obj)) {
-					Nux.signature.signatures[obj] = {};
-					Nux.core.slog("WANTED", obj);
+				var space;
+
+				if(!Nux.signature.exists(name)) {
+					space = Nux.signature.createSpace(name);
+					Nux.core.slog("WANTED", name);
 				}
 
-				return Nux.signature.signatures[obj];
-
+				return space || Nux.signature.getSpace(name);
 			},
 
-			exists: function(obj) {
-				// A config has loaded itself.
-				return Nux.signature.signatures.hasOwnProperty(obj)
-			},
+			permit: function(name, children) {
+				var sigSpace = Nux.signature.getSpace(name);
+				sigSpace.allowed = true;
+				sigSpace.children = true;
 
-			receive: function(){
+			},
+			receive: function(name){
 				var a = arguments;
-				var name = arg(a, 0, null);
+				name = arg(a, 0, null);
 				
 				if(Nux.signature.expected(name)) {
 					// Nux.core.slog('RECEIVE', name)
-					Nux.signature.signatures[name]['received'] = true;
+					var sigSpace = Nux.signature.getSpace(name);
+					sigSpace.received = true;
 				} else {
 
 					Nux.signature.allowed(name, function(){
@@ -768,7 +847,8 @@ e&&(f=e(g,c));return void 0!==f?f:b}},e=function(a){return function(a){b=a;f.val
  				// the imported object's run procedure has
  				// occured
  				if( Nux.signature.exists(name)) {
- 					Nux.signature.signatures[name]['run'] = runValue;
+ 					var sigSpace = Nux.signature.getSpace(name);
+ 					sigSpace.run = runValue;
     				Nux.core.slog("RUN", name)
  				} else {
 
@@ -779,7 +859,7 @@ e&&(f=e(g,c));return void 0!==f?f:b}},e=function(a){return function(a){b=a;f.val
 					})	
  				}
 
- 				return Nux.signature.signatures[name];
+ 				return Nux.signature.getSpace(name)
  			},
 
 			expected: function(){
@@ -795,7 +875,6 @@ e&&(f=e(g,c));return void 0!==f?f:b}},e=function(a){return function(a){b=a;f.val
 				var a = arguments;
 				var name = arg(a, 0, false);
 				var v = null;
-
 				if(name) {
 
 					if (arg(a, 1, false) == true ) {
@@ -803,7 +882,8 @@ e&&(f=e(g,c));return void 0!==f?f:b}},e=function(a){return function(a){b=a;f.val
 						v = true;						
 				
 						if( Nux.signature.exists(name) ) {
-							Nux.signature.signatures[name]['expected'] = v;
+							var sigSpace = Nux.signature.getSpace(name);
+							sigSpace['expected'] = v;
 							Nux.core.slog("EXPECTED", name)
 						} 
 
@@ -811,12 +891,16 @@ e&&(f=e(g,c));return void 0!==f?f:b}},e=function(a){return function(a){b=a;f.val
 						if(Nux.fetch.expected.indexOf(name) > -1){
 							v = true
 						} else {
-							v = false
+							v = false;
+							sp = Nux.space(name);
+							if(Nux.fetch.expected.indexOf(sp) > -1){
+								v=true;
+							}
 						}
 					}
 				} 
 
-				var exp = (v)? v: Nux.fetch.expected;
+				var exp = (v !== null)? v: Nux.fetch.expected;
 				
 				// Nux.signature.signatures[name]['expected'] = v
 				return exp;
@@ -1133,7 +1217,7 @@ e&&(f=e(g,c));return void 0!==f?f:b}},e=function(a){return function(a){b=a;f.val
 	var NuxLoader = function(){
 		var self = this
 		/** legacy and shortcut additions. **/
-		self['import']  	= self.fetch.get;
+		// self['import']  	= self.fetch.get;
 		self.load 			= self.fetch.load;
 		self.booted 		= false;
 		self.NS 			= self.core.namespace;

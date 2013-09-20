@@ -2,19 +2,19 @@
 describe('Namespace can be created', function(){ 
 	it('convert short space to long space', function(){
 		var spaceName = 'test';
-		var extSpace = Nux.defaultConfiguration.extensionNamespace;
+		var extSpace = Nux.config.def.extensionNamespace;
 		var sp = Nux.space(spaceName);
 		expect(sp).toEqual(extSpace + '.' + spaceName);
 	});
 
 	it('safely converts nested space() calls', function() {
 		var spaceName = 'test';
-		var extSpace = Nux.defaultConfiguration.extensionNamespace;
+		var extSpace = Nux.config.def.extensionNamespace;
 		var sp = Nux.space(  Nux.space( spaceName) );
 		expect(sp).toEqual(extSpace + '.' + spaceName);
 	})
 
-	it('Create space by name', function(){
+	it('create space by name', function(){
 		var sp = Nux.space('test');
 		var testSpace = Nux.NS('test');
 		/* {
@@ -54,12 +54,12 @@ describe('Handling events', function(){
 
 	});
 
-	it('can make a new event', function(){ 
+	it('can create new event "test"', function(){ 
 		
 		expect(callback).toBe(Nux.events.test);
 	});
 
-	it('can add event handlers', function(){
+	it('can add event handlers for event "test', function(){
 
 		Nux.events.test(testFunction);
 		
@@ -67,7 +67,7 @@ describe('Handling events', function(){
 		expect(Nux.events.callbacks[extName][0]).toEqual(testFunction);
 	});
 
-	it('can call the custom make event', function(){
+	it('can call the custom made event "test"', function(){
 		
 		Nux.events.test(hooks.testFunction);
 		Nux.events.callEvent(extName);
@@ -75,7 +75,7 @@ describe('Handling events', function(){
 		expect(hooks.testFunction).toHaveBeenCalled();
 	})
 
-	it('can call the custom make event with arguments', function(){
+	it('can call the custom made event "test" with arguments', function(){
 		
 		Nux.events.test(hooks.testFunctionWithArgs);
 		Nux.events.callEvent(extName, [1,2,3]);
@@ -83,27 +83,27 @@ describe('Handling events', function(){
 		expect(hooks.testFunctionWithArgs).toHaveBeenCalledWith(1,2,3);
 	})
 
-	it('can apply passthrough', function() {
+	it('can apply passthrough to "test" events', function() {
 		expect(extName in Nux.events.passed).toBe(false);
 		Nux.events.callEvent(extName, true);
 		expect(Nux.events.passThrough(extName)).toBe(true);
 	})	
 
-	it('can call after passthrough immediately', function() {
+	it('can call after passthrough "test" immediately', function() {
 		expect(Nux.events.passThrough(extName)).toBe(true);
 		Nux.events.test(hooks.testFunction);
 		expect(hooks.testFunction).toHaveBeenCalled();
 
 	})
 
-	it('can delete event chain handlers', function(){
+	it('can delete event "test" chain handlers', function(){
 		Nux.events.dieEvent(extName);
 		expect(Nux.events.callbacks[extName].length).toEqual(0);
 		expect(Nux.events.passThrough(extName, false)).toBe(false);
 		expect(Nux.events.exists(extName) ).toBe(true);
 	});
 
-	it('can destory events', function(){
+	it('can destory "test" events', function(){
 		Nux.events.removeEvent(extName);
 		expect(Nux.events.exists(extName) ).toBe(false);
 
@@ -116,10 +116,10 @@ describe('When implementing an extension', function(){
 		var spaceName = 'nux.extension.test';
 		Nux.addAllowed(spaceName);
 		
-		expect(Nux.defaultConfiguration.allowed).toContain(spaceName);
+		expect(Nux.config.def.allowed).toContain(spaceName);
 	})
 
-	it('_meta.allowed array is applied to defaultConfiguration', function(){
+	it('_meta.allowed array is applied to config.def', function(){
 		var spaceName = 'nux.extension.test';
 		
 		Nux.addAllowed(spaceName);
@@ -129,20 +129,51 @@ describe('When implementing an extension', function(){
 		};
 
 		var useHandler = function(){
-			debugger
-			expect(Nux.defaultConfiguration.allowed).toContain('nux.extension.testAsset');	
+			
+			expect(Nux.config.def.allowed).toContain('nux.extension.testAsset');	
 			Nux.use('testAllowed', testAllowedHandler);
 		};
 
 		Nux.use('test', useHandler);
 	})
 
-	it('automatically loads required extensions', function(){
+
+	it( 'can expect a loading extension', function() {
+		var name = 'test';
+		var returnVal = Nux.signature.expected( Nux.space( name ), true);
+		
+		expect(returnVal).toBe(true);
+
+		var expectSpace = Nux.signature.expected( Nux.space( 'test' ) );
+		expect(expectSpace).toEqual(true);
+
+		var expectRaw = Nux.signature.expected( 'test' );
+		expect(expectRaw).toEqual(true);
+
+		var expectFalse = Nux.signature.expected( 'foo' );
+		expect(expectFalse).toEqual(false);
+
+
+	});
+
+	it( 'addAllowed() adds to allowed extensions', function(){
 		var spaceName = 'nux.extension.test';
 		Nux.addAllowed(spaceName);
-		
-		expect(Nux.defaultConfiguration.allowed).toContain(spaceName);
+		expect(Nux.config.def.allowed).toContain(spaceName);
+	})
 
+	it( 'addAllowed() adds extensions required list of extensions', function(){
+		var spaceName = 'nux.extension.test';
+
+		// Should be in allowed hwhen the test extension is allowed
+		var testSpace = 'nux.extension.testAsset';
+
+		Nux.addAllowed(spaceName);
+		
+		/*
+		_test._meta.allowed = ["nux.extension.testAsset.js"]
+		*/
+		expect(Nux.config.def.allowed).toContain(testSpace);
 	})
  
 })

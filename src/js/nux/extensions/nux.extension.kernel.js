@@ -1,4 +1,4 @@
-var _kernal = Nux.NS('kernal');
+var _kernal = Nux.NS('kernel');
 
 _kernal._meta.main = function(config){
 	var cc = 0;
