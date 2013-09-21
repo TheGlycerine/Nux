@@ -65,18 +65,19 @@ e&&(f=e(g,c));return void 0!==f?f:b}},e=function(a){return function(a){b=a;f.val
 				// If the name register is not in the expected
 				// namespace, and debug == true; raise error
 				if(Nux.config.def.debug) {
-					Nux.core.slog('register', name);
+					Nux.core.slog('SPACE', name);
 
 				}
-
+				
 				space['name'] = name;
 				space['created'] = +(new Date);
+				
 				if(!space.hasOwnProperty('_meta')) {
 					space['_meta'] = {
 							Nux: Nux
 						}
 				}
-				
+			
 				
 
 				var overrides = Nux.signature.overridesAllowed(name);
@@ -172,6 +173,38 @@ e&&(f=e(g,c));return void 0!==f?f:b}},e=function(a){return function(a){b=a;f.val
 				}
 			},
 
+			meta: function(extension){
+				/*
+				Provide a meta object, returned is a
+				object chain for making requests to 
+				an extensions _meta data
+				 */
+				
+				var metaMethod = (function(extension){
+					var meta = extension._meta;
+					var chain = {
+						parent: function(){
+							return extension;
+						},
+
+						value: function(){
+							return meta;
+						},
+
+						has: function(name){
+							/*
+							Does this meta have the given
+							value
+							 */
+							return meta.hasOwnProperty(name);
+						}
+					};
+
+					return chain;
+				})(extension)
+
+				return metaMethod
+			},
 			globalise: function(){
 				if(Nux.config.def.allowGlobals) {
 					Nux.core.makeGlobal(Nux.config.def.globalConfigName, Nux.Config);
@@ -330,7 +363,7 @@ e&&(f=e(g,c));return void 0!==f?f:b}},e=function(a){return function(a){b=a;f.val
 					}
 
 					if(mp[0])  {
-						debugger
+						if(children) debugger
 						Nux.signature.permit(path, children);
 					}
 
@@ -476,9 +509,15 @@ e&&(f=e(g,c));return void 0!==f?f:b}},e=function(a){return function(a){b=a;f.val
 
 			_import: function(name, path){
 			
-				var cb = arg(arguments, 1, null);
+				var cb = arg(arguments, 2, null);
+
+				if(Themis.of(path, Function) ) {
+					path = arg(arguments, 2, Nux.config.def.extensionPath);
+					cb = arg(arguments, 1, Nux._F);
+				}
+
 				//this.importCallbacks.append(name, cb);
-				Import( name, path || Nux.config.def.extensionPath)		
+				Import(name, path);
 			},
 
 			use: function(name){
@@ -604,14 +643,13 @@ e&&(f=e(g,c));return void 0!==f?f:b}},e=function(a){return function(a){b=a;f.val
 
 			call: function(listenerObject) {
 				// debugger;
-				var listenerName = listenerObject.name || listenerObject
+				var listenerName 	= listenerObject.name || listenerObject;
+				var extension 		= listenerObject.item;
+				var space 			= Nux.space(listenerName);
+				var listeners 		= Nux.fetch.listeners[space];
 				
 				Nux.signature.receive(listenerName);
-
-				var space = Nux.space(listenerName)
-				var listeners = Nux.fetch.listeners[space];
-				
-				
+								
 				if(!listeners) {
 					Nux.core.log("No listener for ", space)
 					return
@@ -625,6 +663,8 @@ e&&(f=e(g,c));return void 0!==f?f:b}},e=function(a){return function(a){b=a;f.val
 
 				}
 
+				var metaChain = Nux.core.meta(extension);
+				debugger;
 				// Cannnot use preferable loader components loader.Import/loader.Load
 				// as they haven't been imported yet.
 				zoe.extend(defAppConfig, Nux.config.def, {
@@ -641,17 +681,17 @@ e&&(f=e(g,c));return void 0!==f?f:b}},e=function(a){return function(a){b=a;f.val
 				var runMethodName = 'main';
 				var runMethod;
 
-				if( listenerObject.item.hasOwnProperty('_meta') ) {
-					var  meta = listenerObject.item._meta;
+				if( extension.hasOwnProperty('_meta') ) {
+					var  meta = extension._meta;
 					var runMethodName = ( meta.hasOwnProperty('main') ) ? 'main' : 'run';
-					var metaValue = listenerObject.item._meta[runMethodName];
+					var metaValue = extension._meta[runMethodName];
 
-					if(Themis.of(metaValue, String)) {
-						if( listenerObject.item.hasOwnProperty(runMethodName) ) {
+					if( Themis.of(metaValue, String)) {
+						if( extension.hasOwnProperty(runMethodName) ) {
 							// call string defined extension run method
-							runMethod = listenerObject.item[metaValue];
-						} else if( listenerObject.item._meta.hasOwnProperty(runMethodName) ){
-							runMethod = listenerObject.item._meta[metaValue];
+							runMethod = extension[metaValue];
+						} else if( extension._meta.hasOwnProperty(runMethodName) ){
+							runMethod = extension._meta[metaValue];
 						} else {
 							var s = listenerObject.name + '._meta.main defines missing method ' + runMethodName
 							throw new Error(s);
@@ -667,8 +707,8 @@ e&&(f=e(g,c));return void 0!==f?f:b}},e=function(a){return function(a){b=a;f.val
 				if(runMethod){ 
 					run = runMethod(defAppConfig)
 				} else {
-					if(listenerObject.item.hasOwnProperty('run')) {
-						run = listenerObject.item.run(defAppConfig);	
+					if(extension.hasOwnProperty('run')) {
+						run = extension.run(defAppConfig);	
 					}
 				} 
 
@@ -676,7 +716,7 @@ e&&(f=e(g,c));return void 0!==f?f:b}},e=function(a){return function(a){b=a;f.val
 
 				for (var i = 0; i < listeners.length; i++) {
 					var listener = listeners[i];
-					listener.apply(listenerObject.item, [listenerObject, run])
+					listener.apply(extension, [listenerObject, run])
 				};
 			},
 
@@ -713,7 +753,8 @@ e&&(f=e(g,c));return void 0!==f?f:b}},e=function(a){return function(a){b=a;f.val
 				
 				Nux.fetch.registerListener(listener);
 
-				Nux.core.slog('IMPORTED', listener.name)
+				Nux.core.slog('IMPORTED', listener.name);
+
 				var callHandler = function(_listener){
 					Nux.core.slog("RECEIVE", _listener.name || _listener);
 					Nux.listener.call.apply(Nux, [_listener]);
@@ -878,6 +919,7 @@ e&&(f=e(g,c));return void 0!==f?f:b}},e=function(a){return function(a){b=a;f.val
 				if(name) {
 
 					if (arg(a, 1, false) == true ) {
+						debugger
 						Nux.fetch.expected.push(name);
 						v = true;						
 				

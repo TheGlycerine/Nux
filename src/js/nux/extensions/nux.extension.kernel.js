@@ -22,7 +22,7 @@ _kernal._meta.main = function(config){
 	});
 }
 
-_kernal._meta.allowed = [
+_kernal._meta.required = [
 	"nux.extension.core", 
 	/*{ 
 		name: "nux.extension.timer", 

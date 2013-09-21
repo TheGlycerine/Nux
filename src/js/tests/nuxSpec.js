@@ -25,6 +25,8 @@ describe('Namespace can be created', function(){
 		expect(testSpace.name).toEqual(sp);
 	})
 })
+
+
 describe('Handling events', function(){
 	var testFunction,
 		extName = 'test',
@@ -110,7 +112,23 @@ describe('Handling events', function(){
 	})
 })
 
+describe('When importing extensions', function(){
+
+	it(	'can create a handler to listen', function(){
+		var spaceName = Nux.space('test');
+
+		var testHandler = function(){
+			expect(this.name).toBe(spaceName);
+		};
+
+		Nux.listener.add(spaceName, testHandler);
+		Nux.addAllowed(spaceName).use(spaceName);
+	});
+
+})
+
 describe('When implementing an extension', function(){
+	var async = new AsyncSpec(this);
 
 	it('add an allowed extension for later import', function(){
 		var spaceName = 'nux.extension.test';
@@ -119,19 +137,16 @@ describe('When implementing an extension', function(){
 		expect(Nux.config.def.allowed).toContain(spaceName);
 	})
 
-	it('_meta.allowed array is applied to config.def', function(){
+	async.it('_meta.allowed array is applied to config.def', function(){
 		var spaceName = 'nux.extension.test';
-		
 		Nux.addAllowed(spaceName);
 		
-		var testAllowedHandler = function(){
-			//except(Nux.)
-		};
+		// var testAllowedHandler = function(){};
 
 		var useHandler = function(){
-			
 			expect(Nux.config.def.allowed).toContain('nux.extension.testAsset');	
-			Nux.use('testAllowed', testAllowedHandler);
+			// Nux.use('testAllowed', testAllowedHandler);
+			// done()
 		};
 
 		Nux.use('test', useHandler);
@@ -160,20 +175,31 @@ describe('When implementing an extension', function(){
 		var spaceName = 'nux.extension.test';
 		Nux.addAllowed(spaceName);
 		expect(Nux.config.def.allowed).toContain(spaceName);
+	});
+
+	xit('can load a ghost extension for testing', function(){
+
+		Nux.ghostAsset('nux.extension.testRequired', {
+			main: function(){
+				return 'testRequired ghostAsset'
+			}
+		});
+
+		except(Nux)
 	})
 
-	it( 'addAllowed() adds extensions required list of extensions', function(){
-		var spaceName = 'nux.extension.test';
+	var calledCounter;
+	it('required extensions are imported first', function(){
+		// testAsset should load before test is.
+		runs(function(){
+			calledCounter=0;
+			Nux.use('test', useHandler);
+		});
 
-		// Should be in allowed hwhen the test extension is allowed
-		var testSpace = 'nux.extension.testAsset';
+		var useHandler = function(){
+			expect(Nux.config.def.allowed).toContain('nux.extension.testAsset');	
+		};
 
-		Nux.addAllowed(spaceName);
-		
-		/*
-		_test._meta.allowed = ["nux.extension.testAsset.js"]
-		*/
-		expect(Nux.config.def.allowed).toContain(testSpace);
 	})
  
 })
