@@ -1,11 +1,161 @@
 //https://github.com/malko/l.js
-(function(){var e=function(e){(window.execScript||function(e){window.eval.call(window,e)})(e)},t=function(e,t){return e instanceof(t||Array)},n=document,r="getElementsByTagName",i="replace",s="match",o="length",u="readyState",a="onreadystatechange",f=n[r]("script"),l=f[f[o]-1].innerHTML[i](/^\s+|\s+$/g,"");if(typeof ljs!="undefined"){l&&e(l);return}var c=f[f[o]-1].src[s](/checkLoaded/)?!0:!1,h=n[r]("head")[0]||n.documentElement,p=function(e,t,r){var i=n.createElement(e),s;r&&(i[u]?i[a]=function(){if(i[u]==="loaded"||i[u]==="complete")i[a]=null,r()}:i.onload=r);for(s in t)i[s]=t[s];h.appendChild(i)},d=function(e,n){if(this.aliases&&this.aliases[e]){var r=this.aliases[e].slice(0);return t(r)||(r=[r]),n&&r.push(n),this.load.apply(this,r)}if(t(e)){for(var i=e.length;i--;)this.load(e[i]);return n&&e.push(n),this.load.apply(this,e)}return e[s](/\.css\b/)?this.loadcss(e,n):this.loadjs(e,n)},v={},m={aliases:{},loadjs:function(e,t){var n=e[s]("#")?e[i](/^[^#]+#/,""):null;return n&&(e=e[i](/#.*$/,"")),v[e]===!0?(t&&t(),this):v[e]!==undefined?(t&&(v[e]=function(e,t){return function(){e&&e(),t&&t()}}(v[e],t)),this):(v[e]=function(t){return function(){v[e]=!0,t&&t()}}(t),p("script",{type:"text/javascript",src:e,id:n},function(){v[e]()}),this)},loadcss:function(e,t){var n=e[s]("#")?e[i](/^[^#]+#/,""):null;return n&&(e=e[i](/#.*$/,"")),v[e]||p("link",{type:"text/css",rel:"stylesheet",href:e,id:n},function(){v[e]=!0}),v[e]=!0,t&&t(),this},load:function(){var e=arguments,n=e[o];return n===1&&t(e[0],Function)?(e[0](),this):(d.call(this,e[0],n<=1?undefined:function(){m.load.apply(m,[].slice.call(e,1))}),this)},addAliases:function(e){for(var n in e)this.aliases[n]=t(e[n])?e[n].slice(0):e[n];return this}};if(c){var g,y,b;for(g=0,y=f[o];g<y;g++)v[f[g].src]=!0;b=n[r]("link");for(g=0,y=b[o];g<y;g++)(b[g].rel==="stylesheet"||b[g].type==="text/css")&&(v[b[g].href]=!0)}ljs=m,l&&e(l)})();
+//https://github.com/malko/l.js
+(function(){
+/*
+* script for js/css parallel loading with dependancies management
+* @author Jonathan Gotti < jgotti at jgotti dot net >
+* @licence dual licence mit / gpl
+* @since 2012-04-12
+* @todo add prefetching using text/cache for js files
+* @changelog
+*            - 2013-01-25 - add parrallel loading inside single load call
+*            - 2012-06-29 - some minifier optimisations
+*            - 2012-04-20 - now sharp part of url will be used as tag id
+*                         - add options for checking already loaded scripts at load time
+*            - 2012-04-19 - add addAliases method
+*/
+	/** gEval credits goes to my javascript idol John Resig, this is a simplified jQuery.globalEval */
+	var gEval = function(js){ ( window.execScript || function(js){ window[ "eval" ].call(window,js);} )(js); }
+		, isA =  function(a,b){ return a instanceof (b || Array);}
+		//-- some minifier optimisation
+		, D = document
+		, getElementsByTagName = 'getElementsByTagName'
+		, replace = 'replace'
+		, match = 'match'
+		, length = 'length'
+		, readyState = 'readyState'
+		, onreadystatechange = 'onreadystatechange'
+		//-- get the current script tag for further evaluation of it's eventual content
+		,scripts = D[getElementsByTagName]("script")
+		,script  = scripts[ scripts[length] - 1 ].innerHTML[replace](/^\s+|\s+$/g,'')
+	;
+	//avoid multiple inclusion to override current loader but allow tag content evaluation
+	if( typeof ljs !== 'undefined' ){ script && gEval(script); return; }
+
+	var checkLoaded = scripts[ scripts[length] - 1 ].src[match](/checkLoaded/)?true:false
+		//-- keep trace of header as we will make multiple access to it
+		,header  = D[getElementsByTagName]("head")[0] || D.documentElement
+		,appendElmt = function(type,attrs,cb){
+			var e = D.createElement(type), i;
+			if( cb ){ //-- this is not intended to be used for link
+				if(e[readyState]){
+					e[onreadystatechange] = function(){
+						if (e[readyState] === "loaded" || e[readyState] === "complete"){
+							e[onreadystatechange] = null;
+							cb();
+						}
+					};
+				}else{
+					e.onload = cb;
+				}
+			}
+			for( i in attrs ){ e[i]=attrs[i]; }
+			header.appendChild(e);
+			// return e; // unused at this time so drop it
+		}
+		,load = function(url,cb){
+			if( this.aliases && this.aliases[url] ){
+				var args = this.aliases[url].slice(0);
+				isA(args) || (args=[args]);
+				cb && args.push(cb);
+				return this.load.apply(this,args);
+			}
+
+			if( isA(url) ){ // parallelized request
+				for( var l=url.length; l--;){
+					this.load(url[l]);
+				}
+				cb && url.push(cb); // relaunch the dependancie queue
+				return this.load.apply(this,url);
+			}
+
+
+
+			if( url[match](/\.css\b/) ){
+				return this.loadcss(url,cb);
+			}
+			url = (this._prefix)? this._prefix + url: url;
+			return this.loadjs(url,cb);
+		}
+		,loaded = {}  // will handle already loaded urls
+		,loader  = {
+			aliases:{}
+			,loadjs: function(url,cb){
+				
+				var id  =(url[match]('#')?url[replace](/^[^#]+#/,''):null);
+				id && (url = url[replace](/#.*$/,''));
+				if( loaded[url] === true ){ // already loaded exec cb if any
+					cb && cb();
+					return this;
+				}else if( loaded[url]!== undefined ){ // already asked for loading we append callback if any else return
+					if( cb ){
+						loaded[url] = function(ocb,cb){ return function(){ ocb && ocb(); cb && cb(); } }(loaded[url],cb);
+					}
+					return this;
+				}
+				
+				// first time we ask this script
+				loaded[url] = function(cb){ return function(){loaded[url]=true; cb && cb();}}(cb);
+				appendElmt('script',{type:'text/javascript',src:url,id:id},function(){ loaded[url]() });
+				return this;
+			}
+			,loadcss: function(url,cb){
+				var id  =(url[match]('#')?url[replace](/^[^#]+#/,''):null);
+				id && (url = url[replace](/#.*$/,''));
+				if(! loaded[url]){
+					appendElmt('link',{type:'text/css',rel:'stylesheet',href:url,id:id},function(){ loaded[url]=true; });
+				}
+				loaded[url] = true;
+				cb && cb();
+				return this;
+			}
+			,load: function(){
+				var argv=arguments,argc = argv[length];
+				if( argc === 1 && isA(argv[0],Function) ){
+					argv[0]();
+					return this;
+				}
+				load.call(this,argv[0], argc <= 1 ? undefined : function(){ loader.load.apply(loader,[].slice.call(argv,1))} )
+				return this;
+			}
+			,prefix: function(path) {
+				if(path) this._prefix = path;
+				return this._prefix;
+			}
+			,addAliases:function(aliases){
+				for(var i in aliases ){
+					this.aliases[i]= isA(aliases[i]) ? aliases[i].slice(0) : aliases[i];
+				}
+				return this;
+			}
+		}
+	;
+	if( checkLoaded ){
+		var i,l,links;
+		for(i=0,l=scripts[length];i<l;i++){
+			loaded[scripts[i].src]=true;
+		}
+		links = D[getElementsByTagName]('link');
+		for(i=0,l=links[length];i<l;i++){
+			(links[i].rel==="stylesheet" || links[i].type==='text/css') && (loaded[links[i].href]=true);
+		}
+	}
+	//export ljs
+	ljs = loader;
+	// eval inside tag code if any
+	script && gEval(script);
+})();
+
+/* 
+ * zoe.js 0.0.1
+ * http://zoejs.org
+ */(function(e,t){typeof exports=="object"?module.exports=t():typeof define=="function"&&define.amd?define(function(){return t()}):e.zoe=t();zoe=t()})(this,function(){var e={},t=typeof window!="undefined"?window.console=window.console||{}:global.console;t.dir=t.dir||function(){},t.log=t.log||function(){};var n=e.fn=function(e,t){if(typeof e=="function"||typeof e=="string")t=e,e=null;var u=function(){return u.run(u._this||this,Array.prototype.splice.call(arguments,0),u.fns)};return u.constructor=n,u.fns=e||[],u.run=(typeof t=="string"?n[t]:t)||n.LAST_DEFINED,u.on=i,u.off=s,u.first=o,u._this=undefined,u.bind=r,u},r=function(e){return this._this=e,this},i=function(e){return this.fns.push(e),this},s=function(e){if(!e){this.fns=[];return}for(var t=0;t<this.fns.length;t++)if(this.fns[t]==e){this.fns.splice(t,1);return}},o=function(e){return this.fns=[e].concat(this.fns),this};n.executeReduce=function(e,t){return t===undefined&&(t=e,e=undefined),typeof e=="function"&&(e=e()),function(n,r,i){var s=e;for(var o=0;o<i.length;o++)s=t(s,i[o].apply(n,r));return s}};var u=n.LAST_DEFINED=n.executeReduce(function(e,t){return t!==undefined?t:e});n.STOP_DEFINED=function(t,n,r){var i;for(var s=0;s<r.length;s++){i=r[s].apply(t,n);if(i!==undefined)return i}return i},n.ASYNC=n.ASYNC_NEXT=function(t,r,i){var s=0,o;typeof r[r.length-1]=="function"&&(o=r.pop());var u=function(e){return function(){i[e]?i[e].length>=r.length+1||i[e].run==n.ASYNC?i[e].apply(t,r.concat([u(e+1)])):(i[e].apply(t,r),u(e+1)()):o&&o()}};return u(0)()},n.ASYNC_SIM=function(t,n,r){var i=0,s;typeof n[n.length-1]=="function"&&(s=n.pop());for(var o=0;o<r.length;o++)r[o].apply(t,n.concat([function(){++i==r.length&&s()}]))},e.on=function(e,t,r){var i=e[t];if(!i||i.constructor!=n||i.run!=n.LAST_DEFINED)e[t]=n(i?[i]:[]);e[t].on(r)},e.off=function(e,t,r){if(e[t].constructor==n)return e[t].off(r)};var a=e.extend=function(n,r,i){n=n||{};var s=arguments;s.length>2&&(i=s[s.length-1]);var o;typeof i=="object"?(o=i,i=undefined):i||(r._extend&&(n._extend=a(n._extend||{},r._extend,"REPLACE")),o=n._extend);if(o)for(var u in o){var f=u.indexOf(".");if(f!=-1){var l=u.substr(0,f);o[l]||(o[l]=a)}}for(var u in r)if(!r.hasOwnProperty||r.hasOwnProperty(u)){if(u=="_extend")continue;var c=r[u],h,p=u.length,d=u.substr(0,2)=="__",v=u.substr(p-2,2)=="__",m=d&&!v&&(u=u.substr(2))&&a.APPEND||!d&&v&&(u=u.substr(0,p-2))&&a.PREPEND||d&&v&&(u=u.substr(2,p-4))&&a.REPLACE,g=m||i||o&&(o[u]||o["*"])||a.DEFINE;typeof g=="string"&&(g=a[g]);try{h=g(n[u],c,o&&a.deriveRules(o,u))}catch(y){throw t.dir(n),t.dir(r),t.dir(a.deriveRules(i,u)),'zoe.extend: "'+u+'" override error. \n ->'+(y.message||y)}h!==undefined&&(n[u]=h)}if(s.length>3){var b=[n];b.concat(Array.prototype.splice.call(s,2,s.length-3,s.length-3)),b.push(i),$z.extend.apply(this,b)}return n};a.EXTEND=a,a.DEFINE=function(t,n){if(t!==undefined)throw"No override specified.";return n},a.REPLACE=function(t,n){return n!==undefined?n:t},a.FILL=function(t,n){return t===undefined?n:t},a.IGNORE=function(){};var f=function(e){return e!=null&&e.constructor==Object},l=function(e){return typeof e=="function"},c=function(e){return typeof e=="string"},h=function(e){return e instanceof Array},p=function(e,t){return e?typeof e=="string"?e:(e&&!e["*"]&&(e["*"]=t),e):t};a.APPEND=function(t,n,r){return f(n)?a(f(t)?t:{},n,p(r,"REPLACE")):l(n)?a.CHAIN(t,n):c(n)?a.STR_APPEND(t,n):h(n)?a.ARR_APPEND(t,n):n},a.PREPEND=function(t,n,r){return f(n)&&(t===undefined||f(t))?a(t||{},n,p(r,"FILL")):l(n)?a.CHAIN_FIRST(t,n):c(n)?a.STR_PREPEND(t,n):h(n)?a.ARR_PREPEND(t,n):t===undefined?n:t},a.DAPPEND=function(t,n,r){return a.APPEND(t,n,p(r,"DAPPEND"))},a.DPREPEND=function(n,r,i){return e.extend.PREPEND(n,r,p(i,"DPREPEND"))},a.DREPLACE=function(t,n,r){return f(n)?a(t||{},n,p(r,"DREPLACE")):h(n)?a(t||[],n,p(r,"DREPLACE")):n},a.DFILL=function(t,n,r){return f(n)?a(t||{},n,p(r,"DFILL")):typeof t=="undefined"?n:t},a.ARR_APPEND=function(t,n){return t=t||[],t.concat||(t=[t]),t.concat(n)},a.ARR_PREPEND=function(t,n){return n=n||[],n.concat||(n=[n]),n.concat(t||[])},a.STR_APPEND=function(t,n){return t?t+n:n},a.STR_PREPEND=function(t,n){return n+t},a.deriveRules=function(e,t){var n;for(var r in e){if(r=="*")continue;var i=r.split(".");if(i[0]==t||i[0]=="*")n=n||{},n[i.splice(1).join(".")]=e[r]}return n},a.makeChain=function(e,t){return typeof e=="string"&&(e=n[e]),function(r,i){if(!r||r.constructor!=n||r.run!=e)r=n(r?[r]:[],e);return t?r.first(i):r.on(i),r}},a.CHAIN=a.makeChain(n.LAST_DEFINED),a.CHAIN_FIRST=a.makeChain(n.LAST_DEFINED,!0),a.CHAIN_STOP_DEFINED=a.makeChain(n.STOP_DEFINED),a.CHAIN_ASYNC=a.makeChain(n.ASYNC),e.create=function(e,t){t=v(e,t),t._definition&&(t=t._definition);var r;d(t,function(e){if(e._base)return r=e._base(t),!0}),r=r||{},r._definition=t,r._extend={_base:a.IGNORE,_implement:a.IGNORE,_reinherit:a.IGNORE,_make:a.IGNORE,_integrate:a.IGNORE,_built:a.IGNORE};var i=[],s=n(),o=n();return o._this=s._this=r,d(t,function(n){n=o(n,t)||n,n._integrate&&o.on(n._integrate),a(r,n),n._make&&n._make.call(r,t,n),n._built&&s.on(n._built),i.push(n)},function(t){return i.indexOf(t)!=-1&&!t._reinherit}),s(t),r};var d=function(e,n,r){r=r||function(){};if(e._implement)for(var i=0,s=e._implement.length;i<s;i++){var o=e._implement[i];o||(t.dir(e),t.log("Implementor not defined!")),o._definition&&(o=o._definition);if(r(o))continue;if(d(o,n,r))return!0}return n(e)},v=function(e,t){return e instanceof Array||(t=e,e=[]),t=t||{},t._implement=e.concat(t._implement||[]),t};return e.inherits=function(t,n){if(t._definition)return e.inherits(t._definition,n);if(n._definition)return e.inherits(t,n._definition);var r=!1;return d(t,function(e){if(e===n)return r=!0,!0}),r},e.Constructor={_base:function(e){function t(){t.construct&&t.construct.apply(this,arguments)}return t},_extend:{prototype:a,construct:a.CHAIN},_integrate:function(e){if(typeof e=="function"&&!e._definition)return{construct:e,prototype:e.prototype};var t=Object.getOwnPropertyDescriptor;if(t){var n=t(e,"prototype");n&&!n.enumerable&&a(this.prototype,e.prototype,a.deriveRules(this._extend,"prototype"))}}},e.InstanceEvents={_extend:{_events:"ARR_APPEND"},construct:function(){var t=this.constructor._events;if(!t)return;for(var n=0;n<t.length;n++){var r=t[n];this[r]=e.fn(this[r]?[this[r]]:[]).bind(this)}}},e});
 
 // http://strangemother.github.io/getterSetterJS/
 // 475 bytes gzipped (967 bytes uncompressed)
-function arg(b,a,c,f){var d=null;if(a.constructor==Array)for(var e=0;e<a.length;e++){if(b[a[e]]||!1===b[a[e]]){d=b[a[e]];break}}else if(b[a]||!1===b[a])d=b[a];null==d&&void 0!=c&&(d=c);return f?[d,a[e]]:d}getterSetter=function(b){return GetterSetter.apply(b,arguments)};
-GetterSetter=function(){var b,a,c;this.init=function(){var l=arg(arguments,0,this),g=arg(arguments,1,null),h=arg(arguments,2,null),k=arg(arguments,3,null),m=f.value=arg(arguments,4,l[g]||void 0);h&&(a=h);k&&(c=k);h=d(h);k=e(k);b=m;Object.defineProperty(l,g,{get:h,set:k});return f};var f={value:null,getter:function(b){return b?(a=b,this):d(a)},setter:function(b){return b?(c=b,this):e(c)}},d=function(d){return function(g,c){g=arg(arguments,0,b);c=arg(arguments,1,"get");var e=arg(arguments,2,a||d),f;
-e&&(f=e(g,c));return void 0!==f?f:b}},e=function(a){return function(a){b=a;f.value=a;if(null==c||void 0==c)return d()(a,"set");a=c(a);void 0!=a&&(b=a)}};return this.init.apply(this,arguments)};
+	function arg(b,a,c,f){var d=null;if(a.constructor==Array)for(var e=0;e<a.length;e++){if(b[a[e]]||!1===b[a[e]]){d=b[a[e]];break}}else if(b[a]||!1===b[a])d=b[a];null==d&&void 0!=c&&(d=c);return f?[d,a[e]]:d}getterSetter=function(b){return GetterSetter.apply(b,arguments)};
+	GetterSetter=function(){var b,a,c;this.init=function(){var l=arg(arguments,0,this),g=arg(arguments,1,null),h=arg(arguments,2,null),k=arg(arguments,3,null),m=f.value=arg(arguments,4,l[g]||void 0);h&&(a=h);k&&(c=k);h=d(h);k=e(k);b=m;Object.defineProperty(l,g,{get:h,set:k});return f};var f={value:null,getter:function(b){return b?(a=b,this):d(a)},setter:function(b){return b?(c=b,this):e(c)}},d=function(d){return function(g,c){g=arg(arguments,0,b);c=arg(arguments,1,"get");var e=arg(arguments,2,a||d),f;
+	e&&(f=e(g,c));return void 0!==f?f:b}},e=function(a){return function(a){b=a;f.value=a;if(null==c||void 0==c)return d()(a,"set");a=c(a);void 0!=a&&(b=a)}};return this.init.apply(this,arguments)};
 
 (function(config){
 	var NuxConfig = {
@@ -15,6 +165,12 @@ e&&(f=e(g,c));return void 0!==f?f:b}},e=function(a){return function(a){b=a;f.val
 		name: "Name",
 		debug: false,
 		prefix: "NX",
+		// secure defined the requirement to check if an asset
+		// is allowed to be imported.
+		// If false, the extension must first be applied through
+		// addAllowed(name)
+		// If true, the extension will be allowed automatically
+		secure: false,
 		// Extension namespace to build an extension
 		// based upon spaces loaded. - It"s at this
 		// point we target another application or version 
@@ -27,21 +183,35 @@ e&&(f=e(g,c));return void 0!==f?f:b}},e=function(a){return function(a){b=a;f.val
 		// Nux can be booted at any given time.
 		runOnce: true,
 		overrideSpace: 'override',
+		// relative prefix for all assets imported
+		assetPath: './',
+		// If a method is called prior to the Nux.boot() method
+		// being called; autoBoot ensures the call does not go
+		// unanswered. Instead; core logic is imported using 
+		// boot config settings and an attempt is made to the method
+		// call when required.
+		autoBoot: true,
 		// Extensions allowed to be executed and implemenred
 		// This should only exist in
 		// core loaders and baked
 		// objects
 		allowed: [],
 		events:  ['ready', 'allExpected'],
+		// Special internal logger written to conform
+		// to a log method for Nux, 
+		// Apply slog name to define an action
+		// performed under 'slog name' when in debug
+		ignoreLog: ['handle'],
 		// independant file assets  used for Nux.
 		assets: {
 			'agile': "js/vendor/com.iskitz.ajile.src.js?mvcoff,mvcshareoff",			
-			'zoe': 	"js/vendor/zoe.js",
-			'themis': ["js/vendor/themis/getterSetter.js", "js/vendor/themis/tester.js"],
-			'nux': ["agile", "zoe", "themis"],
+			'zoe': 	"js/vendor/zoe.min.js",
+			'themis': [
+				//"js/vendor/themis/getterSetter.js", 
+				"js/vendor/themis/tester.js"],
+			'nux': ["agile", "themis"],
 			// assets fundamental to Nux - Will be loaded first
 			'required': [
-				'zoe',
 				'themis', 
 				'agile',
 				'js/nux/vendor/majaX.js',
@@ -66,7 +236,6 @@ e&&(f=e(g,c));return void 0!==f?f:b}},e=function(a){return function(a){b=a;f.val
 				// namespace, and debug == true; raise error
 				if(Nux.config.def.debug) {
 					Nux.core.slog('SPACE', name);
-
 				}
 				
 				space['name'] = name;
@@ -178,6 +347,22 @@ e&&(f=e(g,c));return void 0!==f?f:b}},e=function(a){return function(a){b=a;f.val
 				Provide a meta object, returned is a
 				object chain for making requests to 
 				an extensions _meta data
+
+				following can be performed:
+
+					meta.value()
+				
+				Receive an object containing meta content on the extension
+
+					meta.parent()
+
+				Recieve the parent extension; the element associated with this 
+				meta data
+
+					meta.has(value)
+
+				returns true/false if the associated meta object has the value
+				associated.
 				 */
 				
 				var metaMethod = (function(extension){
@@ -207,6 +392,7 @@ e&&(f=e(g,c));return void 0!==f?f:b}},e=function(a){return function(a){b=a;f.val
 			},
 			globalise: function(){
 				if(Nux.config.def.allowGlobals) {
+
 					Nux.core.makeGlobal(Nux.config.def.globalConfigName, Nux.Config);
 					Nux.core.makeGlobal(Nux.config.def.globalName, Nux);
 				}
@@ -254,7 +440,7 @@ e&&(f=e(g,c));return void 0!==f?f:b}},e=function(a){return function(a){b=a;f.val
 				    return s + ( "          " ).substr( s.length );
 				}
 
-				var hidden = ['handle'];
+				var hidden = Nux.config.def.ignoreLog;
 				if(!Nux.config.def.debug) return 
 				/* State log, for writing statement logs 
 				unique to Nux loading */
@@ -314,15 +500,40 @@ e&&(f=e(g,c));return void 0!==f?f:b}},e=function(a){return function(a){b=a;f.val
 			
 		},
 
-		config: {
-
-			
+		config: {		
 			// Default configuration for Nux.
 			def: NuxConfig,
+
 			merge: function(){
-				/* Merge config passed with default config space */
-				rules = Nux.config.rules;
-				return zoe.extend(Nux.config.def, config, rules);
+				/* Merge config passed with default config space 
+				
+					merge({})
+				merges passed bject into the nux def configuration
+				returned it an updated version of Nux.config.def
+
+					merge({}, {})
+
+				merge the two objects by reference of  objectA == objectA <- objectB
+
+					merge({}, {},  rules={})
+
+				pass an object set as defined rules for merging.
+				Returned is ObjectA with ObjectB properites applied by 
+				definitions with the rules object. By default the rules are
+				Nux.config.rules
+				*/
+				var config = arg(arguments, 0, {
+						applied: (new Date) // Time the config object was applied
+					}), 
+					dest = arg(arguments, 1, Nux.config.def),
+					rules = arg(arguments, 2, Nux.config.rules);
+				
+				return zoe.extend(dest, config, rules);
+
+			},
+
+			configure: function(on){
+				return Nux
 			},
 
 			rules: {
@@ -334,13 +545,18 @@ e&&(f=e(g,c));return void 0!==f?f:b}},e=function(a){return function(a){b=a;f.val
 				/*
 				Permit a path to import with use().
 
-				pass children=true collects deep permissions from
+				pass children=true:
+
+					permit(pathString, true)
+
+				collects deep permissions from
 				extensions _meta.allowed. This data may exist 
 				outside the required extension. 
 
 				If the extension needs to be imported, the _meta.main
 				is not called therefore the extension should be inert.
 				 */
+				path = arg(arguments, 0, null);
 				children = arg(arguments, 1, false);
 
 				var overrides = null;
@@ -362,9 +578,11 @@ e&&(f=e(g,c));return void 0!==f?f:b}},e=function(a){return function(a){b=a;f.val
 
 					}
 
-					if(mp[0])  {
-						if(children) debugger
-						Nux.signature.permit(path, children);
+					if(path)  {
+						if(children){
+								
+							Nux.signature.permit(path, children);
+						} 
 					}
 
 					if( overrides ) {
@@ -383,13 +601,15 @@ e&&(f=e(g,c));return void 0!==f?f:b}},e=function(a){return function(a){b=a;f.val
 				external file to read the _meta. The extensions _meta.main
 				method will not be called.
 
-				addAllowed(path, false)
+					addAllowed(path, false)
 
 				Don't import _meta.allowed
 
-				addAllowed(path, true)
+					addAllowed(path, true)
 
 				Import children.
+
+				This method mplements the config.permit method
 				 */
 				var getChildren = arg(arguments, 1, false);
 				
@@ -436,7 +656,7 @@ e&&(f=e(g,c));return void 0!==f?f:b}},e=function(a){return function(a){b=a;f.val
 					});
 				});
 
-				if( inExtensions ) {
+				if( inExtensions || !Nux.config.def.secure ) {
 					// Nux.core.log("Allow access:", name);
 					return true;
 				};
@@ -460,6 +680,9 @@ e&&(f=e(g,c));return void 0!==f?f:b}},e=function(a){return function(a){b=a;f.val
 			load: function(obj, cb) {
 				// clean nux string
 				try {
+					console.log('load', obj)
+					var path = Nux.config.def.assetPath;
+					ljs.prefix(path);
 					ljs.load(obj, cb);
 				} catch(e) {
 					console.log(e)
@@ -477,14 +700,16 @@ e&&(f=e(g,c));return void 0!==f?f:b}},e=function(a){return function(a){b=a;f.val
 			get: function(name){
 				/*
 				Perform an import utilizing the 
-				namespace
+				namespace.
+				This method implements the internally used _import method.
 				*/
 				var path = arg(arguments, 1, Nux.config.def.extensionPath);
 				var cb = arg(arguments, 2, Nux._F);
 				var fcb = arg(arguments, 3, null);
 
-				if( Nux.signature.allowed(name) ) {
+				if( Nux.signature.allowed(name)) {
 					// Nux.listener.add(name, cb);
+					// first
 					Nux.signature.expected(name, true)
 					Nux.fetch._import(name, path, cb);
 				} else {
@@ -508,27 +733,53 @@ e&&(f=e(g,c));return void 0!==f?f:b}},e=function(a){return function(a){b=a;f.val
 			},
 
 			_import: function(name, path){
-			
+				/*
+				Performs an import to the referenced file.
+				This should be used internally in favour of the 
+				fetch.use(name, handler) method.
+				Handlers and callbacks should have been setup prior
+				to calling this method.
+
+				return is undefined.
+				 */
 				var cb = arg(arguments, 2, null);
 
 				if(Themis.of(path, Function) ) {
 					path = arg(arguments, 2, Nux.config.def.extensionPath);
-					cb = arg(arguments, 1, Nux._F);
+					cb = arg(arguments, 1, null);
+
 				}
 
+				// debugger
+				if(cb) Nux.listener.add(name, cb)
 				//this.importCallbacks.append(name, cb);
 				Import(name, path);
 			},
 
 			use: function(name){
+				/*
+				Externally accessible method o implement a Nux
+				extension. the Use method:
+
+					use(nameString [, handlerFunction][, importPathString])
+
+				returned is an extension chain containing:
+
+					then(name [, handlerFunction])
+				
+				This method implements the fetch.get method
+				 */
+				
 				var handler = arg(arguments, 1, Nux._F);
 				var path = arg(arguments, 2, Nux.config.def.extensionPath);
+				
+				// This method may throw an error is the asset has been refused.
 				Nux.listener.add(name, handler)
 				
-				console.time("IMPORT " +  name.path || name)
+				console.time("IMPORT " +  (name.path || name))
 
 				Nux.fetch.get( Nux.space(name), path, function(){
-					console.timeEnd("IMPORT " +  name.path || name)
+					console.timeEnd("IMPORT " + (name.path || name))
 				});
 
 				var chain = Nux.fetch.chain;
@@ -564,9 +815,9 @@ e&&(f=e(g,c));return void 0!==f?f:b}},e=function(a){return function(a){b=a;f.val
 				Method is called before the importHandler applys the extension
 				 */
 
-				Nux.fetch.imported.push(listener.name);
 				io = Nux.fetch.expected.indexOf(listener.name);
-
+				// debugger
+				Nux.fetch.imported.push(listener.name);
 				if( io > -1) { 
 					Nux.fetch.expected.splice(io, 1) 
 					// Nux.signature.expected(listener.name, true)
@@ -587,6 +838,7 @@ e&&(f=e(g,c));return void 0!==f?f:b}},e=function(a){return function(a){b=a;f.val
 				return this;
 			},
 			errors: {
+				00: 'Not Booted',
 				04: 'not implemented',
 				// The event name passed has already been
 				// created. addEvent() has been used
@@ -664,7 +916,7 @@ e&&(f=e(g,c));return void 0!==f?f:b}},e=function(a){return function(a){b=a;f.val
 				}
 
 				var metaChain = Nux.core.meta(extension);
-				debugger;
+				// debugger;
 				// Cannnot use preferable loader components loader.Import/loader.Load
 				// as they haven't been imported yet.
 				zoe.extend(defAppConfig, Nux.config.def, {
@@ -861,10 +1113,15 @@ e&&(f=e(g,c));return void 0!==f?f:b}},e=function(a){return function(a){b=a;f.val
 			},
 
 			permit: function(name, children) {
+
+				// If children, check to see if name permit 
+				// has children referenced. 
+				// If no children are dermined (by space awareness?)
+				// Call the allowed and inspect the children
 				var sigSpace = Nux.signature.getSpace(name);
 				sigSpace.allowed = true;
-				sigSpace.children = true;
-
+				sigSpace.children = children;
+				debugger
 			},
 			receive: function(name){
 				var a = arguments;
@@ -919,15 +1176,20 @@ e&&(f=e(g,c));return void 0!==f?f:b}},e=function(a){return function(a){b=a;f.val
 				if(name) {
 
 					if (arg(a, 1, false) == true ) {
-						debugger
-						Nux.fetch.expected.push(name);
-						v = true;						
-				
-						if( Nux.signature.exists(name) ) {
-							var sigSpace = Nux.signature.getSpace(name);
-							sigSpace['expected'] = v;
-							Nux.core.slog("EXPECTED", name)
-						} 
+						
+						// debugger
+						if(Nux.fetch.expected.indexOf(name) == -1) {
+							Nux.fetch.expected.push(name);
+							v = true;						
+							if( Nux.signature.exists(name) ) {
+								var sigSpace = Nux.signature.getSpace(name);
+								sigSpace['expected'] = v;
+								Nux.core.slog("EXPECTED", name)
+							} 
+						} else {
+							v = true;
+						}
+			
 
 					} else {
 						if(Nux.fetch.expected.indexOf(name) > -1){
@@ -1060,6 +1322,10 @@ e&&(f=e(g,c));return void 0!==f?f:b}},e=function(a){return function(a){b=a;f.val
 			/* provide array or string of assets to import */
 			var handler = arg(arguments, 1, Nux._F);
 			var path = arg(arguments, 2, Nux.config.def.extensionPath);
+
+			if(!Nux.booted) {
+				Nux.errors.throw(00, 'Nux.boot() must be performed')
+			}
 			
 			if(Themis.of(obj, String)) {
 				return Nux.fetch.use(obj, handler, path)
@@ -1261,6 +1527,7 @@ e&&(f=e(g,c));return void 0!==f?f:b}},e=function(a){return function(a){b=a;f.val
 		/** legacy and shortcut additions. **/
 		// self['import']  	= self.fetch.get;
 		self.load 			= self.fetch.load;
+		self.configure		= self.config.configure;
 		self.booted 		= false;
 		self.NS 			= self.core.namespace;
 		self.space 			= self.core.space;
@@ -1268,17 +1535,20 @@ e&&(f=e(g,c));return void 0!==f?f:b}},e=function(a){return function(a){b=a;f.val
 		self.onAllExpected 	= self.events.allExpected;
 		self.addAllowed 	= self.config.addAllowed;
 
-		var init = function(config) {
-			
-			self.core.globalise();
+		self.core.globalise();
+		var init = function(config, args) {
 			console.time('Full load')
+
+			self.config.merge(config);
+			var loadA = ['required', 'nux'];
+
 			self.assets.add(self.config.def.assets)
-				.load(['required', 'nux'], function(){
+				.load(loadA, function(){
 					
+
 					// Init assets is called from self core js
 					// at this point all defined required assets
 					// have been loaded.
-					self.config.merge(config)
 				
 					// Booted flag for call once.
 					var booted = self.booted,
@@ -1286,18 +1556,39 @@ e&&(f=e(g,c));return void 0!==f?f:b}},e=function(a){return function(a){b=a;f.val
 
 					if(booted && self.config.def.runOnce) return booted;
 					self.booted = true;
+					
 					console.time('Nux')
-					self.core.slog("READY","Nux booted.");
-					self.events.callEvent('ready', true)
-				});
+					if( self.config.def.kernel) {
+						self.use('kernel', function(){
+							self.core.slog("READY","Nux booted.");
+							self.events.callEvent('ready', true)
+						})
+					} else {
+						self.core.slog("READY","Nux booted.");
+						self.events.callEvent('ready', true)
+						
+					}
+
+				});		
+				return self;	
 		};
 
-		return init.apply(this, arguments)
+		return self.boot = function(localConfig) {
+			var bootConfig = config;
+			var mergedConfig = Nux.config.merge(bootConfig, localConfig, 'FILL');
+			
+			return init.apply(this, [mergedConfig]);
+		}
 	}
 
+	// Boot the Nux lib
 	return NuxLoader.apply(Nux, this);
 })({
+	// Name the parental object to exist.
+	// If this is not 'Nux' the initial Nux object
+	// will be deleted from the namespace
 	name: "Foo",
+	// console logs and test are implemented if required.
 	debug: true,
 	// Load folder for extension matching the expression
 	// {extennsionNamespace}.{extensionName}.js
