@@ -1,0 +1,335 @@
+
+@import url(http://fonts.googleapis.com/css?family=Source+Sans+Pro:200,300,400,700);
+/* ==========================================================================
+   Author's custom styles
+   ========================================================================== */
+
+body {
+	font-family: 'Source Sans Pro', sans-serif;
+}
+
+.jumbotron, h1, h2, h3, h4 {
+	font-family: 'Source Sans Pro', sans-serif;
+	padding: 0;
+}
+
+.jumbotron {
+margin-top: 50px;
+margin-bottom: 0;
+}
+
+.jumbotron h1 {
+font-size: 8em;
+margin: 25px 0 0 0;
+font-weight: 700;
+color: #FFF;
+text-shadow: 0px 2px 1px rgba(100,100,100,.3);
+}
+
+.jumbotron p {
+line-height: 1.4;
+font-size: 2.5em;
+text-shadow: 0 1px 0 #FFF;
+color: #333;
+}
+
+
+h2 {
+font-weight: 300;
+font-size: 3em;
+color: #7A7A7A;
+text-shadow: 0 1px 1px rgba(100,100,100,.5);
+margin: 20px 50px 20px 0;
+margin-bottom: 20px;
+border-bottom: solid 1px #F1F1F1;
+padding: 10px 0px 20px 0px;
+box-shadow: 0 1px 0px rgba(100,100,100,.05);
+}
+
+h3 {
+font-size: 2.5em;
+margin: 40px 0 10px;
+font-weight: 200;
+color: #666;
+text-shadow: 0 1px 1px #aaa;
+}
+
+h4 {
+font-size: 1.5em;
+margin: 30px 0 10px 0;
+font-weight: 200;
+color: #4B4B4B;
+text-shadow: 0 1px 1px #C2C2C2;
+}
+
+p {
+margin: 0 0 10px;
+font-size: 1.5em;
+font-weight: 200;
+color: #666;
+text-shadow: 0 0px 1px rgba(1,1,1,.7);
+padding: 10px 0;
+}
+
+span.code {
+font-family: 'Courier New';
+background: rgba(10,10,10,.15);
+padding: 1px 6px;
+border-radius: 4px;
+margin: 0 2px;
+font-size: .8em;
+color: #333;
+}
+
+.row ol,
+.row ul {
+margin: 0;
+padding: 0 15px;
+font-size: 1.5em;
+}
+
+.row p, .row ul li, .row ol li {
+font-size: 1.5em;
+line-height: 1.6em;
+font-weight: 300;
+text-shadow: 0 0px 1px rgba(0,0,0,.3);
+}
+
+.row ol li, .row ul li {
+font-size: .9em;
+line-height: 1.6em;
+border-bottom: solid 1px #DFDFDF;
+padding: 10px 20px;
+color: #666;
+box-shadow: 0 1px 0 #fFF;
+background: rgba(100,100,100, .1);
+margin: 5px 0;
+border-radius: 4px;
+}
+
+.image {
+width: 250px;
+height: 250px;
+float: left;
+border-radius: 50%;
+background-color: rgba(202, 202, 202, 0.58);
+text-align: center;
+box-shadow: 0 2px 1px rgba(100,100,100,.3);
+margin: 40px 40px 40px 0;
+}
+
+.image img {
+width: 230px;
+height: 230px;
+border: solid 1px;
+margin: 10px;
+border-radius: 50%;
+padding: 20px;
+border-width: 10px;
+color: #fff;
+opacity: .3;
+}
+
+.clear {
+	clear: both;
+}
+
+body .navbar-inverse {
+background-color: #FFF;
+background-image: none;
+border-color: rgba(19, 198, 255, 0.37);
+border-bottom-width: 1px;
+box-shadow: 0 3px 1px rgba(100,100,100, .2);
+}
+
+
+.navbar-nav>li>a, .navbar-inverse .navbar-nav>li>a {
+text-shadow: 0 0px 0 rgba(0,0,0,0.25);
+font-size: 2.4em;
+color: #999;
+font-weight: 200;
+line-height: 1.5em;
+padding: 10px 2.5em;
+}
+
+
+.navbar-inverse .navbar-collapse, .navbar-inverse .navbar-form {
+border-color: #101010;
+padding: 0;
+}
+
+.navbar-inverse .navbar-nav>li>a:hover, .navbar-inverse .navbar-nav>li>a:focus {
+color: #000;
+background-color: #eee;
+text-shadow: 0 1px 0 #fff;
+}
+
+.dropdown-menu>li>a {
+display: block;
+clear: both;
+font-weight: 100;
+line-height: 1.5;
+color: #333;
+font-size: 2em;
+white-space: nowrap;
+padding: .3em 2.1em;
+margin: 0;
+}
+
+.dropdown-menu>li>a:hover, .dropdown-menu>li>a:focus, .dropdown-menu>.active>a, .dropdown-menu>.active>a:hover, .dropdown-menu>.active>a:focus {
+background-color: #8EB5CF;
+background-image: none;
+}
+
+
+.caret {
+display: inline-block;
+width: 0;
+height: 0;
+margin-left: 15px;
+vertical-align: middle;
+border-top: 10px solid #000;
+border-right: 10px solid transparent;
+border-bottom: 0 dotted;
+border-left: 10px solid transparent;
+content: "";
+}
+
+
+.col-lg-5 {
+width: 49%;
+padding: 0 3%;
+}
+
+
+
+.steps li span.com {
+width: 150px;
+height: 150px;
+display: inline-block;
+border-radius: 50%;
+text-align: center;
+line-height: 150px;
+position: relative;
+font-size: 1.9em;
+background-color: rgb(103, 193, 243);
+color: #FFF;
+left: -75px;
+text-shadow: 0 1px 0 rgba(150, 150, 150, 0.38);
+font-weight: 100;
+float: left;
+margin: 0px 40px 0px 0px;
+}
+
+.steps li {
+list-style: none;
+border: solid 1px;
+}
+
+.wri {
+float: left;
+width: 80%;
+font-size: 14px;
+line-height: 10px;
+margin-top: 20px;
+border-top: solid 1px #DDD;
+padding: 20px 10px;
+}
+
+.wri .links li {
+width: 150px;
+text-overflow: ellipsis;
+height: 1.7em;
+padding: 0;
+float: right;
+margin: 0 10px;
+overflow: hidden;
+text-align: center;
+font-size: .7em;
+line-height: 1.7em;
+border: none;
+background: #EBEBEB;
+}
+
+.wri .links {
+clear: both;
+margin: 0;
+padding: 0;
+}
+
+.wri pre {
+float: right;
+width: 50%;
+}
+
+.steps li .wri p {
+margin: 0;
+padding: 0;
+width: 49%;
+font-size: 16px;
+float: left;
+clear: left;
+line-height: 1.5em;
+}
+
+.links li:first-child {
+margin: 0;
+}
+
+.container .steps li {
+border: none;
+margin: 0px;
+padding: 0px;
+background: none;
+}
+
+.links li a {
+color: #000;
+text-decoration: none;
+}
+
+.item-wrapper {
+width: 17%;
+float: left;
+position: relative;
+border-left: solid 4px #4D4D4D;
+padding: 50px 0;
+left: 7%;
+top: -4px;
+padding-bottom: 50px;
+}
+
+.item-wrapper span.com.inside {
+background-color:  rgb(165, 73, 73);;
+}
+
+.wri ol {
+float: left;
+margin: 0;
+padding: 0;
+}
+
+.steps.wri ol {
+float: left;
+}
+ .wri li p {
+float: right;
+width: 80%;
+}
+
+
+
+.wri li pre {
+float: left;
+margin: 15px;
+width: 75%;
+}
+
+.steps li .wri li p {
+float: right;
+width: 80%;
+padding: 45px 0 0 100px;
+margin-left: 0px;
+left: -110px;
+position: relative;
+}

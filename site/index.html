@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js">
+<!--<![endif]-->
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>Nux</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width">
+
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/rainbow.css">
+    <style>
+    body {
+        padding-top: 50px;
+        padding-bottom: 20px;
+    }
+    </style>
+    <link rel="stylesheet" href="css/bootstrap-theme.min.css">
+    <link rel="stylesheet" href="css/main.css">
+
+    <script src="js/vendor/modernizr-2.6.2-respond-1.1.0.min.js"></script>
+    <script src="js/vendor/rainbow-custom.min.js"></script>
+</head>
+
+<body>
+    <!--[if lt IE 7]>
+            <p class="chromeframe">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> or <a href="http://www.google.com/chromeframe/?redirect=true">activate Google Chrome Frame</a> to improve your experience.</p>
+            <![endif]-->
+    <div class="navbar navbar-inverse navbar-fixed-top">
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+            </div>
+            <div class="navbar-collapse collapse">
+                <ul class="nav navbar-nav">
+                    <li class="active"><a href="#">Nux</a>
+                    </li>
+                    <li><a href="#about">Use</a>
+                    </li>
+                    <li><a href="#contact">More</a>
+                    </li>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">API <b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="#">Importing</a>
+                            </li>
+                            <li><a href="#">Building</a>
+                            </li>
+                            <li><a href="#">Extending</a>
+                            </li>
+                            <li class="divider"></li>
+                            <li class="dropdown-header">Advanced</li>
+                            <li><a href="#errors">Errors</a>
+                            </li>
+                            <li><a href="#">Extras</a>
+                            </li>
+                            <li><a href="#">Support</a>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+
+            </div>
+            <!--/.navbar-collapse -->
+        </div>
+    </div>
+
+    <!-- Main jumbotron for a primary marketing message or call to action -->
+    <div class="jumbotron">
+        <div class="container">
+            <div class="image">
+                <img src="img/nucleus.svg" alt="logo">
+            </div>
+            <h1>Nux</h1>
+            <p>Giant javascript objects made easy.</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Example row of columns -->
+        <div class="row">
+            <div class="col-lg-5">
+                <h2>So What is it?</h2>
+
+                <p>Nux has been carefully crafted to be an asynchronous javascript loader, applying some clever tools to help make big javascript objects little.</p>
+
+            </div>
+            <div class="col-lg-5">
+                <h2>What does it do?</h2>
+                <p>Nux has a very simple concept; Load small parts of your javascript object when needed. The small parts are merged into a larger component. Your object is ready to use.</p>
+            </div>
+
+            <div class="col-lg-5">
+                <h2>Senario</h2>
+                <p>I making a game with with a car. My car has a few components.</p>
+
+                <pre>
+                    <code data-language="javascript">// Files folder |- car.doors.js // lots of code about doors. |- car.wheels.js // lots of code about wheels
+                    </code>
+                </pre>
+                <p>Implementing the code for the car needs something like:</p>
+                <pre>
+                    <code data-language="javascript">
+                        Nux.use([‘doors’, ‘wheels’], function(){ console.log(car.doors, car.wheels); });
+                    </code>
+                </pre>
+                <p>You car has now been extended.</p>
+            </div>
+
+            <div class="col-lg-5">
+
+                <h2>Abilities</h2>
+
+                <p>Even with a tiny end goal and a simple concept - the tool encompases some highly complex features natively. Nux makes stuff like this easy:</p>
+                <ul>
+                    <li>asynchronous loading for javascript object</li>
+                    <li>‘dotted name syntax’ naming for javascript files</li>
+                    <li>clever rules and chaining for overrides</li>
+                    <li>modular methodology for javascript code design</li>
+                    <li>multiple inheritance and chaining based on object extension</li>
+                </ul>
+            </div>
+        </div>
+
+        <hr>
+
+        <section class='sub'>
+            <h2><a href="" name="errors">Importing</a>
+            </h2>
+            <p>Performing an import is the core functionality within Nux. The method is simple.</p>
+            <pre>
+                <code data-language="javascript">
+                    Nux.use('foo', function(){ console.log("foo component has been imported.") })
+                </code>
+            </pre>
+            <p>In order to perform this task, you will need to have an file named 'foo' in your extension path. Inside the foo file, the minimum requirement is as follows:</p>
+            <pre>
+                <code data-language="javascript">
+                    var _foo = Nux.NS('foo'); _foo._meta.main = function(config){ Nux.core.slog("Run foo") }
+                </code>
+            </pre>
+
+            <h3>Breakdown</h3>
+
+            <p>Save this information within your allocated extensions folder named
+                <span class="code">car.foo.js</span>. Notice you do not need very much to get started.
+                <br/>The provided code is all you need to ensure this extension boots into your Nux object.</p>
+
+            <h4>Namespace</h4>
+            <p>The first line creates a space in which to implement all the functionality you write within the file. When this file is imported, the methods are merged with the parent target object.</p>
+            <pre>
+                <code data-language="javascript">
+                    Nux.NS('foo')</code>
+            </pre>
+            <p>When importing
+                <span class="code">car.foo.js</span>, a
+                <span class="code">foo</span>object will be implemented to the existing
+                <span class="code">car</span>object.</p>
+
+            <h4>_meta.main</h4>
+
+            <p>The _meta.main method is almost like a constuct of a class. Nux runs this method with your extension is implemented. This method is optional; you don't have to run any method when your extension is loaded.</p>
+            <pre>
+                <code data-language="javascript">
+                    _foo._meta.main = function(config){ Nux.core.slog("Run foo") }
+                </code>
+            </pre>
+            <p>The
+                <span class="code">main</span>method is apart of the _meta object.</p>
+
+        </section>
+
+        <section class='sub'>
+            <h2><a href="" name="errors">Errors</a>
+            </h2>
+            <p>Errors are an important part of complete code. Errors can be raised through the preferred method of:</p>
+            <pre>
+                <code data-language="javascript">
+                    errors.throw(0)</code>
+            </pre>
+            <p>By using the central dispatch, errors can be captured correctly.</p>
+            <p>To implement your own errors to raise through the framework, simply append the key, value to the error object. To see a full list of available errors:</p>
+            <pre>
+                <code data-language="javascript">
+                    Nux.errors.errors</code>
+            </pre>
+
+            <p>Of which will return something looking like this; an Object containing a list of error types key (number) and value (string):</p>
+            <pre>
+                <code data-language="javascript">
+                    Object { 4: "not implemented", 11: "event exists", 20: "event missing", 30: "Missing allowed", 75: "refuse asset" }
+                </code>
+            </pre>
+
+            <h3>Raise an error</h3>
+            <p>Raising an exception is easy:</p>
+            <pre>
+                <code data-language="javascript">
+                    Nux.errors.throw(20, 'Bad move Joe.')</code>
+            </pre>
+
+            <p>Your console will return with:</p>
+            <pre>
+                <code data-language="javascript">
+                    NuxError: 20 "Missing callback": Bad move Joe.</code>
+            </pre>
+
+            <h3>Custom Errors</h3>
+            <p>For something more custom than a simple throw, You can create an Exception object to perform your magic.
+                <br/>Generate an error Exception object base on an error within the framework:</p>
+            <pre>
+                <code data-language="javascript">
+                    exception = Nux.errors.error(20);</code>
+            </pre>
+
+            <p>returns an Exception object. This next code performs the same:</p>
+
+            <pre>
+                <code data-language="javascript">
+                    exception = new Nux.errors.Exception(20); throw new Nux.errors.Exception(20)
+                </code>
+            </pre>
+            <p>will return a 'missing callback' exception</p>
+
+        </section>
+        
+        
+        <section class="sub api">
+            <h1><a href="" name='API'>API</a>
+            </h1>
+
+            <p>Nux is designed to provide easy access to complex methods via a healthy exposed API. But if that's not enough and you wish to break Nux even further, these guidelines will provide information of how the internals work.</p>
+
+            <h2><a href="" name='start'>Nux.js main bootup</a>
+            </h2>
+
+            <p>The library follows a simple construction. Each step will discuss all largely coded elements and how they interact with other sections of the library code. The following steps convey how the core library (nux.js) is put together.</p>
+
+            <ol class='steps'>
+
+                <li>
+                    <div class="item-wrapper">
+                        <span class="com">Basics</span>
+                    </div>
+
+                    <div class="wri">
+                        <pre>
+                            <code data-language='javascript'>(function(config){ // Nux works in here })({ name: 'foo' })
+                            </code>
+                        </pre>
+                        <p>The entire library is started as a self executing function. Passed into this function is a local config loadout.</p>
+
+                        <p>This local loadout object is passed as an argument to the self executing function</p>
+
+                        <ul class="links">
+                            <li>
+                                <a href="http://markdalgleish.com/2011/03/self-executing-anonymous-functions/">Mark Dalgleish</a>
+                            </li>
+                            <li>
+                                <a href="http://stackoverflow.com/questions/592396/what-is-the-purpose-of-a-self-executing-function-in-javascript">Stackoverflow - What is the purpose of a self executing function in javascript?</a>
+                            </li>
+                            <li>
+                                <a href="http://stackoverflow.com/questions/6090912/javascript-self-executing-function-is-not-a-function">Javascript self executing function “is not a function”</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="clear"></div>
+                </li>
+
+                <li>
+                    <div class="item-wrapper">
+                        <span class="com">Config</span>
+                    </div>
+                    <div class="wri">
+                        <pre>
+                            <code data-language='javascript'>{ name: "Foo", // console logs and test are implemented if required. debug: true, // Load folder for extension matching the expression // {extennsionNamespace}.{extensionName}.js extensionPath: "js/nux/extensions/", vendorPath: "js/nux/vendor/", // Extensions allowed to be executed and implemenred // This should only exist in // core loaders and baked // objects allowed: [ ] }
+                            </code>
+                        </pre>
+                        <p>A local configuration object is a subset of variabled you pass, of which is merged with the NuxConfig</p>
+
+                    </div>
+                    <div class="clear"></div>
+                </li>
+
+                <li>
+                    <div class="item-wrapper">
+                        <span class="com inside">Inside</span>
+                    </div>
+                    <div class="wri">
+                        <pre>
+                            <code data-language='javascript'>
+                                //code
+                            </code>
+                        </pre>
+                        <p>Within the self executing function, 2 objects and a method are implemented</p>
+                        <ol>
+                            <li>
+                                <p>The master configuration object used to load nux. The elements from the local config loadout (passed in through the initial method call) will be merged into this data resulting in a complete config object containing the
+                                    <span class="code">local</span>and
+                                    <span class="code">master</span>config.
+                                </p>
+                                <div class="item-wrapper">
+                                    <span class="com sub-inside">NuxConfig</span>
+                                </div>
+                                <pre>Code</pre>
+                                <div class="clear"></div>
+                            </li>
+                            <li>
+
+                                <p>The library itself. It consists as one large javascript object containing roughly 10 objects of sub components.</p>
+                                <div class="item-wrapper">
+                                    <span class="com sub-inside">Nux</span>
+                                </div>
+                                <pre>
+                                    <code data-language='javascript'>{ _F: function(){}, core: {} Shell: function(){}, settings: {}, config: {}, assets: {}, fetch: {}, errors: {}, listener: {}, signature: {}, use: function(){}, events: (function) }
+
+                                    </code>
+                                </pre>
+
+                                <div class="clear"></div>
+                            </li>
+                            <li>
+                                <p>The method used to initally boot Nux. The loader mostly loads required extensions (through Nux) and implements them. Once complete, Nux dispatches a 'ready' event and other code is initialised.</p>
+                                <div class="item-wrapper">
+                                    <span class="com sub-inside">NuxLoader</span>
+                                </div>
+                                <pre>
+                                    <code data-language='javascript'>
+                                        var init = function(config) { self.core.globalise(); self.assets.add(self.config.def.assets) .load(['required', 'nux'], function(){ self.config.merge(config) if(booted && self.config.def.runOnce) return booted; self.booted = true; self.core.slog("READY","Nux booted."); self.events.callEvent('ready', true) }); };
+                                    </code>
+                                </pre>
+                                <div class="clear"></div>
+                            </li>
+
+                        </ol>
+
+                        <ul>
+                            <li>
+                                <a href=""></a>
+                            </li>
+                        </ul>
+
+                    </div>
+                    <div class="clear"></div>
+                </li>
+
+            </ol>
+
+        </section>
+
+    </div>
+    <!-- /container -->
+    <script src="js/vendor/jquery-1.10.1.min.js"></script>
+    <script src="js/vendor/bootstrap.min.js"></script>
+
+    <script src="js/main.js"></script>
+</body>
+
+</html>
