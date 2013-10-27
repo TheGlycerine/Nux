@@ -137,9 +137,13 @@ describe('When implementing an extension', function(){
 		expect(Nux.config.def.allowed).toContain(spaceName);
 	})
 
+	
+
+	// This is out of scope for alpha project
+	/*
 	async.it('_meta.allowed array is applied to config.def', function(){
 		var spaceName = 'nux.extension.test';
-		Nux.addAllowed(spaceName);
+		// Nux.addAllowed(spaceName, true);
 		
 		// var testAllowedHandler = function(){};
 
@@ -151,7 +155,7 @@ describe('When implementing an extension', function(){
 
 		Nux.use('test', useHandler);
 	})
-
+	*/
 
 	it( 'can expect a loading extension', function() {
 		var name = 'test';
