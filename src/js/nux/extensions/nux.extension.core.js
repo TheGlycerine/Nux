@@ -135,5 +135,5 @@ _core.import = function(name, fun){
 }
 
 _core.run = function(config){
-    Nux.slog("Hi :)", config)
+    Nux.core.slog('CORE', "Hi :)")
 }
