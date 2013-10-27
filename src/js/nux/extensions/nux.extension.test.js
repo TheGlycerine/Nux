@@ -1,7 +1,7 @@
 var _test = Nux.NS('test');
 
 _test._meta.main = function(config){
-	Nux.slog("Run test")
+	Nux.core.slog("Run test")
 }
 
 

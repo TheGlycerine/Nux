@@ -1,4 +1,4 @@
-var timer = Nux.NS('timer');
+var timerSpace = Nux.NS('timer');
 
 /*
 timer.override.listener.__add = function(){
@@ -6,8 +6,9 @@ timer.override.listener.__add = function(){
 }
 */
 
-timer._meta.main = function(nux) {
-	Nux.slog('Yo.', 'timer')
+timerSpace._meta.main = function(nux) {
+	Nux.core.slog('Yo.', 'timer')
 }
 
-timer._meta.overrides = ['nux.exension.listener']
+
+timerSpace._meta.overrides = ['nux.exension.listener']
