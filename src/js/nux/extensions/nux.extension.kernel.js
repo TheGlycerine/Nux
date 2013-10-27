@@ -23,6 +23,7 @@ _kernal._meta.main = function(config){
 }
 
 _kernal._meta.required = [
+	"nux.extension.printer",
 	"nux.extension.core", 
 	/*{ 
 		name: "nux.extension.timer", 
@@ -30,10 +31,10 @@ _kernal._meta.required = [
 		// extension can extend
 		overrides: ['nux.extension.listener']
 	},*/
-	"nux.extension.timer",
+	"nux.extension.apples",
 	"nux.extension.error",
 	"nux.extension.loader",
 	"nux.extension.logger",
 	"nux.extension.packager",
-	"nux.extension.alpha.signals"
+	// "nux.extension.alpha.signals"
 ]
