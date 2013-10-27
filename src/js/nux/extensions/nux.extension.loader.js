@@ -122,7 +122,7 @@ loader.bakeMethods = function(obj, rules){
     the implied options.
     */
     var context = arg(arguments, 2, {});
-    Nux.slog('Bake', context.name || context)
+    Nux.core.slog('Bake', context.name || context)
     var ext = core.base;
     var extended = zoe.extend(ext , obj, rules);
     return extended
@@ -186,13 +186,13 @@ loader.run = function(config) {
     // var core = Import( Nux.space('core') );
     
     // Begin by loading the extension module.
-    var spaceMethods = Import(Nux.defaultConfiguration.extensionNamespace);
+    var spaceMethods = Import(Nux.config.def.extensionNamespace);
 
-    Nux.slog('\'lo :)', Nux.space('loader'))
+    Nux.core.slog('\'lo :)', Nux.space('loader'))
     // debugger
 
     Nux.use('packager', function(listener){
-        Nux.slog("Sup :|", listener.name)
+        Nux.core.slog("Sup :|", listener.name)
         // Load the original methods implemented from the given space
         // ('core' probably)
         // debugger
