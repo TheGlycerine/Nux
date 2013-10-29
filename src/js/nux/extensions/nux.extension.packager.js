@@ -50,7 +50,7 @@ _ext.loadExtension = function(name) {
         })
 }
 
-_ext.Extension = core.Base()
+_ext.Extension = Nux.NS('core').Base()
 
 _ext.run = function(appConfig) {
     Nux.core.slog('Packager', 'Howdy :D')

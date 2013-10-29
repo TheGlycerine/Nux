@@ -103,7 +103,7 @@ loader.FactoryClass = function(){
     var extBase;
 
     // Take a clone at this point, rather than using the referenced namespace
-    var ext = core.base;
+    var ext = Nux.NS('core').Base();
 
     var clone = loader.clone(ext);
     if(!clone) {
