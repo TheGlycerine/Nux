@@ -4,6 +4,7 @@ _kernal._meta.main = function(config){
 	var cc = 0;
 	
 	Nux.use(['core', 'timer'], function(extension){
+		// Should unhook after the first call.
 		console.log("Core and timer imported")
 	}).then('loader', function(extension){
 		// stack overload.
