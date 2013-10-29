@@ -191,6 +191,9 @@
 		// boot config settings and an attempt is made to the method
 		// call when required.
 		autoBoot: true,
+		// Automatically collect requirements (other extensions
+		// the importing extension requires to run correctly)
+		required: true,
 		// Extensions allowed to be executed and implemenred
 		// This should only exist in
 		// core loaders and baked
@@ -295,7 +298,9 @@
 
 					var _name = Nux.space(name);
 
+					(!Namespace) && Nux.errors.throw(01, 'zoejs needed for Namespace')
 					if( space ) {
+
 						var _space = Namespace( _name );
 						_space = space;
 					} else {
@@ -365,6 +370,7 @@
 				associated.
 				 */
 				
+
 				var metaMethod = (function(extension){
 					var meta = extension._meta;
 					var chain = {
@@ -373,7 +379,9 @@
 						},
 
 						value: function(){
-							return meta;
+							var el = arg(arguments, 0, null);
+							return (el)? meta[el]: meta;
+							
 						},
 
 						has: function(name){
@@ -753,6 +761,7 @@
 				// debugger
 				if(cb) Nux.listener.add(name, cb)
 				//this.importCallbacks.append(name, cb);
+				Nux.core.slog("IMPORT", name)
 				Import(name, path);
 			},
 
@@ -772,9 +781,12 @@
 				
 				var handler = arg(arguments, 1, Nux._F);
 				var path = arg(arguments, 2, Nux.config.def.extensionPath);
+				var handler_hook = arg(arguments, 3, name);
 				
 				// This method may throw an error is the asset has been refused.
-				Nux.listener.add(name, handler)
+				Nux.listener.add(handler_hook, handler);
+			
+				Nux.core.slog('PROCESS', handler_hook);
 				
 				console.time("IMPORT " +  (name.path || name))
 
@@ -816,8 +828,9 @@
 				 */
 
 				io = Nux.fetch.expected.indexOf(listener.name);
-				// debugger
+				
 				Nux.fetch.imported.push(listener.name);
+				
 				if( io > -1) { 
 					Nux.fetch.expected.splice(io, 1) 
 					// Nux.signature.expected(listener.name, true)
@@ -839,6 +852,7 @@
 			},
 			errors: {
 				00: 'Not Booted',
+				01: 'Missing Asset',
 				04: 'not implemented',
 				// The event name passed has already been
 				// created. addEvent() has been used
@@ -878,36 +892,106 @@
 		listener: {
 			add: function(name, handler){
 				var space = Nux.space(name)
+				var runMethod = handler;
+				
+
 				if(!Nux.fetch.listeners.hasOwnProperty(space)){
 					Nux.fetch.listeners[space] = [handler];
 					
 					Nux.signature.add(space)
 					// Nux.core.slog("LISTENER+", "NEW " + space)
 				} else {
-					
 					Nux.fetch.listeners[space].push(handler);
 				}
 
 				Nux.signature.add(Nux.space('core'))
-
 				return Ajile.AddImportListener(space, Nux.listener.importHandler);
 			},
 
 			call: function(listenerObject) {
+				/*
+				Call the listener object passed. This is preferably a
+				newly imported extension of which needs implementing.
+				 */
 				// debugger;
 				var listenerName 	= listenerObject.name || listenerObject;
 				var extension 		= listenerObject.item;
 				var space 			= Nux.space(listenerName);
 				var listeners 		= Nux.fetch.listeners[space];
 				
-				Nux.signature.receive(listenerName);
-								
 				if(!listeners) {
 					Nux.core.log("No listener for ", space)
 					return
 				}
 
-				var defAppConfig = {};
+				// var metaChain = Nux.core.meta(extension);
+				
+				for (var i = 0; i < listeners.length; i++) {
+					var listener = listeners[i].handler || listeners[i];
+					listener.apply(extension, [listenerObject])
+
+					// Listener has been called. Kill it.
+					Nux.listener.remove(space, listener, listeners)
+				};
+				
+			},
+
+			metaRequired: function(listener, callHandler) {
+				var required 	= {}
+
+				if(!Nux.config.def.required) return
+				if( listener.item.hasOwnProperty('_meta') ) {
+					/*
+					This should be changed to reference 
+					the 'required' handler list from an extensions
+					_meta object. These object should be imported
+					before the endpoint handler is called.
+					 */
+					required = ( listener.item._meta.hasOwnProperty('extensions') )? 
+									listener.item._meta.extensions: {};
+					var overrides 	= listener.item._meta.overrides;
+				};
+
+
+				if( Nux.assets.allow(required) ) {
+					Nux.core.slog('REQUIRE', required + ' for ' + listener.name);
+					// debugger;
+					forEachAsync(required, function(_next, el, i, arr) {
+						
+						Nux.signature.add(el)
+						console.time('WANTED ' + el, arr)
+						Nux.core.log('ASYNCGET', el)
+						
+						Nux.use(el, function(){
+							Nux.core.log("Downloaded next item")
+							console.timeEnd('WANTED ' + el)
+							
+						});
+
+					}).then(function(){
+						Nux.core.log("Pass listener", listener)
+						callHandler(handler, listener)
+					})
+
+				} else {
+					Nux.core.slog('DISALLOW', required);
+				}
+
+			},
+
+			metaRun: function(listener){
+				// extend the extension namespace and build
+				// an extension around the provided namespace
+				// objects.
+				// defAppConfig.namespace = Namespace(defAppConfig.extensionNamespace)
+				// Collect the run method from the _meta data or
+				// default to the .run() method
+				var runMethodName 	= 'main',
+					runMethod,
+					extension 		= listener.item,
+					space 			= Nux.space(listener.name),
+					defAppConfig 	= {},
+					listeners 		= Nux.fetch.listeners[space];
 
 				try{
 					defAppConfig = (core.hasOwnProperty('_meta'))? core._meta.applicationConfig || {}: {};
@@ -915,7 +999,6 @@
 
 				}
 
-				var metaChain = Nux.core.meta(extension);
 				// debugger;
 				// Cannnot use preferable loader components loader.Import/loader.Load
 				// as they haven't been imported yet.
@@ -924,14 +1007,6 @@
 					'extensions': zoe.extend.ARR_APPEND
 				})
 
-				// extend the extension namespace and build
-				// an extension around the provided namespace
-				// objects.
-				// defAppConfig.namespace = Namespace(defAppConfig.extensionNamespace)
-				// Collect the run method from the _meta data or
-				// default to the .run() method
-				var runMethodName = 'main';
-				var runMethod;
 
 				if( extension.hasOwnProperty('_meta') ) {
 					var  meta = extension._meta;
@@ -939,13 +1014,14 @@
 					var metaValue = extension._meta[runMethodName];
 
 					if( Themis.of(metaValue, String)) {
+
 						if( extension.hasOwnProperty(runMethodName) ) {
 							// call string defined extension run method
 							runMethod = extension[metaValue];
 						} else if( extension._meta.hasOwnProperty(runMethodName) ){
 							runMethod = extension._meta[metaValue];
 						} else {
-							var s = listenerObject.name + '._meta.main defines missing method ' + runMethodName
+							var s = listener.name + '._meta.main defines missing method ' + runMethodName
 							throw new Error(s);
 						}
 
@@ -964,94 +1040,70 @@
 					}
 				} 
 
-				Nux.signature.run(listenerObject.name, run || true);
-
-				for (var i = 0; i < listeners.length; i++) {
-					var listener = listeners[i];
-					listener.apply(extension, [listenerObject, run])
-				};
+				// Call handlers for this listeners name.
+				Nux.signature.run(listener.name, run || true);
+			
 			},
 
-			remove: function(name, listener){
-				var space = Nux.space(name.name || name);
+			remove: function(){
+				var name 			= arg(arguments, 0, null);
+				var listener 		= arg(arguments, 1, name);
+				var space 			= Nux.space(name.name || name || listener.name);
+				var listeners 		= arg(arguments, 2, Nux.fetch.listeners[space]);
+				var ajileHandler 	= Ajile.RemoveImportListener(name, Nux.listener.importHandler);
 				// delete Nux.fetch.listeners[space]
-				var listeners = Nux.fetch.listeners[space];
-				// debugger;
 				for (var i = 0; i < listeners.length; i++) {
 					var _listener = listeners[i];
 					if(_listener == listener) {
-						Nux.fetch.listeners[space][i] = null;
-						Nux.core.log("Listener removed", space, i);
+						listeners.splice(i, 1);
+						Nux.core.log("DEAF", space, i);
 					}
 				};
-				return Ajile.RemoveImportListener(name, Nux.listener.importHandler);
+
+				return ajileHandler
 			},
 
 			importHandler: function(listener){
 				/*
 				Object received through the use() method
 				*/
-				
+				// Ajile.RemoveImportListener(listener.name, Nux.listener.importHandler);
 				// ensure all imports have occured before we
 				// call the handler
 				
-				var required 	= {}
+				// tell the framework this object
+				// has been imported. 
+				if (Nux.fetch.imported.indexOf(listener.name) > -1) {
+					console.log(Nux.fetch.listeners)
+					console.log('AGAIN!', listener.name);
+				}
 
-				if( listener.item.hasOwnProperty('_meta') ) {
-					required = ( listener.item._meta.hasOwnProperty('extensions') )? listener.item._meta.extensions: {};
-					var overrides 	= listener.item._meta.overrides;
-				};
-				
-				
 				Nux.fetch.registerListener(listener);
+
+				// if('nux.extension.core' == listener.name) debugger;
 
 				Nux.core.slog('IMPORTED', listener.name);
 
 				var callHandler = function(_listener){
-					Nux.core.slog("RECEIVE", _listener.name || _listener);
+					Nux.listener.metaRun.apply(Nux, [_listener]);
+					debugger;
+					Nux.signature.receive(_listener);
 					Nux.listener.call.apply(Nux, [_listener]);
 					// Ensure the entire service is only booted once.
-					Nux.listener.remove(listener.name, _listener);
+					Nux.listener.remove(_listener);
 					Nux.fetch.next();
 				}
 
-				callHandler(listener)
-
-
-				if(required && required.length>0) {
-					
-					if( Nux.assets.allow(required) ) {
-						Nux.core.slog('REQUIRE', required + ' for ' + listener.name);
-						// debugger;
-						forEachAsync(required, function(_next, el, i, arr) {
-							Nux.signature.add(el)
-							console.time('WANTED ' + el, arr)
-							Nux.core.log('ASYNCGET', el)
-							debugger
-							Nux.use(el, function(){
-								Nux.core.log("Downloaded next item")
-								console.timeEnd('WANTED ' + el)
-								
-							});
-
-						}).then(function(){
-							Nux.core.log("Pass listener", listener)
-							callHandler(handler, listener)
-						})
-
-					} else {
-						Nux.core.slog('DISALLOW', required);
-					}
-
+				if( Nux.core.meta(listener.item).value('required') ) {
+					Nux.listener.metaRequired(listener, callHandler)
 				} else {
-
-					if( Nux.signature.expected().length <= 0 ) {
-						Nux.events.callEvent('allExpected')
-						// Detach recently added
-						Nux.events.dieEvent('allExpected')
-
-					}
+					callHandler(listener);
 					// No requirements	
+					if( Nux.signature.expected().length <= 0 ) {
+						Nux.events.callEvent('allExpected');
+						// Detach recently added
+						Nux.events.dieEvent('allExpected');
+					}
 				}
 			}
 		},
@@ -1126,13 +1178,14 @@
 			receive: function(name){
 				var a = arguments;
 				name = arg(a, 0, null);
-				
+				name = name.name || name;
+
+				Nux.core.slog('RECEIVE', name)
+
 				if(Nux.signature.expected(name)) {
-					// Nux.core.slog('RECEIVE', name)
 					var sigSpace = Nux.signature.getSpace(name);
 					sigSpace.received = true;
 				} else {
-
 					Nux.signature.allowed(name, function(){
 						Nux.core.slog('UNEXPECTED', 'ALLOWED ' + name);
 					}, function(){
@@ -1173,12 +1226,12 @@
 				var a = arguments;
 				var name = arg(a, 0, false);
 				var v = null;
-				if(name) {
 
+				if(name) {					
 					if (arg(a, 1, false) == true ) {
 						
-						// debugger
 						if(Nux.fetch.expected.indexOf(name) == -1) {
+							
 							Nux.fetch.expected.push(name);
 							v = true;						
 							if( Nux.signature.exists(name) ) {
@@ -1186,8 +1239,11 @@
 								sigSpace['expected'] = v;
 								Nux.core.slog("EXPECTED", name)
 							} 
+
 						} else {
+
 							v = true;
+
 						}
 			
 
@@ -1203,6 +1259,7 @@
 						}
 					}
 				} 
+
 
 				var exp = (v !== null)? v: Nux.fetch.expected;
 				
@@ -1331,8 +1388,11 @@
 				return Nux.fetch.use(obj, handler, path)
 			} else if(Themis.of(obj, Array)) {
 				for (var i = 0; i < obj.length; i++) {
+					// Send the signature hook to, (all items 
+					// wanted at this import (obj)) 
+					// As later this is used for a dehook.
 					var p = obj[i];
-					var hook = Nux.fetch.use(p, handler, path);
+					var hook = Nux.fetch.use(p, handler, path, obj);
 				};
 
 				return hook;
@@ -1497,7 +1557,6 @@
 					name. Therefore any event handlers listening
 					will be disconnected and not called.
 					 */
-					console.log("die event", name)
 					Nux.events.callbacks[name] = []
 				},
 				exists: function(name) {
