@@ -1,0 +1,9 @@
+button.import {
+	border: none;
+	font-size: 32px;
+	font-weight: 200;
+	padding: 0 20px;
+	border-radius: 2px;
+	box-shadow: 0 2px 0 rgba(100,100,100,.3);
+	margin-right: 10px;
+}
