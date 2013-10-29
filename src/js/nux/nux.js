@@ -504,8 +504,7 @@
 				}
 
 				majaX(obj, cb);
-			}
-			
+			}			
 		},
 
 		config: {		
@@ -705,28 +704,6 @@
 			chain: [],
 			imported: [],	
 
-			get: function(name){
-				/*
-				Perform an import utilizing the 
-				namespace.
-				This method implements the internally used _import method.
-				*/
-				var path = arg(arguments, 1, Nux.config.def.extensionPath);
-				var cb = arg(arguments, 2, Nux._F);
-				var fcb = arg(arguments, 3, null);
-
-				if( Nux.signature.allowed(name)) {
-					// Nux.listener.add(name, cb);
-					// first
-					Nux.signature.expected(name, true)
-					Nux.fetch._import(name, path, cb);
-				} else {
-					Nux.signature.addFail(name);
-					if(fcb) fcb(name, path, cb);
-					return false;
-				}
-			},
-			
 			load: function() {
 				return Load.apply(this, arguments);
 			},
@@ -740,31 +717,22 @@
 				}
 			},
 
-			_import: function(name, path){
+			registerListener: function(listener) {
 				/*
-				Performs an import to the referenced file.
-				This should be used internally in favour of the 
-				fetch.use(name, handler) method.
-				Handlers and callbacks should have been setup prior
-				to calling this method.
-
-				return is undefined.
+				Method is called before the importHandler applys the extension
 				 */
-				var cb = arg(arguments, 2, null);
 
-				if(Themis.of(path, Function) ) {
-					path = arg(arguments, 2, Nux.config.def.extensionPath);
-					cb = arg(arguments, 1, null);
-
-				}
-
-				// debugger
-				if(cb) Nux.listener.add(name, cb)
-				//this.importCallbacks.append(name, cb);
-				Nux.core.slog("IMPORT", name)
-				Import(name, path);
+				io = Nux.fetch.expected.indexOf(listener.name);
+				
+				Nux.fetch.imported.push(listener.name);
+				
+				if( io > -1) { 
+					Nux.fetch.expected.splice(io, 1) 
+					// Nux.signature.expected(listener.name, true)
+					return true;
+				};
 			},
-
+			
 			use: function(name){
 				/*
 				Externally accessible method o implement a Nux
@@ -822,21 +790,54 @@
 
 				return hook
 			},
-			registerListener: function(listener) {
-				/*
-				Method is called before the importHandler applys the extension
-				 */
 
-				io = Nux.fetch.expected.indexOf(listener.name);
-				
-				Nux.fetch.imported.push(listener.name);
-				
-				if( io > -1) { 
-					Nux.fetch.expected.splice(io, 1) 
-					// Nux.signature.expected(listener.name, true)
-					return true;
-				};
+			get: function(name){
+				/*
+				Perform an import utilizing the 
+				namespace.
+				This method implements the internally used _import method.
+				*/
+				var path = arg(arguments, 1, Nux.config.def.extensionPath);
+				var cb = arg(arguments, 2, Nux._F);
+				var fcb = arg(arguments, 3, null);
+
+				if( Nux.signature.allowed(name)) {
+					// Nux.listener.add(name, cb);
+					// first
+					Nux.signature.expected(name, true)
+					Nux.fetch._import(name, path, cb);
+				} else {
+					Nux.signature.addFail(name);
+					if(fcb) fcb(name, path, cb);
+					return false;
+				}
+			},
+			
+			_import: function(name, path){
+				/*
+				Performs an import to the referenced file.
+				This should be used internally in favour of the 
+				fetch.use(name, handler) method.
+				Handlers and callbacks should have been setup prior
+				to calling this method.
+
+				return is undefined.
+				 */
+				var cb = arg(arguments, 2, null);
+
+				if(Themis.of(path, Function) ) {
+					path = arg(arguments, 2, Nux.config.def.extensionPath);
+					cb = arg(arguments, 1, null);
+
+				}
+
+				// debugger
+				if(cb) Nux.listener.add(name, cb)
+				//this.importCallbacks.append(name, cb);
+				Nux.core.slog("IMPORT", name)
+				Import(name, path);
 			}
+
 		},
 
 		errors: {
@@ -894,7 +895,6 @@
 				var space = Nux.space(name)
 				var runMethod = handler;
 				
-
 				if(!Nux.fetch.listeners.hasOwnProperty(space)){
 					Nux.fetch.listeners[space] = [handler];
 					
