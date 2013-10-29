@@ -1086,7 +1086,7 @@
 
 				var callHandler = function(_listener){
 					Nux.listener.metaRun.apply(Nux, [_listener]);
-					debugger;
+					
 					Nux.signature.receive(_listener);
 					Nux.listener.call.apply(Nux, [_listener]);
 					// Ensure the entire service is only booted once.
