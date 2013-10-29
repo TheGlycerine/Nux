@@ -84,6 +84,7 @@ _core.Base = function() {
 
     return WidgetBase
 }
+
 _core.base = _core.Base()
 
 _core.import = function(name, fun){
