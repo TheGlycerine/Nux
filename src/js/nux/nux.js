@@ -207,7 +207,7 @@
 		ignoreLog: ['handle'],
 		// independant file assets  used for Nux.
 		assets: {
-			'agile': "js/vendor/com.iskitz.ajile.src.js?mvcoff,mvcshareoff",			
+			'agile': "js/vendor/com.iskitz.ajile.src.js?mvcoff,mvcshareoff,cloakoff, debugoff",			
 			'zoe': 	"js/vendor/zoe.min.js",
 			'themis': [
 				//"js/vendor/themis/getterSetter.js", 
@@ -224,7 +224,7 @@
 	}
 
 	var Nux = {
-		// A funtion for callback defaults
+		// A funtion foconsr callback defaults
 		_F: function(){},
 
 
@@ -709,7 +709,6 @@
 			},
 			
 			next: function(){
-
 				var next = Nux.fetch.chain.shift();
 
 				if(next) {
@@ -732,8 +731,68 @@
 					return true;
 				};
 			},
-			
-			use: function(name){
+
+			use: function(name) {
+
+				// receive name (String, Array)
+				console.log("Use", name);
+
+				var handler = arg(arguments, 1, Nux._F);
+				var path = arg(arguments, 2, Nux.config.def.extensionPath);
+				
+
+				// Add to handler chain
+				// This method may throw an error is the asset has been refused.
+				
+				// Turn a string into an array if required.
+				var _handlerHooks = (Themis.of(name, Array))? name: [name];
+				// spaceify the names
+				var handlerHooks = []
+				for (var i = 0; i < _handlerHooks.length; i++) {
+					var name = Nux.space(_handlerHooks[i]);
+					handlerHooks.push(name);
+				};
+				
+				// name is implemented as array only
+				Nux.listener.add(handlerHooks, handler);
+
+				// Add removeListener (on name import list) handler to listeners
+				Nux.listener.add(handlerHooks, function(ext){
+					console.log(handlerHooks, "New use extra hook, remove Handler");
+				});
+				
+				for (var i = 0; i < handlerHooks.length; i++) {
+					var name = handlerHooks[i];
+					// begin import
+					Nux.fetch.get(name, path);
+				};
+
+				// Nux.fetch.get(Nux.space(name), path);
+				
+				/*
+					// receive import
+						// handle import to all listeners
+							// slice import name from any handler in chain with importName in [name] array
+							// handler handlers with an empty array of names should be called:
+								Every call made removed a name from the list. If the
+								list is empty all names are imported and the handler 
+								should be called.
+							// removed any called listener.
+				// return chain methods:
+					// Use: 
+						perform another concurrent call. 
+						use() is returned because you may want a different
+						handler hooked to a name import
+					// Then:
+						After the previous handlers have been executed, ( use() )
+						_then_ perform this method.
+					// On: 
+						Inhert handler of which is only called when the name
+						is imported. No import is made when on() referenced
+				 */
+			},
+
+			_use: function(name){
 				/*
 				Externally accessible method o implement a Nux
 				extension. the Use method:
@@ -758,7 +817,7 @@
 				
 				console.time("IMPORT " +  (name.path || name))
 
-				Nux.fetch.get( Nux.space(name), path, function(){
+				Nux.fetch.get(Nux.space(name), path, function(){
 					console.timeEnd("IMPORT " + (name.path || name))
 				});
 
@@ -793,27 +852,18 @@
 
 			get: function(name){
 				/*
-				Perform an import utilizing the 
-				namespace.
+				Perform an import utilizing the namespace.
+				A single fully qualified name should be passed.
+				listeners should already be prepared.
 				This method implements the internally used _import method.
 				*/
 				var path = arg(arguments, 1, Nux.config.def.extensionPath);
-				var cb = arg(arguments, 2, Nux._F);
-				var fcb = arg(arguments, 3, null);
-
-				if( Nux.signature.allowed(name)) {
-					// Nux.listener.add(name, cb);
-					// first
-					Nux.signature.expected(name, true)
-					Nux.fetch._import(name, path, cb);
-				} else {
-					Nux.signature.addFail(name);
-					if(fcb) fcb(name, path, cb);
-					return false;
-				}
+				console.log("get", name, path)
+				Nux.fetch._import(name, path);
+				
 			},
 			
-			_import: function(name, path){
+			_import: function(name){
 				/*
 				Performs an import to the referenced file.
 				This should be used internally in favour of the 
@@ -823,19 +873,13 @@
 
 				return is undefined.
 				 */
-				var cb = arg(arguments, 2, null);
-
-				if(Themis.of(path, Function) ) {
-					path = arg(arguments, 2, Nux.config.def.extensionPath);
-					cb = arg(arguments, 1, null);
-
-				}
-
-				// debugger
-				if(cb) Nux.listener.add(name, cb)
+				var path = arg(arguments, 1, Nux.config.def.extensionPath);
+				
 				//this.importCallbacks.append(name, cb);
-				Nux.core.slog("IMPORT", name)
-				Import(name, path);
+				console.log("import", name, path);
+
+				var v = Include(name, path);
+				console.log("V", v)
 			}
 
 		},
@@ -891,7 +935,65 @@
 		},
 
 		listener: {
-			add: function(name, handler){
+			// Storage place of handlers waiting for
+			// imports
+			listeners: [],
+			masterListeners: {},
+			// Is true when Nux is ready to accept
+			// events
+			add: function(names, handler){
+				console.log('listen', names);
+				
+				// Loop names, applying namespace - 
+				// follow by applying this as the new
+				// handler hook chain
+				
+				// Call the master listener, passing the element 
+				// if which is called.
+				Nux.listener.masterListener(names);
+
+				var hookChain = [];
+				for (var i = 0; i < names.length; i++) {
+					var space = Nux.space(names[i]);
+					hookChain.push(space);
+				};
+
+				// Push the listener chain
+				Nux.listener.listeners.push({
+					expectedListeners: hookChain,
+					listener: [handler]
+				});
+				
+				return true;
+			},
+			masterListener: function(space){
+				/*
+				Create and return the master listener
+				 */
+
+				if(!Nux.listener.masterListeners.hasOwnProperty(space)) {
+					Nux.listener.masterListeners[space] = 1;
+				} else {
+					Nux.listener.masterListeners[space]++;
+				};
+				
+				if(!Nux.listener.masterListeners['master']) {
+					console.log("master listener for", space);
+					Nux.listener.masterListeners['master'] = Ajile.AddImportListener(Nux.listener.handler);
+				}
+				return Nux.listener._masterLister;
+			},
+			handler: function(listener){
+				/*
+				An extension was imported. The object passed is the 
+				listener object containing the extension and the handler
+				 */
+				// call all methods hooked
+				console.log("Extension imported", listener);
+
+			},
+
+			_add: function(name, handler){
 				var space = Nux.space(name)
 				var runMethod = handler;
 				
@@ -1201,6 +1303,7 @@
  					var sigSpace = Nux.signature.getSpace(name);
  					sigSpace.run = runValue;
     				Nux.core.slog("RUN", name)
+
  				} else {
 
 					Nux.signature.allowed(name, function(){
