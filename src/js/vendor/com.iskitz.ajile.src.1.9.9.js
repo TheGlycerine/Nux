@@ -1,11 +1,11 @@
 /**----------------------------------------------------------------------------+
 | Product:  ajile [com.iskitz.ajile]
-| @version  2.1.7
+| @version  1.9.9
 |+-----------------------------------------------------------------------------+
-| @author   Mike Lee [iskitz.com]
+| @author   Michael A. I. Lee [iskitz.com]
 |
 | Created:  Tuesday,   November   4, 2003    [2003.11.04]
-| Updated:  Saturday,  June      21, 2013    [2013.06.21.05.15-07.00]
+| Updated:  Thursday,  February  21, 2013    [2013.02.21.00.07-08.00]
 |+-----------------------------------------------------------------------------+
 |
 | [ajile] - Advanced JavaScript Importing & Loading Extension is a JavaScript
@@ -16,7 +16,7 @@
 |
 |                  "Smart scripts that play nice!"
 |
-|           Copyright (c) 2003-2013 Mike Lee, iSkitz.com
+|           Copyright (c) 2003-2013 Michael A. I. Lee, iSkitz.com
 |
 |+-----------------------------------------------------------------------------+
 |
@@ -33,14 +33,14 @@
 | for the specific language governing rights and limitations under the
 | License.
 |
-| The Original Code is ajile [ajile.net].
+| The Original Code is ajile.
 |
-| The Initial Developer of the Original Code is Mike Lee [iskitz.com]
+| The Initial Developer of the Original Code is Michael A. I. Lee
 |
 | Portions created by the Initial Developer are Copyright (C) 2003-2013
 | the Initial Developer. All Rights Reserved.
 |
-| Contributor(s): Mike Lee [iskitz.com]
+| Contributor(s): Michael A. I. Lee [ http://ajile.net/ ]
 |
 | Alternatively, the contents of this file may be used under the terms of
 | either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -76,7 +76,7 @@
      , CONTROLLER = "index"
      , EXTENSION  = ".js"
      , GENERIC    = ''
-     , INTERNAL   = "<"+Math.random()+">"
+     , INTERNAL   = "<*>"
      , QNAME      = "com.iskitz.ajile"
      , SEPARATOR
      , TYPES      = [ ALIAS, "Import", "ImportAs", "Include", "Load"
@@ -115,14 +115,14 @@
 
    function $create ()
    {
-      INFO = getNamespaceInfo (QNAME);
       THIS = GetModule (QNAME);
 
       if (THIS && !OVERRIDE) return;
 
-      !THIS   && (THIS = {});
-      VERSION ?  (INFO.version = VERSION) : (VERSION = INFO.version);
-      cloakObject (notifyAll);
+      !THIS && (THIS = {});
+      INFO = new NamespaceInfo (getNamespaceInfo (QNAME));
+      VERSION ? (INFO.version = VERSION) : (VERSION = INFO.version);
+      cloakObject (notifyImportListeners);
       setAttribution();
 
       if (!isDOM)
@@ -175,11 +175,7 @@
       &&    (supporters = new SimpleSet())
       &&    dependence.add (currentModuleName, supporters)
       ;
-
-      supporters.add (fullName, shortName)
-      && DEBUG
-      && log ((currentModuleName +" :: USES :: "+ (shortName || fullName)), arguments)
-      ;
+      supporters.add (fullName, shortName);
    }
 
 
@@ -215,9 +211,8 @@
       !moduleName && (moduleName = '');
 
       var item
-        , listeners = importListeners.get (moduleName)
-        ;
-      listener = {notify:listener, notified:notified};
+        , listeners = importListeners.get (moduleName);
+      listener      = {notify:listener, notified:notified};
 
       notifyOriginal && (listener.notifyOriginal = notifyOriginal);         // API: ajile 1.6.1...1.7.3
       !listeners && (listeners = new SimpleSet()) && importListeners.add (moduleName, listeners);
@@ -225,16 +220,16 @@
 
       if (moduleName) {
          item = GetModule (moduleName);
-         item && notifyOne (moduleName, item, listener.notify, notified);
+         item && notifyImportListener (moduleName, item, listener.notify, notified);
       }
       else if (!moduleName && processed.getSize() > 0)
          for (var importee in processed.getAll())
             if ("undefined" == typeof Object.prototype[importee]) {
                item = GetModule (importee);
-               item && notifyOne (importee, item, listener.notify, notified);
+               item && notifyImportListener (importee, item, listener.notify, notified);
             }
 
-      moduleName && (moduleName != INTERNAL) && (new ImportThread (moduleName)).start();
+      moduleName && (new ImportThread (moduleName)).start();
       return true;
    }
 
@@ -247,7 +242,7 @@
             !items && (items = {});
             items [name] = item;
          }
-         !notified.length && notifyOne (names, items, notify, notified, isGroupImported);
+         !notified.length && notifyImportListener (names, items, notify, notified, isGroupImported);
       }
       return isGroupImported;
    }
@@ -265,7 +260,7 @@
 
    function cloakModule (moduleName)
    {
-      for (var debugOff, id, isCloaked, module, nsInfo, sys, loaders=getLoaders(), i=loaders.length; --i >= 0;)
+      for (var id, isCloaked, module, nsInfo, sys, loaders=getLoaders(), i=loaders.length; --i >= 0;)
       {
          if (!loaders[i]) continue;
          id = loaders[i].title;
@@ -274,14 +269,13 @@
          isCloaked = false;
          sys       = !!id && (id.indexOf (QNAME) == 0);
 
-         if (id) {
-             module    = GetModule (id);
-             nsInfo    = GetNamespaceInfo (id);
-             isCloaked = !!nsInfo && nsInfo.hasOption ("cloak");
-             debugOff  = !!nsInfo && nsInfo.hasOption ("debugoff");
-         }
+         id
+         && (module    = GetModule (id))
+         && (nsInfo    = GetNamespaceInfo (id))
+         && (isCloaked = nsInfo.hasOption ("cloak"))
+         ;
 
-         if (module && ((sys && debugOff) || (nsInfo && isCloaked) || CLOAK || !loaders[i].src)) {
+         if (module && (sys || (nsInfo && isCloaked) || CLOAK || !loaders[i].src)) {
             cloakObject ((isFunction (module) ? module : module.constructor));
             cloakNode (loaders[i]);
          }
@@ -318,7 +312,7 @@
 
    function cloakObject (obj)
    {
-      if (!CLOAK || DEBUG || !obj || !obj.toString || obj === Function || obj === Object)
+      if (!obj || !obj.toString || obj === Function || obj === Object)
          return false;
 
     //obj.toString.trueValue = obj.valueOf;
@@ -326,12 +320,39 @@
       return true;
    }
 
-   var cloakObjectToggler = function() {
-      return "cloaked";//CLOAK ? undefined : this.toString.trueValue();    //WebKit:trueValue, Firefox:toString
+   cloakObjectToggler = function() {
+      return "cloaked";//CLOAK ? undefined : this.toString.trueValue();    //WebKit:yes, Firefox:no
    };
 
 
    function compareNumbers(num1, num2) { return num1 - num2; }
+
+
+   function completeImports(fullName)
+   {
+      var modules = !isString (fullName)
+      ?  pendingImports.getAllArray()
+      :  [[fullName, pendingImports.get (fullName) || fullName]]
+      ;
+
+      if (!modules) return;
+
+      for (var module, shortName, i = modules.length; --i >=0;)
+      {
+         fullName = modules [i][0];
+         module   = GetModule (fullName);
+
+         if (!module || !isSupported (fullName))
+            continue;
+
+         logImportCheck ((shortName = modules[i][1]), fullName, arguments);
+
+         if (shortName == '*') shortName = undefined;
+
+         handleImported   (shortName, fullName, module);
+         updateDependents (fullName);
+      }
+   }
 
 
    function DEPRECATED$GetPathFor(_namespace)
@@ -502,7 +523,7 @@
       var onLoad     = executeFailSafe.onLoad;
       delete executeFailSafe.onLoad;
 
-      handleImports();
+      completeImports();
       cloakModule();
 
       return onLoad && isFunction (onLoad) && onLoad (isRestoring);
@@ -860,22 +881,22 @@ paths:for(var path in paths)
 
       if (shortName == '*')
          ((shortName = LOADED)
-         ,log (('Import ("'+ fullName +'.*")...'), arguments));
-      else if (shortName == fullName)
-         log (('Include ("'+shortName+'")...'), arguments);
+         , log('...\t:: Import ("'+ fullName +'.*")', arguments));
+      else if(shortName == fullName)
+         log ('...\t:: Include ("'+shortName+'")', arguments);
       else
-         log (('ImportAs ("'+shortName+'", "'+ fullName +'")...'), arguments);
+         log ('...\t:: ImportAs ("'+shortName+'", "'+ fullName +'")', arguments);
 
-      if ((new ImportThread (fullName)).start()) return module;
+      if ((new ImportThread(fullName)).start())
+         return module;
 
       url = handleImport$formatURL (shortName, fullName, url, notation, version);
 
-      Load ( url
-           , getContainer ((owner || global || this))
-           , 'ImportAs("'+ shortName +'", "'+ fullName +'");'
-           , false
-           , fullName
-           );
+      var isLoading = Load( url
+                          , getContainer ((owner || global || this))
+                          , 'ImportAs("'+ shortName +'", "'+ fullName +'");'
+                          , false
+                          , fullName);
 
       return module;
    }
@@ -933,10 +954,10 @@ paths:for(var path in paths)
 
       if (shortName && shortName != LOADED && (!pendingName || (pendingName != '*' && pendingName != LOADED))) {
          if (isInclude)
-            logMsg[0] = 'Include  ("'+fullName+'")...SUCCESS!';
+            logMsg[0] = 'SUCCESS :: Include ("'+fullName+'")';
          else {
             owner[shortName] = module;
-            logMsg[0] = 'ImportAs ("'+shortName+'", "'+fullName+'")...SUCCESS!';
+            logMsg[0] = 'SUCCESS :: ImportAs ("'+shortName+'", "'+fullName+'")';
          }
 
          pendingImports.remove (fullName);
@@ -947,14 +968,14 @@ paths:for(var path in paths)
          handleImported$Wild (shortName, fullName, module, owner, isInclude, logMsg);
 
       else if (pendingName != '*' && (pendingName == LOADED || shortName == LOADED)) {
-         logMsg[0] = (isInclude ? 'Include' : 'Import  ') +' ("'+ fullName +'.*")...SUCCESS!';
+         logMsg[0] = "SUCCESS :: " + (isInclude ? "Include" : "Import") + ' ("' + fullName + '.*")';
          pendingImports.remove (fullName);
          processed.add (fullName, '*');
       }
 
-      (logMsg.length > 0) && log (logMsg.join ("\r\n"), arguments);
-      shortName && (shortName != fullName) && (shortName != LOADED) && notifyAll (shortName, module);
-      notifyAll (fullName, module);
+      (logMsg.length > 0)       && log (logMsg.join ("\r\n"), arguments);
+      (shortName != fullName)   && notifyImportListeners (shortName, module);
+      notifyImportListeners (fullName, module);
 
       return module;
    }
@@ -962,56 +983,31 @@ paths:for(var path in paths)
    
    function handleImported$Wild(shortName, fullName, module, owner, isInclude, logMsg)
    {
-      if (!isInclude)
+      logMsg[logMsg.length] = " ";
+
+      if(!isInclude)
       {
-         logMsg[logMsg.length] = "\r\n";
-         
          var $fullName;
 
-         for (var member in module)
+         for(var member in module)
          {
-            if (typeof Object.prototype[member] != "undefined")
+            if(typeof Object.prototype[member] != "undefined")
                continue;
 
             $fullName = fullName + '.' + member;
 
-            if (nsInfoMap[$fullName] || hasNamingConflict (member, $fullName, owner))
+            if(nsInfoMap[$fullName] || hasNamingConflict(member, $fullName, owner))
                continue;
 
             owner[member] = module[member];
-            logMsg[logMsg.length] = 'ImportAs ("'+member+'", "'+$fullName+'")...SUCCESS!';
+            logMsg[logMsg.length] = 'SUCCESS :: ImportAs ("'+member+'", "'+$fullName+'")';
          }
-
-         (logMsg.length > 1) && (logMsg[logMsg.length] = " ");
       }
 
-      pendingImports.remove (fullName);
-      (shortName != LOADED) && pendingImports.add (fullName, LOADED);
-   }
+      pendingImports.remove(fullName);
 
-
-   function handleImports (fullName)
-   {
-      var modules = !isString (fullName)
-                  ?  pendingImports.getAllArray()
-                  :  [[fullName, pendingImports.get (fullName) || fullName]]
-                  ;
-
-      if (!modules) return;
-
-      for (var module, shortName, i = modules.length; --i >=0;)
-      {
-         fullName = modules [i][0];
-         module   = GetModule (fullName);
-
-         if (!module || !isSupported (fullName))
-            continue;
-
-         logImportCheck ((shortName = modules[i][1]), fullName, arguments);
-         if (shortName == '*') shortName = undefined;         
-         handleImported   (shortName, fullName, module);
-         updateDependents (fullName);
-      }
+      if(shortName != LOADED)
+         pendingImports.add(fullName, LOADED);
    }
 
 
@@ -1034,7 +1030,7 @@ paths:for(var path in paths)
          msg += "\n\nThe module is currently inaccessible.\n";
       else
          msg += "\n\nThe module can currently be accessed using its "
-             +  "fully-qualified name:\n\n\t"+ fullName +"\n";
+             +  "fully-qualified name:\n\n\t"+ fullName +".\n";
          
       log(msg, arguments, DEBUG);
 
@@ -1060,7 +1056,7 @@ paths:for(var path in paths)
 
       if(!fullName || fullName == "*")
       {
-         log ('ERROR :: ImportAs ("'+ shortName +'", "'+ fullName +'")');
+         log('ERROR :: ImportAs ("'+ shortName +'", "'+ fullName +'")');
          return undefined;
       }
 
@@ -1085,8 +1081,11 @@ paths:for(var path in paths)
       else if(typeof owner[shortName] != "undefined" && shortName != fullName)
          for(var sys=(LEGACY ? TYPES.concat(TYPES_OLD) : TYPES), t=sys.length; --t >= 0;)
          {
-            if (shortName != sys[t]) continue;
-            log ('ERROR :: ImportAs ("'+ shortName +'", "'+ fullName +'")! '+ shortName +" is restricted.");
+            if(shortName != sys[t]) continue;
+
+            log('ERROR :: ImportAs ("'+ shortName +'", "'+ fullName +'")! '
+               + shortName +" is restricted.", arguments);
+
             return owner[shortName];
          }
 
@@ -1121,59 +1120,43 @@ paths:for(var path in paths)
    function ImportThread (fullName, ttl, maxCheckCount)
    {
       var terminatorID
-        , THIS          = this
-        , thread
         , threadID
-        , threads       = ImportThread.threads || (ImportThread.threads = {})
-        , timesChecked  = 0
+        , timesChecked = 0
         ;
 
-      function $ImportThread ()
+      function $ImportThread (THIS)
       {
          maxCheckCount = maxCheckCount || 500;
          THIS.start    = start;
          THIS.stop     = stop;
+         terminatorID  = setInterval (stop, (ttl = (ttl || 60000)));
+
          return THIS;
-      }
-
-      function run()
-      {
-         switch (true)
-         {
-            case (++timesChecked >= maxCheckCount):
-               stop();
-               DEBUG && log ("ImportThread :: "+ fullName +"...TIMEDOUT");
-               return false;
-
-            case (!!GetModule (fullName) && isSupported (fullName)):
-               stop();
-               DEBUG && log ("ImportThread :: "+ fullName +"...SUCCESS");
-               handleImports (fullName);
-               return true;
-
-            default:
-               isDOM05 ? (threadID = setTimeout (run, 15.625)) : stop();
-               return false;
-         }
       }
 
       function start()
       {
-         thread =  threads[fullName];
-         thread && thread.stop();
-         threads[fullName] = THIS;
-         terminatorID = setInterval (stop, (ttl = (ttl || 60000)));
-         DEBUG && log ("ImportThread :: "+ fullName +"...START");
-         return run();
+         switch (true)
+         {
+            case ++timesChecked >= maxCheckCount:
+               stop();
+               return false;
+
+            case !!GetModule (fullName) && isSupported (fullName):
+               completeImports (fullName);
+               stop();
+               return true;
+               
+           default:
+               threadID = setTimeout (start, 0);
+               return false;
+         }
       }
 
       function stop()
       {
          (undefined != threadID)     && clearTimeout  (threadID);
          (undefined != terminatorID) && clearInterval (terminatorID);
-         delete threads[fullName];
-         threads = undefined;
-         DEBUG && log ("ImportThread :: "+ fullName +"...STOP");
       }
 
       if (this.constructor != ImportThread)
@@ -1262,14 +1245,10 @@ paths:for(var path in paths)
 //      if (!supporters)
 //         return isInlineImportReady (fullName, shortName);
 
-      DEBUG && ((shortName == LOADED) && (shortName = ""));
-
       for (var supporter in supporters)
          if ("undefined" == typeof Object.prototype [supporter])
-            if (!GetModule (supporters [supporter])) {
-               DEBUG && log (("WARN :: "+ (shortName || fullName) +" :: MISSING :: "+supporter), arguments);
+            if (!GetModule (supporters [supporter]))
                return false;
-            }
 
       return true;
    }
@@ -1332,7 +1311,7 @@ paths:for(var path in paths)
 
       if(url)
       {
-         log ((url +"..."), arguments);
+         log("...\t:: Load [ " + url + " ]", arguments);
 
          if(isWebKit || !(isIE || isOpera))
             script.src = url;
@@ -1342,7 +1321,7 @@ paths:for(var path in paths)
          if(!isWebKit || isIE || isOpera)
             script.src = url;
 
-         log ((url +"...DONE"), arguments);
+         log("DONE\t:: Load [ " + url + " ]", arguments);
       }
 
       if(!code) return true;
@@ -1455,42 +1434,39 @@ paths:for(var path in paths)
    }
 
 
-   function log (message, _caller, showLog)
+   function log(message, _caller, showLog)
    {
       if(!DEBUG && !showLog) return;
 
-      var name     = !_caller ? [''] : (/function\s*([^(]*)\s*\(/).exec (String (_caller.callee))
-        , calledBy = !name    ? ''   : (name.length > 1 ? name[1] : name[0])
-        ;
+      var name     = (/function\s*([^(]*)\s*\(/).exec(_caller.callee) || ['']
+        , calledBy = name.length > 1 ? name[1] : name[0];
 
       if(message != undefined)
       {
          var _LOG = LOG;
          var now  = new Date();
          LOG      = [now.getFullYear(), now.getMonth()+1, now.getDate()].join('.') + ','
-                  + [now.getHours(),    now.getMinutes(), now.getSeconds(), now.getMilliseconds()].join(':') + " :: "
+                  + [now.getHours(),    now.getMinutes(), now.getSeconds(), now.getMilliseconds()].join(':') + "\t:: "
                   + currentModuleName + " :: "
-                  + (calledBy         ? (calledBy +" :: ") : "")
-                  + message           + "\r\n"
+                  + calledBy          + "\r\n"
+                  + message           + "\r\n\r\n"
                   ;
 
          var state = LOG.indexOf("ERROR") >= 0 ? "error"
                    : LOG.indexOf("WARN")  >= 0 ? "warn"
-                   : "info"
-                   ;
+                   : "info";
 
-         !log.is && (log.is = { Firebug : (typeof console  != "undefined" && isFunction(console.info))
-                              , MochiKit: (typeof MochiKit != "undefined" && isFunction(MochiKit.log))
-                              , YAHOO   : (typeof YAHOO    != "undefined" && isFunction(YAHOO.log))
-                              });
+         !log.is ? log.is = { Firebug : (typeof console  != "undefined" && isFunction(console.info))
+                            , MochiKit: (typeof MochiKit != "undefined" && isFunction(MochiKit.log))
+                            , YAHOO   : (typeof YAHOO    != "undefined" && isFunction(YAHOO.log))
+                            }:0;
 
          log.is.Firebug  && console[state](LOG);
          log.is.YAHOO    && YAHOO.log(LOG, state);
          log.is.MochiKit && ( state == "info"  ? MochiKit.log       (LOG)
                             : state == "error" ? MochiKit.logError  (LOG)
                             : state == "warn"  ? MochiKit.logWarning(LOG)
-                            : 0
-                            );
+                            : 0);
 
          LOG += _LOG;
       }
@@ -1505,10 +1481,9 @@ paths:for(var path in paths)
                  ? ('Import   ("'+ fullName  +'.*")')
                  : (shortName == fullName)
                  ? ('Include  ("'+ fullName  +'")')
-                 : ('ImportAs ("'+ shortName +'", "'+ fullName +'")')
-                 ;
+                 : ('ImportAs ("'+ shortName +'", "'+ fullName +'")');
 
-      log ((logMsg +"..."), params);
+      log(("CHECKING :: "+ logMsg +"..."), params);
    }
 
 
@@ -1661,40 +1636,30 @@ paths:for(var path in paths)
    }
 
 
-   function notifyOne (name, item, notify, notified, internalNotify) {
-      function notifyOne () {
-         if (notified && !notified.length) {
-            DEBUG && log ((name +(isDOM05 ? "" : " :: synchronously") +"...SKIP"), arguments);
-            return;   // Don't notify; RemoveImportListener was used.
-         }
-         var handler = internalNotify || notify;
-         notify (new Listener ({name:name, item:item, notify:handler}));
-         DEBUG && log ((name +(isDOM05 ? "" : " :: synchronously") +"...DONE"), arguments);
+   function notifyImportListener (name, item, notify, notified, internalNotify) {
+      function notifyImported () {
+         if (notified && !notified.length) return;   // Don't notify; RemoveImportListener was used.
+         var callback = internalNotify || notify;
+         notify (new Listener ({name:name, item:item, notify:callback}));
       }
-
-      DEBUG && log ((name +(isDOM05 ? "" : " :: synchronously")+"..."), arguments);
-
-      var id = isDOM05 ? setTimeout (notifyOne, 0) : 0;
+      var id = setTimeout (notifyImported, 0); 
       notified && (notified [notified.length] = id);
-      !isDOM05 && notifyOne();
    }
 
 
-   function notifyAll (fullName, item) {
+   function notifyImportListeners (fullName, item) {
       var listenerList =
       [   importListeners.get ('')
       ,   importListeners.get (fullName)
       ,   importListeners.get (INTERNAL)
       ];
-
       if (!listenerList[0] && !listenerList[1] && !listenerList[2])
          return;
 
       var hasListeners =  !!(listenerList[0] && listenerList[0].getSize())
                        || !!(listenerList[1] && listenerList[1].getSize())
                        ;
-
-      DEBUG && hasListeners && log ((fullName +"..."), arguments);
+      DEBUG && hasListeners && log (("NOTIFY :: Import Listeners for " + fullName + "..."), arguments);
 
       for (var listener, listeners, i=listenerList.length; --i >= 0;) {
          if (!listenerList[i]) continue;
@@ -1705,11 +1670,11 @@ paths:for(var path in paths)
                if (!listeners[id]) continue;
                listener = listeners[id];
                isFunction (listener.notify)
-               &&    notifyOne (fullName, item, listener.notify, listener.notified);
+               &&    notifyImportListener (fullName, item, listener.notify, listener.notified);
             }
       }//end: for...listenerList
 
-      DEBUG && hasListeners && log ((fullName +"...DONE"), arguments);
+      DEBUG && hasListeners && log(("NOTIFY :: Import Listeners for " + fullName + "...DONE!"), arguments);
    }
 
 
@@ -1846,7 +1811,7 @@ paths:for(var path in paths)
          THIS.DIR_NAMESPACE                     = THIS.USE_PATH = '\x2f';
          THIS.DOT_NAMESPACE                     = THIS.USE_NAME = '\x2e';
 
-         cloakObject(THIS.CompleteImports       = handleImports);
+         cloakObject(THIS.CompleteImports       = completeImports);
          cloakObject(THIS.EnableDebugging       = THIS.EnableDebug);
          cloakObject(THIS.GetPathFor            = DEPRECATED$GetPathFor);
          cloakObject(global.JSBasePath          = global.JSPath
@@ -2069,4 +2034,4 @@ paths:for(var path in paths)
      , usage             =  new SimpleSet();
 
    $create();
-})("2.1.7", this);
+})("1.9.9", this);
