@@ -760,7 +760,6 @@
 				Nux.listener.add(handlerHooks, function(ext){
 					console.log(handlerHooks, "New use extra hook, remove Handler");
 				});
-				
 				for (var i = 0; i < handlerHooks.length; i++) {
 					var name = handlerHooks[i];
 					// begin import
@@ -879,7 +878,8 @@
 				console.log("import", name, path);
 
 				var v = Include(name, path);
-				console.log("V", v)
+				// console.log("V", v)
+				return v;
 			}
 
 		},
@@ -942,7 +942,6 @@
 			// Is true when Nux is ready to accept
 			// events
 			add: function(names, handler){
-				console.log('listen', names);
 				
 				// Loop names, applying namespace - 
 				// follow by applying this as the new
@@ -956,12 +955,13 @@
 				for (var i = 0; i < names.length; i++) {
 					var space = Nux.space(names[i]);
 					hookChain.push(space);
+					console.log('listen', hookChain);
 				};
 
 				// Push the listener chain
 				Nux.listener.listeners.push({
 					expectedListeners: hookChain,
-					listener: [handler]
+					listeners: [handler]
 				});
 				
 				return true;
@@ -989,8 +989,27 @@
 				listener object containing the extension and the handler
 				 */
 				// call all methods hooked
-				console.log("Extension imported", listener);
+				var handlers = [];
 
+				// strip the listener names from expected listeners
+				var len = Nux.listener.listeners.length;
+				while(len--) {
+					var handler = Nux.listener.listeners[len],
+						pos 	= handler.expectedListeners.indexOf(listener.name),
+						spliced = handler.expectedListeners.splice(pos, 1);
+					if(handler.expectedListeners.length == 0) {
+						console.log(pos, spliced)
+						handlers = handlers.concat(handler.listeners);
+						Nux.listener.listeners.splice(len, 1);
+					} else {
+						console.log(listener)
+					}
+				};
+
+				for (var i = 0; i < handlers.length; i++) {
+					var hook = handlers[i];
+					hook.call(Nux, listener);
+				};
 			},
 
 			_add: function(name, handler){
@@ -1016,10 +1035,10 @@
 				newly imported extension of which needs implementing.
 				 */
 				// debugger;
-				var listenerName 	= listenerObject.name || listenerObject;
-				var extension 		= listenerObject.item;
-				var space 			= Nux.space(listenerName);
-				var listeners 		= Nux.fetch.listeners[space];
+				var listenerName 	= listenerObject.name || listenerObject,
+					extension 		= listenerObject.item,
+					space 			= Nux.space(listenerName),
+					listeners 		= Nux.fetch.listeners[space];
 				
 				if(!listeners) {
 					Nux.core.log("No listener for ", space)
@@ -1495,8 +1514,8 @@
 					// wanted at this import (obj)) 
 					// As later this is used for a dehook.
 					var p = obj[i];
-					var hook = Nux.fetch.use(p, handler, path, obj);
 				};
+				var hook = Nux.fetch.use(obj, handler, path, obj);
 
 				return hook;
 			}
