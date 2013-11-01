@@ -716,50 +716,34 @@
 				}
 			},
 
-			registerListener: function(listener) {
-				/*
-				Method is called before the importHandler applys the extension
-				 */
-
-				io = Nux.fetch.expected.indexOf(listener.name);
-				
-				Nux.fetch.imported.push(listener.name);
-				
-				if( io > -1) { 
-					Nux.fetch.expected.splice(io, 1) 
-					// Nux.signature.expected(listener.name, true)
-					return true;
-				};
-			},
-
 			use: function(name) {
-
-				// receive name (String, Array)
-				console.log("Use", name);
 
 				var handler = arg(arguments, 1, Nux._F);
 				var path = arg(arguments, 2, Nux.config.def.extensionPath);
 				
-
 				// Add to handler chain
 				// This method may throw an error is the asset has been refused.
 				
 				// Turn a string into an array if required.
 				var _handlerHooks = (Themis.of(name, Array))? name: [name];
 				// spaceify the names
-				var handlerHooks = []
+				var handlerHooks = [];
+
 				for (var i = 0; i < _handlerHooks.length; i++) {
-					var name = Nux.space(_handlerHooks[i]);
-					handlerHooks.push(name);
+					var _name = Nux.space(_handlerHooks[i]);
+					handlerHooks.push(_name);
 				};
 				
 				// name is implemented as array only
 				Nux.listener.add(handlerHooks, handler);
 
+				console.time(handlerHooks)
 				// Add removeListener (on name import list) handler to listeners
 				Nux.listener.add(handlerHooks, function(ext){
-					console.log(handlerHooks, "New use extra hook, remove Handler");
+					console.timeEnd(ext.name);
+					console.log(arguments)
 				});
+
 				for (var i = 0; i < handlerHooks.length; i++) {
 					var name = handlerHooks[i];
 					// begin import
@@ -857,9 +841,7 @@
 				This method implements the internally used _import method.
 				*/
 				var path = arg(arguments, 1, Nux.config.def.extensionPath);
-				console.log("get", name, path)
 				Nux.fetch._import(name, path);
-				
 			},
 			
 			_import: function(name){
@@ -872,13 +854,8 @@
 
 				return is undefined.
 				 */
-				var path = arg(arguments, 1, Nux.config.def.extensionPath);
-				
-				//this.importCallbacks.append(name, cb);
-				console.log("import", name, path);
-
-				var v = Include(name, path);
-				// console.log("V", v)
+				var path = arg(arguments, 1, Nux.config.def.extensionPath),
+					v 	 = Include(name, path);
 				return v;
 			}
 
@@ -955,13 +932,16 @@
 				for (var i = 0; i < names.length; i++) {
 					var space = Nux.space(names[i]);
 					hookChain.push(space);
-					console.log('listen', hookChain);
 				};
 
 				// Push the listener chain
 				Nux.listener.listeners.push({
 					expectedListeners: hookChain,
-					listeners: [handler]
+					listeners: [handler],
+					// List of extensions imported
+					// (later to be passed to the handler method
+					// as arguments)
+					extensions: []
 				});
 				
 				return true;
@@ -978,7 +958,6 @@
 				};
 				
 				if(!Nux.listener.masterListeners['master']) {
-					console.log("master listener for", space);
 					Nux.listener.masterListeners['master'] = Ajile.AddImportListener(Nux.listener.handler);
 				}
 				return Nux.listener._masterLister;
@@ -994,68 +973,39 @@
 				// strip the listener names from expected listeners
 				var len = Nux.listener.listeners.length;
 				while(len--) {
-					var handler = Nux.listener.listeners[len],
-						pos 	= handler.expectedListeners.indexOf(listener.name),
-						spliced = handler.expectedListeners.splice(pos, 1);
+
+					var handler = Nux.listener.listeners[len];
+
+					var ni = handler.expectedListeners.indexOf(listener.name);
+					if(ni > -1) {
+						// remove the name of the expected listeners
+						handler.expectedListeners.splice(ni, 1);
+						// add a reference to the item imported.
+						// by using the same index, arguments passed
+						// back to the handler method are
+						// positioned the same in the arguments
+						// list
+						handler.extensions.push(listener.item);
+
+					}
+
 					if(handler.expectedListeners.length == 0) {
-						console.log(pos, spliced)
+						// If all the expected listeners have been
+						// removed, all extensions required for 
+						// this handler have been fetched.
 						handlers = handlers.concat(handler.listeners);
 						Nux.listener.listeners.splice(len, 1);
-					} else {
-						console.log(listener)
 					}
 				};
 
+				// Call each handler in the array
 				for (var i = 0; i < handlers.length; i++) {
 					var hook = handlers[i];
-					hook.call(Nux, listener);
+
+					hook.apply(Nux, handler.extensions);
 				};
 			},
-
-			_add: function(name, handler){
-				var space = Nux.space(name)
-				var runMethod = handler;
-				
-				if(!Nux.fetch.listeners.hasOwnProperty(space)){
-					Nux.fetch.listeners[space] = [handler];
-					
-					Nux.signature.add(space)
-					// Nux.core.slog("LISTENER+", "NEW " + space)
-				} else {
-					Nux.fetch.listeners[space].push(handler);
-				}
-
-				Nux.signature.add(Nux.space('core'))
-				return Ajile.AddImportListener(space, Nux.listener.importHandler);
-			},
-
-			call: function(listenerObject) {
-				/*
-				Call the listener object passed. This is preferably a
-				newly imported extension of which needs implementing.
-				 */
-				// debugger;
-				var listenerName 	= listenerObject.name || listenerObject,
-					extension 		= listenerObject.item,
-					space 			= Nux.space(listenerName),
-					listeners 		= Nux.fetch.listeners[space];
-				
-				if(!listeners) {
-					Nux.core.log("No listener for ", space)
-					return
-				}
-
-				// var metaChain = Nux.core.meta(extension);
-				
-				for (var i = 0; i < listeners.length; i++) {
-					var listener = listeners[i].handler || listeners[i];
-					listener.apply(extension, [listenerObject])
-
-					// Listener has been called. Kill it.
-					Nux.listener.remove(space, listener, listeners)
-				};
-				
-			},
+			
 
 			metaRequired: function(listener, callHandler) {
 				var required 	= {}
@@ -1097,7 +1047,6 @@
 				} else {
 					Nux.core.slog('DISALLOW', required);
 				}
-
 			},
 
 			metaRun: function(listener){
@@ -1163,70 +1112,7 @@
 
 				// Call handlers for this listeners name.
 				Nux.signature.run(listener.name, run || true);
-			
 			},
-
-			remove: function(){
-				var name 			= arg(arguments, 0, null);
-				var listener 		= arg(arguments, 1, name);
-				var space 			= Nux.space(name.name || name || listener.name);
-				var listeners 		= arg(arguments, 2, Nux.fetch.listeners[space]);
-				var ajileHandler 	= Ajile.RemoveImportListener(name, Nux.listener.importHandler);
-				// delete Nux.fetch.listeners[space]
-				for (var i = 0; i < listeners.length; i++) {
-					var _listener = listeners[i];
-					if(_listener == listener) {
-						listeners.splice(i, 1);
-						Nux.core.log("DEAF", space, i);
-					}
-				};
-
-				return ajileHandler
-			},
-
-			importHandler: function(listener){
-				/*
-				Object received through the use() method
-				*/
-				// Ajile.RemoveImportListener(listener.name, Nux.listener.importHandler);
-				// ensure all imports have occured before we
-				// call the handler
-				
-				// tell the framework this object
-				// has been imported. 
-				if (Nux.fetch.imported.indexOf(listener.name) > -1) {
-					console.log(Nux.fetch.listeners)
-					console.log('AGAIN!', listener.name);
-				}
-
-				Nux.fetch.registerListener(listener);
-
-				// if('nux.extension.core' == listener.name) debugger;
-
-				Nux.core.slog('IMPORTED', listener.name);
-
-				var callHandler = function(_listener){
-					Nux.listener.metaRun.apply(Nux, [_listener]);
-					
-					Nux.signature.receive(_listener);
-					Nux.listener.call.apply(Nux, [_listener]);
-					// Ensure the entire service is only booted once.
-					Nux.listener.remove(_listener);
-					Nux.fetch.next();
-				}
-
-				if( Nux.core.meta(listener.item).value('required') ) {
-					Nux.listener.metaRequired(listener, callHandler)
-				} else {
-					callHandler(listener);
-					// No requirements	
-					if( Nux.signature.expected().length <= 0 ) {
-						Nux.events.callEvent('allExpected');
-						// Detach recently added
-						Nux.events.dieEvent('allExpected');
-					}
-				}
-			}
 		},
 
 		signature: {
@@ -1506,19 +1392,10 @@
 				Nux.errors.throw(00, 'Nux.boot() must be performed')
 			}
 			
-			if(Themis.of(obj, String)) {
-				return Nux.fetch.use(obj, handler, path)
-			} else if(Themis.of(obj, Array)) {
-				for (var i = 0; i < obj.length; i++) {
-					// Send the signature hook to, (all items 
-					// wanted at this import (obj)) 
-					// As later this is used for a dehook.
-					var p = obj[i];
-				};
-				var hook = Nux.fetch.use(obj, handler, path, obj);
+			var hook = Nux.fetch.use(obj, handler, path, obj);
 
-				return hook;
-			}
+			return hook;
+			
 		},
 
 		// A list of all events to be exposed and captured 

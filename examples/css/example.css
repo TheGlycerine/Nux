@@ -1,9 +1,16 @@
 button.import {
 	border: none;
 	font-size: 32px;
-	font-weight: 200;
+	outline: none;
+	font-weight: 300;
 	padding: 0 20px;
 	border-radius: 2px;
 	box-shadow: 0 2px 0 rgba(100,100,100,.3);
 	margin-right: 10px;
+}
+
+button.import.imported {
+background: rgb(161, 231, 161);
+font-weight: 300;
+box-shadow: 0 2px 0 rgb(135, 185, 133);
 }
