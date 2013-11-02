@@ -507,7 +507,7 @@
 			}			
 		},
 
-		config: {		
+		config: {
 			// Default configuration for Nux.
 			def: NuxConfig,
 
@@ -741,7 +741,7 @@
 				// Add removeListener (on name import list) handler to listeners
 				Nux.listener.add(handlerHooks, function(ext){
 					console.timeEnd(ext.name);
-					console.log(arguments)
+					console.log(arguments);
 				});
 
 				for (var i = 0; i < handlerHooks.length; i++) {
@@ -854,11 +854,12 @@
 
 				return is undefined.
 				 */
+				
 				var path = arg(arguments, 1, Nux.config.def.extensionPath),
 					v 	 = Include(name, path);
+
 				return v;
 			}
-
 		},
 
 		errors: {
@@ -968,8 +969,19 @@
 				listener object containing the extension and the handler
 				 */
 				// call all methods hooked
-				var handlers = [];
+				var handlers = [],
+					required = (listener.item._meta && 
+						listener.item._meta.required)? listener.item._meta.required: null;
 
+				if(required) {
+					Nux.use(required, function(){
+						console.log('All imports for', listener.name)
+						
+
+					});
+				}
+				
+				console.log("Importing", listener.name)
 				// strip the listener names from expected listeners
 				var len = Nux.listener.listeners.length;
 				while(len--) {
@@ -978,6 +990,13 @@
 
 					var ni = handler.expectedListeners.indexOf(listener.name);
 					if(ni > -1) {
+
+						// Check the extension for required - push the allowed
+						// into the import array for this extension.
+						if(required) {
+							handler.expectedListeners = handler.expectedListeners.concat(required);
+						}
+
 						// remove the name of the expected listeners
 						handler.expectedListeners.splice(ni, 1);
 						// add a reference to the item imported.
@@ -999,9 +1018,9 @@
 				};
 
 				// Call each handler in the array
+				console.log("Calling", handlers.length, 'handlers')
 				for (var i = 0; i < handlers.length; i++) {
 					var hook = handlers[i];
-
 					hook.apply(Nux, handler.extensions);
 				};
 			},
@@ -1395,7 +1414,6 @@
 			var hook = Nux.fetch.use(obj, handler, path, obj);
 
 			return hook;
-			
 		},
 
 		// A list of all events to be exposed and captured 
