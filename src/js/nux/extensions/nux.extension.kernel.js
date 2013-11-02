@@ -1,6 +1,6 @@
-var _kernal = Nux.NS('kernel');
+var _kernel = Nux.NS('kernel');
 
-_kernal._meta.main = function(config){
+_kernel._meta.main = function(config){
 	var cc = 0;
 	
 	Nux.use(['core', 'timer'], function(extension){
@@ -23,7 +23,11 @@ _kernal._meta.main = function(config){
 	});
 }
 
-_kernal._meta.required = [
+_kernel._meta.assets = [
+	
+]
+
+_kernel._meta.required = [
 	"nux.extension.printer",
 	"nux.extension.core", 
 	/*{ 

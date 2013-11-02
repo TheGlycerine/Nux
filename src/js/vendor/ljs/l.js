@@ -74,7 +74,7 @@
 		,loaded = {}  // will handle already loaded urls
 		,loader  = {
 			aliases:{}
-			,loadjs: function(url,cb){
+			,loadjs: function(url,cb, p){
 				var id  =(url[match]('#')?url[replace](/^[^#]+#/,''):null);
 				id && (url = url[replace](/#.*$/,''));
 				if( loaded[url] === true ){ // already loaded exec cb if any
@@ -87,6 +87,7 @@
 					return this;
 				}
 				// first time we ask this script
+				if(p) url=p+url;
 				loaded[url] = function(cb){ return function(){loaded[url]=true; cb && cb();}}(cb);
 				appendElmt('script',{type:'text/javascript',src:url,id:id},function(){ loaded[url]() });
 				return this;

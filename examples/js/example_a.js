@@ -19,9 +19,14 @@ $(document).ready(function(){
 	kernel: false,
 	// console logs and test are implemented if required.
 	debug: false,
-	assetPath: '../src/',
+	// Asset path loads the files required for the extension
+	// from this location. This should map to your
+	// JS folder relative to the location of this
+	// boot config
+	assetPath: '../src/js/',
+
 	// Load folder for extension matching the expression
-	// {extennsionNamespace}.{extensionName}.js
+
 	extensionPath: "../src/js/nux/extensions/",
 	vendorPath: "../src/js/nux/vendor/",
 	required: false,
