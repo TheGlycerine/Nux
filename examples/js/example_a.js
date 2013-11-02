@@ -3,6 +3,7 @@ $(document).ready(function(){
 	$('button.import').click(function(){
 		var self = $(this);
 		Nux.use(self.text(), function(){
+			console.log("Recolour button")
 			self.addClass('imported')
 		})
 	})

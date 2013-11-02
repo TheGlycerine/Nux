@@ -227,7 +227,6 @@
 		// A funtion foconsr callback defaults
 		_F: function(){},
 
-
 		core: {
 			spaceDefinitions: [],
 			newSpace: function(name, space) {
@@ -708,16 +707,19 @@
 				return Load.apply(this, arguments);
 			},
 			
-			next: function(){
-				var next = Nux.fetch.chain.shift();
-
-				if(next) {
-					return Nux.use.apply(Nux, next)
-				}
-			},
-
 			use: function(name) {
+				/*
+				Externally accessible method o implement a Nux
+				extension. the Use method:
 
+					use(nameString [, handlerFunction][, importPathString])
+
+				returned is an extension chain containing:
+
+					then(name [, handlerFunction])
+				
+				This method implements the fetch.get method
+				 */
 				var handler = arg(arguments, 1, Nux._F);
 				var path = arg(arguments, 2, Nux.config.def.extensionPath);
 				
@@ -773,64 +775,6 @@
 						Inhert handler of which is only called when the name
 						is imported. No import is made when on() referenced
 				 */
-			},
-
-			_use: function(name){
-				/*
-				Externally accessible method o implement a Nux
-				extension. the Use method:
-
-					use(nameString [, handlerFunction][, importPathString])
-
-				returned is an extension chain containing:
-
-					then(name [, handlerFunction])
-				
-				This method implements the fetch.get method
-				 */
-				
-				var handler = arg(arguments, 1, Nux._F);
-				var path = arg(arguments, 2, Nux.config.def.extensionPath);
-				var handler_hook = arg(arguments, 3, name);
-				
-				// This method may throw an error is the asset has been refused.
-				Nux.listener.add(handler_hook, handler);
-			
-				Nux.core.slog('PROCESS', handler_hook);
-				
-				console.time("IMPORT " +  (name.path || name))
-
-				Nux.fetch.get(Nux.space(name), path, function(){
-					console.timeEnd("IMPORT " + (name.path || name))
-				});
-
-				var chain = Nux.fetch.chain;
-				// Import Chain
-				var hook = {
-					then: function(_name){
-						/*
-						Chaining imports can be a nasty business.
-						Use promise like then() method hooking to stop
-						nesting nightmares.
-
-						use('core').then('loader', function(){
-							// core and loader imported.
-						})
-						*/
-						var _n = Nux.space(_name);
-
-						if(Nux.space(name) in Nux.fetch.fails) {
-							Nux.core.slog("REFUSE", _n);
-						} else {
-							var _handler = arg(arguments, 1, Nux._F);
-							// debugger
-							var pri = chain.push([_n, _handler]);
-							// Nux.core.log("with  ", _n, 'handler:', Boolean(_handler));
-						}
-					}
-				}
-
-				return hook
 			},
 
 			get: function(name){
@@ -975,13 +919,10 @@
 
 				if(required) {
 					Nux.use(required, function(){
-						console.log('All imports for', listener.name)
-						
-
+						console.log('All imports for', listener.name);
 					});
 				}
 				
-				console.log("Importing", listener.name)
 				// strip the listener names from expected listeners
 				var len = Nux.listener.listeners.length;
 				while(len--) {
@@ -1018,7 +959,8 @@
 				};
 
 				// Call each handler in the array
-				console.log("Calling", handlers.length, 'handlers')
+				if (handlers.length > 0)
+					console.log("Calling", handlers.length, 'handlers')
 				for (var i = 0; i < handlers.length; i++) {
 					var hook = handlers[i];
 					hook.apply(Nux, handler.extensions);
