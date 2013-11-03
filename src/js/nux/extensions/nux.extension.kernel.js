@@ -24,7 +24,7 @@ _kernel._meta.main = function(config){
 }
 
 _kernel._meta.assets = [
-	
+	'assets/jquery-2.0.3.min.js'
 ]
 
 _kernel._meta.required = [

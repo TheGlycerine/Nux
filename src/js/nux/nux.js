@@ -1004,7 +1004,6 @@
 					if(Themis.of(assets, Object)) {
 						// doesn't need a wait loader as assets are 
 						// pre loaded, not imported.
-						
 						listener.item._meta._assets = false;
 					} else {
 						
