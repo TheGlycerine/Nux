@@ -24,9 +24,7 @@ $(document).ready(function(){
 	// JS folder relative to the location of this
 	// boot config
 	assetPath: '../src/js/',
-
 	// Load folder for extension matching the expression
-
 	extensionPath: "../src/js/nux/extensions/",
 	vendorPath: "../src/js/nux/vendor/",
 	required: false,

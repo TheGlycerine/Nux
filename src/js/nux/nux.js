@@ -289,7 +289,7 @@
 				'themis', 
 				'agile',
 			]
-		}		
+		}
 	}
 
 	var Nux = {
@@ -996,7 +996,7 @@
 
 
 				if(assets) {
-					debugger
+					
 					// Assets are required for the extension to run.
 					// add a flag to the listener handler set
 					if(Themis.of(assets, Object)) {
