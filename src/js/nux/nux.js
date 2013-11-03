@@ -93,7 +93,6 @@
 					return this;
 				}
 				// first time we ask this script
-
 				loaded[url] = function(cb){ return function(){loaded[url]=true; cb && cb();}}(cb);
 				appendElmt('script',{type:'text/javascript',src:url,id:id},function(){ loaded[url]() });
 				return this;
@@ -856,7 +855,7 @@
 				This method implements the internally used _import method.
 				*/
 				var path = arg(arguments, 1, Nux.config.def.extensionPath);
-				Nux.fetch._import(name, path);
+				return Nux.fetch._import(name, path);
 			},
 			
 			_import: function(name){
@@ -872,7 +871,6 @@
 				
 				var path = arg(arguments, 1, Nux.config.def.extensionPath),
 					v 	 = Include(name, path);
-
 				return v;
 			}
 		},
@@ -998,7 +996,7 @@
 
 
 				if(assets) {
-					
+					debugger
 					// Assets are required for the extension to run.
 					// add a flag to the listener handler set
 					if(Themis.of(assets, Object)) {

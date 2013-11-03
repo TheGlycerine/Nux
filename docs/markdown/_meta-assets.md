@@ -1,5 +1,7 @@
 # _meta.assets
 
+**Assets have been removed from an internal app during pre release.**
+
 You can optionally provide a set of js assets to import prior to your extension run method is performed. 
 These assets can be libraries and extenal files your extension depends upon.
 
