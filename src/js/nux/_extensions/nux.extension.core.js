@@ -135,6 +135,6 @@ _core.import = function(name, fun){
 	return importAllowed;
 }
 
-_core.run = function(config){
+_core.main = function(config){
     Nux.core.slog('CORE', "Hi :)")
 }
