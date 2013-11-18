@@ -8,12 +8,10 @@ _required.handler = function(){
 	console.log("INJECT")
 	return true;
 }
-_required._meta.map = {
-	'Nux.listener': {
-		handler: _required.handler
-	}
-}
+
+_required._meta.map = {}
 
 _required._meta.main = function(config) {
-
+	// debugger
+	console.log("Boot required")
 }

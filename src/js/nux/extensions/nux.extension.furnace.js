@@ -13,5 +13,6 @@ _furnace._meta.assets = [
 ]
 
 _furnace._meta.main = function(config){
-	console.log("furnace boot - Should boot before kernel", FOO)
+	// debugger
+	console.log("Boot furnace", FOO)
 }

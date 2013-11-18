@@ -6,7 +6,7 @@ core options and interface printers
 var _kernel = Nux.NS('kernel');
 
 _kernel._meta.main = function(config){
-	console.log("kernel boot")
+	console.log("Kernel Boots. Needed: ", _kernel._meta.required, 'This should have booted first')
 }
 
 _kernel._meta.assets = [
@@ -15,5 +15,5 @@ _kernel._meta.assets = [
 
 _kernel._meta.required = [
 	'nux.extension.required',
-	// 'nux.extension.furnace'
+	//'nux.extension.furnace'
 ]
