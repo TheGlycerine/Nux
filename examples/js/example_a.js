@@ -3,10 +3,21 @@ $(document).ready(function(){
 	$('button.import').click(function(){
 		var self = $(this);
 		Nux.use(self.text(), function(){
-			console.log("Recolour button")
-			self.addClass('imported')
+			self.addClass('imported');
 		})
 	})
+
+	$('.switch').click(function(){
+		localStorage.theme = $('.switch input')[0].checked
+		$('body').toggleClass('dark', $('.switch input')[0].checked);
+		
+	})
+
+	if(localStorage.theme == 'true') {
+		$('body').addClass('dark');
+		$('.switch input')[0].checked = true
+	}
+
 
 })
 
