@@ -34,10 +34,10 @@ $(document).ready(function(){
 	// from this location. This should map to your
 	// JS folder relative to the location of this
 	// boot config
-	assetPath: '../src/js/',
+	assetPath: '../src/js/nux/assets',
 	// Load folder for extension matching the expression
 	extensionPath: "../src/js/nux/extensions/",
-	vendorPath: "../src/js/nux/vendor/",
+	vendorPath: "../src/js/vendor",
 	required: false,
 }).onReady(function(){
 	console.log("Nux ready")

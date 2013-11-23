@@ -1,0 +1,18 @@
+# notes
+
+A nux extension is designed to be a single object existing in a larger scope. By creating a nux object (using the Nux library) an object can be scoped for inherited, extendable objects. 
+
+# Imports
+
+An extension can import other required extensions before or after the extension boots.
+
+	A requires B and C
+	B + C load then A
+
+# Assets
+
+An extension can load external assets before or after the extension has loaded. These assets can be JS CSS or other data files of which are not extensions.
+
+# main
+
+An extension can have a main method of which boots after assets and required extensions are imported.

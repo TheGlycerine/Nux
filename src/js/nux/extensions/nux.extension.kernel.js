@@ -6,12 +6,8 @@ core options and interface printers
 var _kernel = Nux.NS('kernel');
 
 _kernel._meta.main = function(config){
-	console.log("Kernel Boots. Needed: ", _kernel._meta.required, 'This should have booted first')
+	console.log("BOOT: Kernel. Needed: ", _kernel._meta.required, 'This should have booted first')
 }
-
-_kernel._meta.assets = [
-	'nux/assets/jquery-2.0.3.min.js'
-]
 
 _kernel._meta.required = [
 	'nux.extension.required',

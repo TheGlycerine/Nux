@@ -8,8 +8,8 @@ method chaining and overriding.
 var _furnace = Nux.NS('furnace');
 
 _furnace._meta.assets = [
-	'nux/assets/zoe.min.js',
-	'nux/assets/foo.js'
+	'%(assetPath)s/zoe.min.js',
+	'%(assetPath)s/foo.js'
 ]
 
 _furnace._meta.main = function(config){

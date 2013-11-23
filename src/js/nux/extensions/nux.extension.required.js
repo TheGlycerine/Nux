@@ -13,5 +13,5 @@ _required._meta.map = {}
 
 _required._meta.main = function(config) {
 	// debugger
-	console.log("Boot required")
+	console.log("BOOT: required")
 }
