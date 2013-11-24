@@ -24,7 +24,7 @@ $(document).ready(function(){
 // Will load Nux or the development environment.
 bootNux = function(){
 	if(!window.hasOwnProperty('Nux')) return false
-	if(devInt) window.clearInterval(devInt);
+	if(window['__devInt']) window.clearInterval(window['__devInt']);
 
 	;Nux
 	// First the boot, applying a set of rules to
@@ -50,4 +50,4 @@ bootNux = function(){
 
 	return true
 }
-devInt = (!bootNux())? window.setInterval(bootNux, 100): -1;
+window['__devInt'] = (!bootNux())? window.setInterval(bootNux, 100): -1;

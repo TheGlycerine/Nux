@@ -32,7 +32,7 @@
 				This method implements the fetch.get method
 				 */
 				var handler = arg(arguments, 1, Nux._F);
-				var path = arg(arguments, 2, Nux.config.def.extensionPath);
+				var path = arg(arguments, 2, Nux.__config().extensionPath);
 				
 				// Add to handler chain
 				// This method may throw an error is the asset has been refused.
@@ -93,7 +93,7 @@
 				listeners should already be prepared.
 				This method implements the internally used _import method.
 				*/
-				var path = arg(arguments, 1, Nux.config.def.extensionPath);
+				var path = arg(arguments, 1, Nux.__config().extensionPath);
 				return Nux.fetch._import(name, path);
 			},
 			
@@ -108,7 +108,7 @@
 				return is undefined.
 				 */
 				
-				var path = arg(arguments, 1, Nux.config.def.extensionPath),
+				var path = arg(arguments, 1, Nux.__config().extensionPath),
 					v 	 = Include(name, path);
 				return v;
 			}

@@ -1,6 +1,9 @@
 ;(function(){
 	NuxComponentHeader.apply(this, arguments)
 })('assets', {
+	// relative prefix for all assets imported
+	assetPath: './',
+
 	// global options
 	// independant file assets  used for Nux.
 		assets: {

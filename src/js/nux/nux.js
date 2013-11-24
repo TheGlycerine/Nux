@@ -24,8 +24,7 @@
 		// Nux can be booted at any given time.
 		runOnce: true,
 		overrideSpace: 'override',
-		// relative prefix for all assets imported
-		assetPath: './',
+		
 		// If a method is called prior to the Nux.boot() method
 		// being called; autoBoot ensures the call does not go
 		// unanswered. Instead; core logic is imported using 
@@ -116,8 +115,6 @@
 
 			self.config.merge(config);
 			var loadA = ['required', 'nux'];
-			debugger;
-
 			var assetPath = self.config.configif(self.__config().assets)
 				
 			self.assets.add(assetPath)

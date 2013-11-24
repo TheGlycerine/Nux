@@ -13,10 +13,10 @@ var deps = [
 ];
 
 var components = [
-	'as/utils',
-	'as/l',
+	'nx/utils',
 	'nx/_F',
 	'nx/assets',
+	'nx/bootloader',
 	'nx/core',
 	'nx/config',
 	'nx/errors',

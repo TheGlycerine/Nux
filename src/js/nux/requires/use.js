@@ -10,7 +10,7 @@
 	return function(obj){
 		/* provide array or string of assets to import */
 		var handler = arg(arguments, 1, Nux._F);
-		var path = arg(arguments, 2, Nux.config.def.extensionPath);
+		var path = arg(arguments, 2, Nux.__config().extensionPath);
 
 		if(!Nux.booted) {
 			Nux.errors.throw(00, 'Nux.boot() must be performed')

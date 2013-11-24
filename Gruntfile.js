@@ -7,7 +7,7 @@ module.exports = function(grunt) {
         separator: ';'
       },
       dist: {
-        src: ['src/js/nux/extensions/**/*.js', 'src/js/nux/nux.js'],
+        src: ['src/js/nux/requires/**/*.js', 'src/js/nux/nux.js'],
         dest: 'dist/<%= pkg.name %>.js'
       }
     },
@@ -21,10 +21,6 @@ module.exports = function(grunt) {
           'dist/<%= pkg.name %>.min.js': ['<%= concat.dist.dest %>']
         }
       }
-    },
-
-    qunit: {
-      files: ['test/**/*.html']
     },
 
     jshint: {
