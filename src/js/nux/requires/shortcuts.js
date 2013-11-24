@@ -10,8 +10,9 @@
 	/** legacy and shortcut additions. **/
 	// self['import']  	= self.fetch.get;
 	return function(obj){
-		debugger
 		console.log("Implement shortcuts")
+		
+		var self = this;
 		self.load 			= self.fetch.load;
 		self.configure		= self.config.configure;
 		self.booted 		= false;

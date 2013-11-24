@@ -43,6 +43,6 @@ requirejs.config({
 require(deps, function(zoe, imp, comp){
 	window['zoe'] = zoe;
 	requirejs(components, function(){
-		console.log("All components collected - boot nux.");
+		console.log("Loaded", arguments.length, ' compoenents - boot nux.');
 	})
 })
