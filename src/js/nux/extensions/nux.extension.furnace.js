@@ -14,5 +14,6 @@ _furnace._meta.assets = [
 
 _furnace._meta.main = function(config){
 	// debugger
+	
 	console.log("Boot furnace", FOO)
 }
