@@ -100,6 +100,7 @@
 		},
 
 		space: function(name) {
+			var path = arg(arguments, 1, null);
 			/*
 			Receive the fully qualified name
 			for the application NAMESPACE
@@ -119,10 +120,12 @@
 			}
 
 
-			var str = Nux.__config().extensionNamespace + '.' + name;
-			if(name.indexOf('.') > -1) {
-				str=name;
-			}
+			var str=name;
+			if( name.indexOf('.') < 0 && path == null) {
+				
+				str = Nux.__config().extensionNamespace + '.' + name
+				
+			} 
 
 			return str;
 		},

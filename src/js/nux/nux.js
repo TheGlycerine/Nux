@@ -78,12 +78,13 @@
 
             function assign(obj, keyPath, value, config) {
                 
-                if(!keyPath || keyPath && keyPath.length == 0) {
+                if(!keyPath || keyPath && keyPath.length === 0) {
                     // no path - is override
                     var methodObject = value;
                     if( typeof(methodObject) == 'function') {
                         methodObject = value();
                     }
+
                     ext = zoe.extend(Nux, methodObject, config);
                     return ext;
                 } else {
