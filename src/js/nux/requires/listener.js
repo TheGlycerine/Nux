@@ -85,6 +85,7 @@
 
 				// strip the listener names from expected listeners
 				var len = Nux.listener.listeners.length;
+				
 				while(len--) {
 					var importObject = Nux.listener.listeners[len];
 

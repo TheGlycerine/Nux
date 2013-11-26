@@ -34,7 +34,6 @@
 				if(required) {
 					// Check the extension for required - push the allowed
 					// into the import array for this extension.
-					console.log("Importing required", required, 'for', listener.item.name);
 					Nux.use(required, function(){
 						// Boot should be allowed.
 						listener.item.boot('requires');
@@ -43,7 +42,6 @@
 
 
 				if(map) {
-					console.log("Mapping...")
 					for(var item in map) {
 						
 						// The item is the name of the
