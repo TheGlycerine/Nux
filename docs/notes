@@ -16,3 +16,65 @@ An extension can load external assets before or after the extension has loaded. 
 # main
 
 An extension can have a main method of which boots after assets and required extensions are imported.
+
+
+Nux:
+
++ Build upon many extensions put together using require and Grunt
++ The library should provide a platform to import 
+  javascript code to plug into already existing objects
++ little code should be required to merge these components
+
+Scope:
+
++ build complex javascript objects from little files
++ have a predictable format for naming convensions
++ use live loading, asset loading and depencency management automatically
+
+## Function:
+
+Nux.js will build a nux object in the global namespace. This will be used to
+drive a method factory for object creation and importing.
+	
+	Nux.use(['car.doors', 'car.windows'], function(){
+
+	}, 'path/')
+
+
+## Getting extended:
+
+An extension needs a fundamental component to work. This ensures Nux knows where the
+file should plug in. The first line is your NameSpace. This defines an where your
+code should exist in your global space.
+
+	var _doors = Nux.NS('car.doors');
+
+	// The rest of the code is your application logic.
+	_doors.open = function(){
+		console.log("open the door");
+	}
+
+
+## Assets:
+
+Nux allows you to divides your component into smaller parts. Some components may need
+additional libraries such as jQuery. 
+
+This generates a Nux object bound to a set of rules given through the Shell.
+You can use the internal asset collection 
+
+	var _doors = Nux.NS('car.doors');
+
+	_doors._meta.required = [
+		'car.windows',
+	]
+
+	// The rest of the code is your application logic.
+	_doors.open = function(){
+		console.log("open the door");
+	}
+
+	_doors.lock = function(){
+		console.log("Lock doors")
+		car.windows.close()
+	}
