@@ -1,5 +1,5 @@
 ;(function(){
-	NuxComponentHeader.apply(this, arguments)
+	return NuxComponentHeader.apply(this, arguments)
 })('bootloader', {
 	// global options
 },function(){
@@ -85,4 +85,17 @@
 				return ext
 			}
 		}
+}).chain({
+	'listener.handler': 'CHAIN'
+}, function(){
+	return {
+		listener: {
+			handler: function(listener){
+				if( listener.item ) {
+					Nux.bootloader.wrap(listener.item);
+				}
+
+			}
+		}
+	}
 })

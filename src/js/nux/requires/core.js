@@ -103,6 +103,10 @@
 			/*
 			Receive the fully qualified name
 			for the application NAMESPACE
+
+			// only add namespace to the start of the name
+			// if there is no folder space
+			// '.'
 			*/
 			if(!name) {
 				name = ''
@@ -114,7 +118,12 @@
 				return name
 			}
 
+
 			var str = Nux.__config().extensionNamespace + '.' + name;
+			if(name.indexOf('.') > -1) {
+				str=name;
+			}
+
 			return str;
 		},
 

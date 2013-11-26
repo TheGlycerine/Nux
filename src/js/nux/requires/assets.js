@@ -1,24 +1,24 @@
 ;(function(){
-	NuxComponentHeader.apply(this, arguments)
+	return NuxComponentHeader.apply(this, arguments)
 })('assets', {
 	// relative prefix for all assets imported
 	assetPath: './',
 
 	// global options
 	// independant file assets  used for Nux.
-		assets: {
-			'agile': "%(vendorPath)s/com.iskitz.ajile.src.js?mvcoff,mvcshareoff,cloakoff, debugoff",			
-			'zoe': 	"%(vendorPath)s/zoe.min.js",
-			'themis': [
-				//"%(vendorPath)s/themis/getterSetter.js", 
-				"%(vendorPath)s/themis/tester.js"],
-			'nux': ["agile", "themis"],
-			// assets fundamental to Nux - Will be loaded first
-			'required': [
-				'themis', 
-				'agile',
-			]
-		}
+	assets: {
+		'agile': "%(vendorPath)s/com.iskitz.ajile.src.js?mvcoff,mvcshareoff,cloakoff, debugoff",			
+		'zoe': 	"%(vendorPath)s/zoe.min.js",
+		'themis': [
+			//"%(vendorPath)s/themis/getterSetter.js", 
+			"%(vendorPath)s/themis/tester.js"],
+		'nux': ["agile", "themis"],
+		// assets fundamental to Nux - Will be loaded first
+		'required': [
+			'themis', 
+			'agile',
+		]
+	}
 },function(config, nuxConfig){
 
 	// Your implementation goes here.
@@ -85,4 +85,38 @@
 				}
 			}
 		}
+}).chain({
+	'listener.handler': 'CHAIN'
+}, function(){
+	return {
+		listener: {
+			handler: function(listener){
+				var ex = listener.item._meta;
+				var assets = (ex && ex.assets)? ex.assets: null;
+
+				if(assets) {
+					var assetsLoaded = (function(listener){
+
+						// This method will be called 
+						// when the assets have been loaded. If no
+						// assets are required, it will be called
+						// immediately.
+						var ext = listener.item
+						return function(){
+							ext._meta.assetsLoaded = true;
+							ext.boot('assets');
+						}
+
+					})(listener);
+					ex.assetsLoaded = false
+					Nux.assets.load(assets, assetsLoaded);
+				} else {
+					if(listener.item.hasOwnProperty('_meta')){
+						ex.assetsLoaded = true;
+					}
+				}
+				
+			}
+		}
+	}
 })

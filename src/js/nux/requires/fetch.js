@@ -17,7 +17,7 @@
 			load: function() {
 				return Load.apply(this, arguments);
 			},
-			
+			// [name], handler, path
 			use: function(name) {
 				/*
 				Externally accessible method o implement a Nux
@@ -32,6 +32,7 @@
 				This method implements the fetch.get method
 				 */
 				var handler = arg(arguments, 1, Nux._F);
+				
 				var path = arg(arguments, 2, Nux.__config().extensionPath);
 				
 				// Add to handler chain
@@ -48,12 +49,13 @@
 				};
 				
 				// name is implemented as array only
-				Nux.listener.add(handlerHooks, handler);
+				Nux.listener.add(handlerHooks, handler, path);
 
 				console.time(handlerHooks)
 				// Add removeListener (on name import list) handler to listeners
 				Nux.listener.add(handlerHooks, function(ext){
-					console.timeEnd(ext.name);				});
+					console.timeEnd(ext.name);
+				}, path);
 
 				for (var i = 0; i < handlerHooks.length; i++) {
 					var name = handlerHooks[i];
@@ -84,6 +86,8 @@
 						Inhert handler of which is only called when the name
 						is imported. No import is made when on() referenced
 				 */
+				
+				return Nux
 			},
 
 			get: function(name){
@@ -110,6 +114,7 @@
 				
 				var path = arg(arguments, 1, Nux.__config().extensionPath),
 					v 	 = Include(name, path);
+				
 				return v;
 			}
 		}
