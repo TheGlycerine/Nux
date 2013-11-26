@@ -24,10 +24,10 @@ nuxReady = function(){
 	// This method will boot when nux is prepared
 
 	// lets build a car!
-	_car = Nux.use(['car.doors'], function(){
-
+	_nuxcar = Nux.use(['car'], function(){
+		
 		car.doors.open()
-		car.doors.lock()
+		car.locks.lock()
 		console.log("imported door and windows", car, _car)
 
 	}, 'js/exampleb/car_parts/');
