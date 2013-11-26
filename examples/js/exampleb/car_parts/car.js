@@ -11,6 +11,7 @@ _car.close = function(){
 }
 
 _car.lock = function(){
+
 	car.windows.close();
 	this.close();
 	Nux.use('car.locks', function(){
@@ -18,6 +19,9 @@ _car.lock = function(){
 	})
 }
 
+_car._meta.main = function(){
+	console.log("car main run", car.windows)
+}
 _car._meta.required = [
 	'car.windows',
 ]

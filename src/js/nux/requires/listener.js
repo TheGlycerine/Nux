@@ -26,7 +26,7 @@
 
 				var hookChain = [];
 				for (var i = 0; i < names.length; i++) {
-					var space = Nux.space(names[i]);
+					var space = Nux.space(names[i], path);
 					hookChain.push(space);
 				};
 
@@ -85,14 +85,13 @@
 
 				// strip the listener names from expected listeners
 				var len = Nux.listener.listeners.length;
-				
+				console.log(listener.name, 'imported');
+
 				while(len--) {
 					var importObject = Nux.listener.listeners[len];
 
 					var ni = importObject.expectedListeners.indexOf(listener.name);
-
 					if(ni > -1) {
-
 						// remove the name of the expected listeners
 						importObject.expectedListeners.splice(ni, 1);
 						// add a reference to the item imported.
@@ -102,6 +101,8 @@
 						// list
 						importObject.extensions.push(listener.item);
 						ex.importObject = importObject;
+
+						console.log(listener.name, 'has handler')
 						// This item is expected and has listeners attached waiting.
 						Nux.listener.handleExpected(importObject, listener.item, ex);
 					}

@@ -34,10 +34,13 @@
 				if(required) {
 					// Check the extension for required - push the allowed
 					// into the import array for this extension.
+					console.log(listener.name, 'requires', required)
 					Nux.use(required, function(){
 						// Boot should be allowed.
 						listener.item.boot('requires');
 					}, (ex.hasOwnProperty('importObject'))? ex.importObject.path: null);
+				} else {
+					console.log(listener.name, 'has no requirements')
 				}
 
 
@@ -83,6 +86,8 @@
 						}
 						// chain the methods into the mapping
 						}
+				} else {
+					console.log(listener.name, "has no mapping")
 				}
 			}
 		}
