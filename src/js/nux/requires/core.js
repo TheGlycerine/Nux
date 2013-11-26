@@ -24,12 +24,10 @@
 				Nux.core.slog('SPACE', name);
 			}
 			
-			space['name'] = name;
-			space['created'] = +(new Date);
-			
 			if(!space.hasOwnProperty('_meta')) {
 				space['_meta'] = {
-						
+						name: name,
+						created: +(new Date)		
 					}
 			}				
 
