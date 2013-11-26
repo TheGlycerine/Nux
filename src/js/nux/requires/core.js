@@ -119,7 +119,7 @@
 
 
 			var str=name;
-			if( name.indexOf('.') < 0 && path == null) {
+			if( name.indexOf('.') < 0 && (path == null || Nux.__config().extensionPath == path) ) {
 				
 				str = Nux.__config().extensionNamespace + '.' + name
 				

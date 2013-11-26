@@ -114,7 +114,6 @@
 
         
     };
-
     var NuxLoader = function(){
 
         if(window.hasOwnProperty('__Nux')) {

@@ -7,6 +7,9 @@ _locks.lock = function(){
 
 }
 
+_locks._meta.main = function(){
+	console.log('locks have arrived')
+}
 _locks._meta.required = [
 	'car.windows',
 	'car.doors',

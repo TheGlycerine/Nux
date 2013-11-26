@@ -12,7 +12,7 @@
 }, function(){
 	return {
 		use: function(){
-			console.log('USE', arguments[0])
+			// console.log('USE', arguments[0], 'from', arguments[2])
 		}
 	}
 })

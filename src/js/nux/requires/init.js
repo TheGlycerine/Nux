@@ -1,3 +1,4 @@
+
 ;(function(){
 	NuxComponentHeader.apply(this, arguments)
 })('init', {

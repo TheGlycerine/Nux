@@ -33,7 +33,7 @@
 				 */
 				var handler = arg(arguments, 1, Nux._F);
 				var path = arg(arguments, 2, Nux.__config().extensionPath);
-				console.log('use', name, 'from', path)
+	
 				// Add to handler chain
 				// This method may throw an error is the asset has been refused.
 				

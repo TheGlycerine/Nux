@@ -76,25 +76,34 @@
 
 				}).apply(ext, [bootSpace]);
 
-				ext.boot = bootFunction;
+				if(!ext._meta) {
+					ext._meta = {}
+				}
+				ext._meta.boot = bootFunction;
 				// Calls the boot function and persists to 
 				// run the method. The 'init' is mearly to 
 				// shim a value to change and to provide some 
 				// context of sequence for later event listeners.
-				ext.boot('init')
+				ext._meta.boot('init')
 				return ext
 			}
 		}
 }).chain({
-	'listener.handler': 'CHAIN'
+	'listener.handler': 'CHAIN',
+	'listener.importObject': 'CHAIN'
 }, function(){
 	return {
 		listener: {
 			handler: function(listener){
+
 				if( listener.item ) {
+
 					Nux.bootloader.wrap(listener.item);
 				}
 
+			},
+			importObject: function(hookChain, handler, path){
+				// debugger;
 			}
 		}
 	}

@@ -21,5 +21,5 @@ _doors._meta.required = [
 ]
 
 _doors._meta.main = function(){
-	console.log("doors have turned up")
+	console.log("MAIN doors have turned up")
 }

@@ -6,17 +6,17 @@ _car.open = function(){
 }
 
 _car.close = function(){
-	console.log('close the doors');
+	console.log('close the car');
 	this._open = false;
 }
 
 _car.lock = function(){
-
 	car.windows.close();
 	this.close();
 	Nux.use('car.locks', function(){
-		car.locks.lock()	
-	})
+		console.log("Locks imported")
+		car.locks.lock();
+	}, this)
 }
 
 _car._meta.main = function(){
@@ -24,4 +24,5 @@ _car._meta.main = function(){
 }
 _car._meta.required = [
 	'car.windows',
+	'car.doors',
 ]

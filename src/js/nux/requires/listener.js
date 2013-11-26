@@ -31,7 +31,14 @@
 				};
 
 				// Push the listener chain
-				Nux.listener.listeners.push({
+			
+				var importObject = Nux.listener.importObject(hookChain, handler, path)
+				
+				Nux.listener.listeners.push(importObject);
+				return true;
+			},
+			importObject: function(hookChain, handler, path) {
+				return {
 					expectedListeners: hookChain,
 					listeners: [handler],
 					// Store the import path of this object
@@ -41,10 +48,9 @@
 					// (later to be passed to the handler method
 					// as arguments)
 					extensions: []
-				});
-				
-				return true;
+				}
 			},
+
 			getListener: function(name){
 				// Return the space listener item containing import
 				// information on this imported object by reference of it's name.
@@ -85,7 +91,6 @@
 
 				// strip the listener names from expected listeners
 				var len = Nux.listener.listeners.length;
-				console.log(listener.name, 'imported');
 
 				while(len--) {
 					var importObject = Nux.listener.listeners[len];
@@ -99,10 +104,9 @@
 						// back to the handler method are
 						// positioned the same in the arguments
 						// list
-						importObject.extensions.push(listener.item);
+						//importObject.extensions.push(listener.item);
 						ex.importObject = importObject;
-
-						console.log(listener.name, 'has handler')
+						ex.path = importObject.path;
 						// This item is expected and has listeners attached waiting.
 						Nux.listener.handleExpected(importObject, listener.item, ex);
 					}

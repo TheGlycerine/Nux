@@ -15,5 +15,5 @@ _windows.alarm = function(){
 
 
 _windows._meta.main = function(){
-	console.log("windows have turned up")
+	console.log("MAIN windows have turned up")
 }

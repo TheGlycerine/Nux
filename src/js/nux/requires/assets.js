@@ -104,7 +104,7 @@
 						var ext = listener.item
 						return function(){
 							ext._meta.assetsLoaded = true;
-							ext.boot('assets');
+							ext._meta.boot('assets');
 						}
 
 					})(listener);
