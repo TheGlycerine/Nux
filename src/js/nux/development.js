@@ -9,12 +9,13 @@ requirejs is needed.
 var deps = [
 	'as/zoe.min', 
 	'nx/NuxImplement', 
-	'nx/NuxComponentHeader'
+	'nx/NuxComponentHeader',
+	'nx/utils'
 ];
 
 var components = [
-	'nx/utils',
 	'nx/_F',
+	'nx/init',
 	'nx/assets',
 	'nx/bootloader',
 	'nx/core',
@@ -31,6 +32,10 @@ var components = [
 	'nux'
 ]
 
+var overrides = [
+	'nx/listener-handler-map',
+	'nx/use-ch'
+]
 
 requirejs.config({
 	baseUrl: '../src/js/nux',
@@ -42,7 +47,13 @@ requirejs.config({
 
 require(deps, function(zoe, imp, comp){
 	window['zoe'] = zoe;
+	var count = arguments.length;
+
 	requirejs(components, function(){
-		console.log("Loaded", arguments.length, ' compoenents - boot nux.');
+		count += arguments.length
+		requirejs(overrides, function(){
+			count += arguments.length;
+			console.log("Loaded", count, 'components - boot nux.');
+		})
 	})
 })
