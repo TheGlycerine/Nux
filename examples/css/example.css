@@ -16,3 +16,50 @@ background: rgb(161, 231, 161);
 font-weight: 300;
 box-shadow: 0 2px 0 rgb(135, 185, 133);
 }
+
+
+
+.consoles .console .file {
+	float: right;
+}
+
+.consoles {
+border-radius: 5px;
+background: #555;
+padding: 15px 20px;
+font-family: 'Courier New', monospace;
+font-size: 16px;
+line-height: 1.3em;
+width: 50%;
+}
+
+.consoles .console {
+display: list-item;
+background: rgba(255,255,255,.1);
+margin: 2px 0;
+padding: 0 4px;
+list-style-type: decimal;
+list-style-position: inside;
+color: #aaa;
+}
+
+.consoles .console .file .line {
+width: 1em;
+display: inline-block;
+text-align: right;
+color: #999;
+}
+
+.consoles .console .text {
+color: #eee;
+}
+
+.content {
+margin: 50px 0;
+color: #eee;
+}
+
+.dark .content p {
+color: #DBDBDB;
+text-shadow: none;
+}
