@@ -18,7 +18,7 @@
     <link rel="stylesheet" href="css/example.css">
     <style>
     body {
-    padding: 10px;
+        padding: 10px;
     }
     </style>
     <link rel="stylesheet" href="../site/css/bootstrap-theme.min.css">
@@ -35,7 +35,7 @@
             <![endif]-->
     <div class="navbar navbar-inverse navbar-fixed-top">
         <button class="ex next" data-example='example_b'><div class="arrow left"></div>Requirements</button>
-
+        <h1>SPACESHIPS!</h1>
         <div class="switch-cont">
             <label class="switch">
                 <input type="checkbox" class="switch-input">
@@ -64,5 +64,17 @@
 <p>Making a spaceship requires a lot of small pieces. Lets make something complex, very easily.</p>
 
 <h4>Building a structure</h4>
+
 <p>We first make a master component of which lives in the window level. This can be seen in example_c folder spaceship.js</p>
+
+<button type='button' class='import' id='spaceshipButton'>window.spaceship</button>
+
+<p>Brilliant, If the button went green; we've imported our spaceship. You can go find it in the console as <span class="code">spaceship</span></p>
+
+<h4>Add Graphics!</h4>
+
+<p>So, code can be a little boring without something to play with. By implementing the <span class="code">spaceship.renderer</span> component will give us something to see.</p>
+
+<button type='button' class='import' id='spaceshipRendererButton'>spaceship.renderer</button>
+
 </html>
