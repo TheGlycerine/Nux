@@ -89,6 +89,10 @@
 				var ex = listener.item._meta;
 				var handlers = [];
 
+				if(!ex && listener.name != 'com.iskitz.ajile') {
+					console.warn("Wooh! this extension has no _meta?", listener)
+				}
+
 				// strip the listener names from expected listeners
 				var len = Nux.listener.listeners.length;
 
