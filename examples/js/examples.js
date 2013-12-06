@@ -19,7 +19,7 @@ $(document).ready(function(){
 		var val = $(this).data('example');
 		window.location = val + '.html';
 	})
-
+	
 })
 
 
