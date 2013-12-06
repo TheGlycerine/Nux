@@ -75,7 +75,7 @@
 			
 			if( name ) {
 
-				var _name = Nux.space(name);
+				var _name = Nux.space(name, Nux.core.spaceHash[name]);
 
 				(!Namespace) && Nux.errors.throw(01, 'zoejs needed for Namespace')
 				if( space ) {
@@ -96,7 +96,7 @@
 
 			return _space;	
 		},
-
+		spaceHash: {},
 		space: function(name) {
 			var path = arg(arguments, 1, null);
 			/*
@@ -117,14 +117,13 @@
 				return name
 			}
 
-
 			var str=name;
 			if( name.indexOf('.') < 0 && (path == null || Nux.__config().extensionPath == path) ) {
 				
 				str = Nux.__config().extensionNamespace + '.' + name
 				
-			} 
-
+			}
+			Nux.core.spaceHash[str] = path
 			return str;
 		},
 
