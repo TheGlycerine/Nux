@@ -5,7 +5,8 @@ Asynchronous MVC Module Inheritance Framework.
 
 Nux is an MIT licensed asynchronous javascript file loader incorporating an unobtrusive MVC style naming convention to create modular, readable, interchangeable code.
 
-Nux provides a namespaced module loader. Smaller files loaded from a specific directory, large javascript objects are created. By implementing:
+Nux provides a namespaced module loader. Smaller files are loaded from a specific directory creating large javascript objects.
+
 
 * asynchronous loading for javascript object
 * ‘dotted name syntax’ naming for javascript files
@@ -17,7 +18,18 @@ Covering all bases, Nux sits as a tiny loadout building a larger more complex ja
 
 ## Simply put.
 
-We make a very complex object for our game. By using Nux, it all becomes easy to manage.
+When building something complicated like a game or an application, You don't build a giant blob of FOO app; you create many individual elements and
+plug them together in some clever way.
+
+Consider if you could make that a lot easier with your javascript blob of FOO - breaking down your FOO application into bitesize chunks.
+
+
+### Example
+
+You're making a game of which has WOOSHY spaceships! You don't want to build giant blob of FOO_SHIP consisting for 8000 lines, you want to make small pieces of spaceship, and plug them 
+together like clever lego.
+
+Put your spaceship pieces in cleverly named files, in some folder somewhere.
 
 **/root/js/game/objects/vehicles/** 
 

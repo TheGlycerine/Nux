@@ -7,7 +7,6 @@ nuxReady = function(){
 		car.doors.open()
 		console.log("---")
 		car.lock()
-
 	}, 'js/exampleb/car_parts/');
  
 	_human = Nux.use(['human.body'], function(){

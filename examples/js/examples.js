@@ -15,6 +15,11 @@ $(document).ready(function(){
 		$('.switch input')[0].checked = true
 	}
 
+	$('.navbar button.ex').click(function(){
+		var val = $(this).data('example');
+		window.location = val + '.html';
+	})
+
 })
 
 

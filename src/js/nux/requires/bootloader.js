@@ -13,6 +13,18 @@
 			required extensions are booted in a queue.
 			 */
 			boots: {},
+			mainSpace: function(ext){
+				/*
+				space provided to the main() method when a new
+				component is booted
+				 */
+				
+				return {
+					ext: ext,
+					scope: ext,
+					arguments: [Nux]
+				}
+			},
 
 			wrap: function(ext){
 				/*
@@ -43,8 +55,10 @@
 				}
 
 				bootFunction = (function(bootSpace){
-				
+					var mainSpace = this;
 					return function(loadVal){
+
+						var self = mainSpace;
 						var val = arg(arguments, 1, true);
 						var extBootSpace = bootSpace;
 						extBootSpace[loadVal] = val;
@@ -65,7 +79,7 @@
 								) {
 
 								
-								ext._meta.main();
+								ext._meta.main.apply(self.scope, self.arguments);
 								extBootSpace.booted = true;
 							
 
@@ -74,7 +88,7 @@
 						
 					}
 
-				}).apply(ext, [bootSpace]);
+				}).apply(this.mainSpace(ext), [bootSpace]);
 
 				if(!ext._meta) {
 					ext._meta = {}

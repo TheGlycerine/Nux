@@ -59,7 +59,53 @@ margin: 50px 0;
 color: #eee;
 }
 
-.dark .content p {
+.dark p {
 color: #DBDBDB;
 text-shadow: none;
+}
+
+.navbar button.prev {
+left: 1em;
+}
+
+
+.dark .navbar button {
+background: rgb(80, 80, 80);
+color: #BBB;
+border-color: rgb(80,80,80);
+}
+
+.navbar button {
+border: none;
+margin: 10px;
+padding: 0px 10px;
+position: relative;
+height: 2em;
+background: #ddd;
+border-color: #ddd;
+font-size: 1em;
+text-transform: uppercase;
+color: #333;
+outline: none;
+}
+
+
+button .arrow {
+border: solid 1em;
+width: 0;
+position: absolute;
+height: 0;
+display: block;
+top: 0;
+border-color: transparent;
+}
+
+button .arrow.right {
+right: -2em;	
+border-left-color: inherit;
+}
+
+button .arrow.left {
+border-right-color: inherit;
+left: -2em;
 }

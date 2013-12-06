@@ -10,7 +10,7 @@ border-bottom-width: 1px;
 box-shadow: 0 1px 4px rgba(27, 27, 27, 1);
 }
 
-body.dark h3 {
+body.dark h3, body.dark h4 {
 color: #57BBD5;
 text-shadow: 0 1px 1px #000;
 font-weight: 300;
