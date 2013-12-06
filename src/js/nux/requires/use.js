@@ -26,6 +26,12 @@
 			Nux.errors.throw(00, 'Nux.boot() must be performed')
 		}
 		
+		// Allow the second parameter to be a string for an import path;
+		// Nux.use('com.path', 'path/folders');
+		if(Themis.of(handler, String) && path == ip) {
+			path = handler;
+			handler = Nux._F;
+		}
 		var hook = Nux.fetch.use(obj, handler, path, obj);
 
 		return hook;
