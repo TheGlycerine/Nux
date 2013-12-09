@@ -21,6 +21,7 @@
 			errors: {
 				00: 'Not Booted',
 				01: 'Missing Asset',
+				02: 'Error already exists',
 				04: 'not implemented',
 				// The event name passed has already been
 				// created. addEvent() has been used
@@ -54,6 +55,15 @@
 			},
 			throw: function(errorCode, value) {
 				throw this.error(errorCode, value);
+			},
+			add: function(errorCode, value) {
+				if(this.errors.hasOwnProperty(value)) {
+					this.throw(02, errorCode);
+					return false
+				} else {
+					this.errors[errorCode] = value;
+					return true;
+				}
 			}
 		}
 })

@@ -58,23 +58,31 @@
     <script src="js/examples.js"></script>
 </body>
 
+<div class="left">
+    <h3>WOOSHY SPACESHIPS!</h3>
 
-<h3>WOOSHY SPACESHIPS!</h3>
+    <p>Making a spaceship requires a lot of small pieces. Lets make something complex, very easily.</p>
 
-<p>Making a spaceship requires a lot of small pieces. Lets make something complex, very easily.</p>
+    <h4>Building a structure</h4>
 
-<h4>Building a structure</h4>
+    <p>We first make a master component of which lives in the window level. This can be seen in example_c folder spaceship.js</p>
 
-<p>We first make a master component of which lives in the window level. This can be seen in example_c folder spaceship.js</p>
+    <button type='button' class='import' id='spaceshipButton'>spaceship</button>
 
-<button type='button' class='import' id='spaceshipButton'>window.spaceship</button>
+    <p>Brilliant, If the button went green; we've imported our spaceship. You can go find it in the console as <span class="code">spaceship</span></p>
 
-<p>Brilliant, If the button went green; we've imported our spaceship. You can go find it in the console as <span class="code">spaceship</span></p>
+    <h4>Add Graphics!</h4>
 
-<h4>Add Graphics!</h4>
+    <p>So, code can be a little boring without something to play with. By implementing the <span class="code">spaceship.renderer</span> component will give us something to see.</p>
 
-<p>So, code can be a little boring without something to play with. By implementing the <span class="code">spaceship.renderer</span> component will give us something to see.</p>
+    <button type='button' class='import' id='spaceshipRendererButton'>spaceship.renderer</button>
 
-<button type='button' class='import' id='spaceshipRendererButton'>spaceship.renderer</button>
+    <button type="button" class="import hidden polyButton" id='triangleButton'>Triangle</button>
+    <button type="button" class="import hidden polyButton" id='squareButton'>Square</button>
+</div>
 
+<div class="right">
+    <canvas id="canvas" style="width: 800px; height: 500px;"></canvas>
+</div>
 </html>
+

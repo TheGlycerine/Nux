@@ -8,9 +8,14 @@ examples = {
 	},
 	importRenderer: function(button) {
 		Nux.use(['spaceship.renderer'], function(){
-			console.log('spaceship renderer');
+			
 			$(button).addClass('imported');
 		}, 'js/examplec');
+	},
+	renderPoly: function(count) {
+		$(this).addClass('imported');
+
+		return basic.shape.polygon(count);
 	}
 }
 
@@ -20,9 +25,17 @@ $(document).ready(function(){
 	});
 
 	$('#spaceshipRendererButton').click(function(){
-		examples.importRenderer(this)
+		examples.importRenderer(this);
+		$('.polyButton').removeClass('hidden');
 	});
 
+	$('#triangleButton').click(function(){
+		examples.renderPoly.call(this, 3)
+	})
+
+	$('#squareButton').click(function(){
+		examples.renderPoly.call(this, 4)
+	})
 });
 
 nuxReady = function(){

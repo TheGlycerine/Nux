@@ -21,7 +21,7 @@
 				 */
 				// If this extension has requirements, push them into the array of listeners 
 				// required for the handler event
-				if( meta.required ){
+				if( meta && meta.required ){
 					importObject.expectedListeners = importObject.expectedListeners.concat(meta.required);
 				}
 			},
@@ -30,6 +30,7 @@
 				var ex = listener.item._meta;
 				var map = (ex && ex.map)? ex.map: null,
 					required = (ex && ex.required)? ex.required: null;
+					errors = (ex && ex.errors)? ex.errors: null;
 
 				if(required) {
 					// Check the extension for required - push the allowed
@@ -38,6 +39,20 @@
 						// Boot should be allowed.
 						listener.item._meta.boot('requires');
 					}, (ex.hasOwnProperty('importObject'))? ex.importObject.path: null);
+				}
+
+				if(errors) {
+					/*
+					Implement errors given to for native implementation.
+					An error will be provided if the error number has
+					been used.
+					 */
+					for (var errorNo in errors) {
+						if (errors.hasOwnProperty(errorNo)) {
+							var e = errors.errorNo;
+							Nux.errors.add(errorNo, errors[errorNo]);
+						}
+					}
 				}
 
 
@@ -82,7 +97,7 @@
 							}
 						}
 						// chain the methods into the mapping
-						}
+					}
 				}
 			}
 		}

@@ -109,8 +109,10 @@
 						// positioned the same in the arguments
 						// list
 						//importObject.extensions.push(listener.item);
-						ex.importObject = importObject;
-						ex.path = importObject.path;
+						if(ex) {
+							ex.importObject = importObject;
+							ex.path = importObject.path;
+						}
 						// This item is expected and has listeners attached waiting.
 						Nux.listener.handleExpected(importObject, listener.item, ex);
 					}

@@ -134,7 +134,57 @@
 				return Nux;
 			},
 
-			configif: function(strOrObj) {
+			relatives: function(strOrObj, path){
+				/*
+				pass a string, array or object and 
+				all paths with a relative reference at the
+				start of the string will be replaced with
+				a context to the extensionPath
+				 */
+				
+				var rep = function(s){
+					var p = path
+					var r = './'
+					
+					if(p.slice(-1) != '/') {
+						p += '/';
+					}
+					if( s.slice(0, r.length) == r) {
+						return (p + s.slice(r.length));
+					} else {
+						return s
+					}
+				}
+
+				if( typeof( strOrObj ) == 'string') {
+					return rep(strOrObj);
+				} else if( strOrObj instanceof Array ) {
+					var retObj = []
+					for (var i = 0; i < strOrObj.length; i++) {
+						retObj.push( rep(strOrObj[i]) );
+					};
+					return retObj;
+
+				} else if( typeof(strOrObj) == 'object' ) {
+					var retObj = {};
+
+					for( var key in strOrObj ) {
+						var val = strOrObj[key];
+						if( typeof(val) == 'string' ) {
+							retObj[key] = rep(val);
+						} else if (val instanceof Array) {
+							// expecting array
+							retObj[key] = []
+							for (var i = 0; i < val.length; i++) {
+								retObj[key].push( rep(val[i]) );
+							};
+						}
+					}
+					return retObj;
+				}
+			},
+
+			configif: function(strOrObj, match) {
 				/*
 				returned is a relicated object or
 				string with sprintf formatted strings

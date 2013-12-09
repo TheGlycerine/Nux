@@ -77,7 +77,11 @@
 				// clean nux string
 				var pc = arg(arguments, 2, Nux.__config().assetPath);
 				var paths = Nux.config.configif(obj);
-				ljs.load(paths, cb);
+				var metaPc = (pc.hasOwnProperty('_meta'))? pc._meta.path: pc;
+
+				var relPaths = Nux.config.relatives(obj, metaPc);
+				console.log(paths, relPaths, metaPc)
+				ljs.load(relPaths, cb);
 				try {
 					// console.log('load', obj, pc)
 				} catch(e) {
@@ -109,7 +113,7 @@
 
 					})(listener);
 					ex.assetsLoaded = false
-					Nux.assets.load(assets, assetsLoaded);
+					Nux.assets.load(assets, assetsLoaded, listener.item);
 				} else {
 					if(listener.item.hasOwnProperty('_meta')){
 						ex.assetsLoaded = true;

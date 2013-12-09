@@ -93,7 +93,7 @@
 			} else {
 				return Import(Nux.__config().extensionNamespace);
 			}
-
+			console.log("Space", name, _space)
 			return _space;	
 		},
 		spaceHash: {},
