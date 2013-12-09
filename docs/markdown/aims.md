@@ -3,89 +3,89 @@
 + Build a large javascript object by importing many smaller files through the conventions of the application.
 
 ````javascript
-        Nux.use([
-            'car.wheels',
-            'car.doors',
-            'car.engine',
-            'car.driver'
-        ])
+Nux.use([
+    'car.wheels',
+    'car.doors',
+    'car.engine',
+    'car.driver'
+])
 ````
 
 + Provide a naming convention targeted toward the extensions logic.
 
 
 ````javascript
-        Nux.use([
-            'app',
-            'app.model',
-            'app.model.shortcuts',
-            'app.controller'
-        ], function(){
-            Nux.use('app.controller.foo');
-        })
+Nux.use([
+    'app',
+    'app.model',
+    'app.model.shortcuts',
+    'app.controller'
+], function(){
+    Nux.use('app.controller.foo');
+})
 ````
 
 
 + Allow an extension to be imported when needed.
 ````javascript
-        Nux.use('music.player', function(){
-            $('#random_button').click(function(){
-                Nux.use('music.artists.shuffle', function(){
-                    this.suffler();
-                })
-            })
+Nux.use('music.player', function(){
+    $('#random_button').click(function(){
+        Nux.use('music.artists.shuffle', function(){
+            this.suffler();
         })
+    })
+})
 ````
 
 + An extension can require assets (external JS/CSS) files to be imported when used
 
 ````javascript
-        // car.doors
-        var _doors = Nux.NS('car.doors');
+// car.doors
+var _doors = Nux.NS('car.doors');
 
-        _doors.lock = function(){
-            car.windows.close();
-        }
+ _doors.lock = function(){
+     car.windows.close();
+}
 
-        _doors_._meta.assets = [
-            './vendor/verlet-1.0.0.js',
-        ]
+_doors_._meta.assets = [
+    './vendor/verlet-1.0.0.js',
+]
 ````
 
 + An extension can require other extensions (through use of the Nux naming convention) to be implemented prior to the use of the target import.
 
 ````javascript
-        // car.doors
-        var _doors = Nux.NS('car.doors');
+// car.doors
+var _doors = Nux.NS('car.doors');
 
-        _doors.lock = function(){
-            car.windows.close();
-        }
+_doors.lock = function(){
+    car.windows.close();
+}
 
-        _doors._meta.required = [
-            'car.windows',
-        ]
+_doors._meta.required = [
+    'car.windows',
+]
 ````
 
 + Nux implements required data though use of the `_meta` object on every import.
 
 ````javascript
-        var _foo = Nux.NS('things.foo');
-            
-        _foo._meta.main = function(config) {
-            // debugger
-            console.log("BOOT: foo")
-        }
-        
-        _foo._meta.map = {}
-        
-        _kernel._meta.foo = [
-            //'nux.extension.furnace'
-        ]
-        
-        _furnace._meta.assets = [
-            './foo.js'
-        ]
+var _foo = Nux.NS('things.foo');
+    
+_foo._meta.main = function(config) {
+    // debugger
+    console.log("BOOT: foo")
+}
+
+_foo._meta.map = {}
+
+_kernel._meta.foo = [
+    //'nux.extension.furnace'
+]
+
+_furnace._meta.assets = [
+    './foo.js'
+]
 ````
 
 + An extension imported with Nux can be overridden by other extensions. Allowing for easy importing.
@@ -93,24 +93,24 @@
 + An extension would load and boot once, but may be imported (silently) many times
 
 ````javascript
-        var _foo = Nux.NS('things.foo');
-            
-        _foo._meta.main = function(config) {
-            // debugger
-            console.log("BOOT: foo")
-        }
+var _foo = Nux.NS('things.foo');
+    
+_foo._meta.main = function(config) {
+    // debugger
+    console.log("BOOT: foo")
+}
 
-        Nux.use('thing.foo');
-        // BOOT: foo
-        Nux.use('thing.foo');
-        Nux.use('thing.foo');
+Nux.use('thing.foo');
+// BOOT: foo
+Nux.use('thing.foo');
+Nux.use('thing.foo');
 ````
 
 
 + Nux can be extended with _batteries_ to augment extension loading
 
 ````javascript
-        Nux.use(['kernel', 'signals', 'logger', 'timer']);
+Nux.use(['kernel', 'signals', 'logger', 'timer']);
 ````
 
 + Anything Nux can live without, lives in the batteries.
@@ -153,19 +153,19 @@ To implement a sexy logic into Nux, you follow a simple rule - create a file bas
 File `basic.shape.js` would be imported with:
 
 ````javascript
-    // your code
-    Nux.use('basic.shape')
+// your code
+Nux.use('basic.shape')
 ````
 
 A basic file (minimum setup) layout for `basic.shape.js`:
 
 ````javascript
-    // basic.shape.js
-    var shape = Nux.NS('basic.shape');
+// basic.shape.js
+var shape = Nux.NS('basic.shape');
     
-    shape.myFoo = function(){
-        console.log("Hey! I'm a nux extension")
-    }
+shape.myFoo = function(){
+    console.log("Hey! I'm a nux extension")
+}
 ````
 
 ### MVC
@@ -184,12 +184,12 @@ Most of the examples follow simple base use of the Nux framework. For a more log
 By nature of a Nux extension, and the methods used to setup an objects are modular. As modular as you need to.
 
 ````javascript
-    Nux.use([
-        'car',
-        'car.wheels',
-        'car.doors',
-        'car.headlights'
-    ])
+Nux.use([
+    'car',
+    'car.wheels',
+    'car.doors',
+    'car.headlights'
+])
 ````
 
 Each component is specifically designed to it's module. Each module can be imported when required - therefore you do not need to download lots of code at once.
@@ -211,12 +211,12 @@ This is an excellent idea. Why load 8000 lines of javascript all at once? Does t
 Consider if you could load all your Youtube code when someone presses the youtube button?
 
 ````javascript
-    $('#play_video').click(function(){
-        Nux.use(['view.youtube', 'data.youtube'], function(){
-            // Play the first video in the youtube data list
-            view.player.play(data.youtube.links[0])
-        }, 'js/my_favorites/')
-    })
+$('#play_video').click(function(){
+    Nux.use(['view.youtube', 'data.youtube'], function(){
+        // Play the first video in the youtube data list
+        view.player.play(data.youtube.links[0])
+    }, 'js/my_favorites/')
+})
 ````
 
 This is a little example of what could be achieved. All data and assets will be loaded before the handler is called.
