@@ -2,23 +2,23 @@
 
 + Build a large javascript object by importing many smaller files through the conventions of the application.
 
-    Nux.use([
-        'car.wheels',
-        'car.doors',
-        'car.engine',
-        'car.driver'
-    ])
+        Nux.use([
+            'car.wheels',
+            'car.doors',
+            'car.engine',
+            'car.driver'
+        ])
 
 + Provide a naming convention targeted toward the extensions logic.
 
-    Nux.use([
-        'app',
-        'app.model',
-        'app.model.shortcuts',
-        'app.controller'
-    ], function(){
-        Nux.use('app.controller.foo');
-    })
+        Nux.use([
+            'app',
+            'app.model',
+            'app.model.shortcuts',
+            'app.controller'
+        ], function(){
+            Nux.use('app.controller.foo');
+        })
 
 + Allow an extension to be imported when needed.
 
