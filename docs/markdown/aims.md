@@ -22,79 +22,79 @@
 
 + Allow an extension to be imported when needed.
 
-    Nux.use('music.player', function(){
-        $('#random_button').click(function(){
-            Nux.use('music.artists.shuffle', function(){
-                this.suffler();
+        Nux.use('music.player', function(){
+            $('#random_button').click(function(){
+                Nux.use('music.artists.shuffle', function(){
+                    this.suffler();
+                })
             })
         })
-    })
 
 + An extension can require assets (external JS/CSS) files to be imported when used
     
-    // car.doors
-    var _doors = Nux.NS('car.doors');
+        // car.doors
+        var _doors = Nux.NS('car.doors');
 
-    _doors.lock = function(){
-        car.windows.close();
-    }
+        _doors.lock = function(){
+            car.windows.close();
+        }
 
-    _doors_._meta.assets = [
-        './vendor/verlet-1.0.0.js',
-    ]
+        _doors_._meta.assets = [
+            './vendor/verlet-1.0.0.js',
+        ]
 
 + An extension can require other extensions (through use of the Nux naming convention) to be implemented prior to the use of the target import.
 
-    // car.doors
-    var _doors = Nux.NS('car.doors');
+        // car.doors
+        var _doors = Nux.NS('car.doors');
 
-    _doors.lock = function(){
-        car.windows.close();
-    }
+        _doors.lock = function(){
+            car.windows.close();
+        }
 
-    _doors._meta.required = [
-        'car.windows',
-    ]
+        _doors._meta.required = [
+            'car.windows',
+        ]
 
 + Nux implements required data though use of the `_meta` object on every import.
 
-    var _foo = Nux.NS('things.foo');
+        var _foo = Nux.NS('things.foo');
+            
+        _foo._meta.main = function(config) {
+            // debugger
+            console.log("BOOT: foo")
+        }
         
-    _foo._meta.main = function(config) {
-        // debugger
-        console.log("BOOT: foo")
-    }
-    
-    _foo._meta.map = {}
-    
-    _kernel._meta.foo = [
-        //'nux.extension.furnace'
-    ]
-    
-    _furnace._meta.assets = [
-        './foo.js'
-    ]
+        _foo._meta.map = {}
+        
+        _kernel._meta.foo = [
+            //'nux.extension.furnace'
+        ]
+        
+        _furnace._meta.assets = [
+            './foo.js'
+        ]
 
 + An extension imported with Nux can be overridden by other extensions. Allowing for easy importing.
 
 + An extension would load and boot once, but may be imported (silently) many times
 
-    var _foo = Nux.NS('things.foo');
-        
-    _foo._meta.main = function(config) {
-        // debugger
-        console.log("BOOT: foo")
-    }
+        var _foo = Nux.NS('things.foo');
+            
+        _foo._meta.main = function(config) {
+            // debugger
+            console.log("BOOT: foo")
+        }
 
-    Nux.use('thing.foo');
-    // BOOT: foo
-    Nux.use('thing.foo');
-    Nux.use('thing.foo');
+        Nux.use('thing.foo');
+        // BOOT: foo
+        Nux.use('thing.foo');
+        Nux.use('thing.foo');
 
 
 + Nux can be extended with _batteries_ to augment extension loading
     
-    Nux.use(['kernel', 'signals', 'logger', 'timer']);
+        Nux.use(['kernel', 'signals', 'logger', 'timer']);
 
 + Anything Nux can live without, lives in the batteries.
     
