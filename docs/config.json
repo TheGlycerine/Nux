@@ -1,0 +1,8 @@
+{
+	"title": "Nux documenation",
+	"tagline": "Make big javascript little",
+	"docs_path": "./markdown",
+	"theme": "blue",
+	"float": true,
+	"repo": "github.com/Strangemother/Nux"
+}

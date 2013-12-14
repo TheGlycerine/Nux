@@ -55,18 +55,17 @@
             // implement a an object set into
             // nux.
             var lf = function(){    
-
+                    console.log("implementing cached", this.paths)
                     return [
                         this.paths, 
                         this.method(this.config, NuxConfig), 
                         this.config
                     ];
                 };
-
-            for (var i = __nux.length - 1; i >= 0; i--) {
-                var v = (lf).apply( __nux[i]);
+            for (var i = 0; i < __nux.length; i++) {
+                var v = (lf).apply( __nux[i] );
                 this.implement.apply(this, v);
-            }
+            };
 
         },
         implement: function(paths, method, config) {

@@ -105,13 +105,18 @@
                 <p>I making a game with with a car. My car has a few components.</p>
 
                 <pre>
-                    <code data-language="javascript">// Files folder |- car.doors.js // lots of code about doors. |- car.wheels.js // lots of code about wheels
+                    <code data-language="javascript">
+// Files folder
+|- car.doors.js // lots of code about doors. 
+|- car.wheels.js // lots of code about wheels
                     </code>
                 </pre>
                 <p>Implementing the code for the car needs something like:</p>
                 <pre>
                     <code data-language="javascript">
-                        Nux.use([‘doors’, ‘wheels’], function(){ console.log(car.doors, car.wheels); });
+Nux.use([‘doors’, ‘wheels’], function(){ 
+    console.log(car.doors, car.wheels); 
+});
                     </code>
                 </pre>
                 <p>You car has now been extended.</p>
@@ -140,13 +145,18 @@
             <p>Performing an import is the core functionality within Nux. The method is simple.</p>
             <pre>
                 <code data-language="javascript">
-                    Nux.use('foo', function(){ console.log("foo component has been imported.") })
+Nux.use('foo', function(){ 
+    console.log("foo component has been imported.") 
+})
                 </code>
             </pre>
             <p>In order to perform this task, you will need to have an file named 'foo' in your extension path. Inside the foo file, the minimum requirement is as follows:</p>
             <pre>
                 <code data-language="javascript">
-                    var _foo = Nux.NS('foo'); _foo._meta.main = function(config){ Nux.core.slog("Run foo") }
+var _foo = Nux.NS('foo'); 
+_foo._meta.main = function(config){ 
+    Nux.core.slog("Run foo") 
+}
                 </code>
             </pre>
 
@@ -172,7 +182,9 @@
             <p>The _meta.main method is almost like a constuct of a class. Nux runs this method with your extension is implemented. This method is optional; you don't have to run any method when your extension is loaded.</p>
             <pre>
                 <code data-language="javascript">
-                    _foo._meta.main = function(config){ Nux.core.slog("Run foo") }
+_foo._meta.main = function(config){ 
+    Nux.core.slog("Run foo") 
+}
                 </code>
             </pre>
             <p>The
@@ -185,8 +197,7 @@
             </h2>
             <p>Errors are an important part of complete code. Errors can be raised through the preferred method of:</p>
             <pre>
-                <code data-language="javascript">
-                    errors.throw(0)</code>
+                <code data-language="javascript">errors.throw(0)</code>
             </pre>
             <p>By using the central dispatch, errors can be captured correctly.</p>
             <p>To implement your own errors to raise through the framework, simply append the key, value to the error object. To see a full list of available errors:</p>
@@ -198,7 +209,13 @@
             <p>Of which will return something looking like this; an Object containing a list of error types key (number) and value (string):</p>
             <pre>
                 <code data-language="javascript">
-                    Object { 4: "not implemented", 11: "event exists", 20: "event missing", 30: "Missing allowed", 75: "refuse asset" }
+Object { 
+    4: "not implemented", 
+    11: "event exists", 
+    20: "event missing", 
+    30: "Missing allowed", 
+    75: "refuse asset" 
+}
                 </code>
             </pre>
 

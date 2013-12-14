@@ -1,6 +1,6 @@
 ;(function(){
 	NuxComponentHeader.apply(this, arguments)
-})('use', {
+})('_use', {
 	// global options
 },function(){
 	// Your implementation goes here.
@@ -12,6 +12,7 @@
 	return function(obj){
 		console.log("Implement shortcuts")
 		
+		/*
 		var self = this;
 		self.load 			= self.fetch.load;
 		self.configure		= self.config.configure;
@@ -21,6 +22,6 @@
 		self.onReady 		= self.events.ready;
 		self.onAllExpected 	= self.events.allExpected;
 		self.addAllowed 	= self.config.addAllowed;
-	
+		*/
 	}
 })

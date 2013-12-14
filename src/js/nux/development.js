@@ -25,6 +25,7 @@ var components = [
 	'nx/fetch',
 	'nx/listener',
 	'nx/settings',
+	'nx/stack',
 	'nx/signature',
 	'nx/use',
 	'nx/shortcuts',

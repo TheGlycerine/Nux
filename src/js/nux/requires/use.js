@@ -7,6 +7,7 @@
 	// Nux may not exist, therefore A light loader is implemented
 	// and your content is stored until the method can
 	// be successfully applied.
+	
 	return function(obj){
 		/* provide array or string of assets to import */
 		var handler = arg(arguments, 1, Nux._F);
@@ -19,9 +20,11 @@
 		
 		var ip = (this._meta && this._meta.importObject)? this._meta.importObject.path: Nux.__config().extensionPath;
 		var path = arg(arguments, 2, ip);
+		
 		if(Themis.of(path, Object)) {
 			path = (path.hasOwnProperty('_meta'))? path._meta.path: ip;
 		}
+
 		if(!Nux.booted) {
 			Nux.errors.throw(00, 'Nux.boot() must be performed')
 		}

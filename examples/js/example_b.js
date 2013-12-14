@@ -1,4 +1,4 @@
-nuxReady = function(){
+_nuxReady = function(){
 	// This method will boot when nux is prepared
 
 	// lets build a car!
@@ -8,8 +8,9 @@ nuxReady = function(){
 		console.log("---")
 		car.lock()
 	}, 'js/exampleb/car_parts/');
- 
+ /*
 	_human = Nux.use(['human.body'], function(){
 		console.log(human);
 	}, 'js/exampleb/human_parts/')	
+*/
 }

@@ -18,8 +18,10 @@ NuxComponentHeader = function __self(){
 		   return obj
 		}
 
+		console.log('caching', arguments[0])
 		NuxImplement(arguments);
 	} else {
+		console.log("implementing", arguments[0])
 		Nux.implement.apply(this, arguments);
 	}
 

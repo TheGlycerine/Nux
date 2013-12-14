@@ -48,12 +48,10 @@
 					handlerHooks.push(_name);
 				};
 				
-				// name is implemented as array only
-				Nux.listener.add(handlerHooks, handler, path);
-
 				console.time(handlerHooks)
 				// Add removeListener (on name import list) handler to listeners
 				Nux.listener.add(handlerHooks, function(ext){
+					handler.apply(this, [ext])
 					console.timeEnd(ext.name);
 				}, path);
 

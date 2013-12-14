@@ -35,10 +35,21 @@
 				if(required) {
 					// Check the extension for required - push the allowed
 					// into the import array for this extension.
+					Nux.stack.traverse('expected', function(name){
+						if(name == listener.name) {
+							console.log('Inserting required for', name, required)
+							this.add(required);
+						}
+					});
+
+					
 					Nux.use(required, function(){
 						// Boot should be allowed.
-						listener.item._meta.boot('requires');
-					}, (ex.hasOwnProperty('importObject'))? ex.importObject.path: null);
+						console.log('Required booted');
+						Nux.stack.traverse('required', function(name) {
+							debugger;
+						})
+					}, (ex.hasOwnProperty('importObject'))? ex.importObject.path: ex.path);
 				}
 
 				if(errors) {
