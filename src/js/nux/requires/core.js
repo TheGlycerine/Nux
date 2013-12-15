@@ -31,6 +31,7 @@
 					}
 			}				
 
+			if(Nux.hasOwnProperty('signature'))
 			var overrides = Nux.signature.overridesAllowed(name);
 			// Overrides will have been previously
 			// applied through the allowed permissions

@@ -63,15 +63,52 @@ module.exports = function(grunt) {
     watch: {
       files: ['<%= jshint.files %>'],
       tasks: ['jshint']
+    },
+    closureCompiler:  {
+      buildout: {
+
+        // [OPTIONAL] set an output file
+        dest: '../dist/google_comp.js'
+      },
+      options: {
+        // [REQUIRED] Path to closure compiler
+        compilerFile: '../lib/compiler.jar',
+
+        // [OPTIONAL] set to true if you want to check if files were modified
+        // before starting compilation (can save some time in large sourcebases)
+        checkModified: true,
+
+        // [OPTIONAL] Set Closure Compiler Directives here
+        compilerOpts: {
+          /**
+           * Keys will be used as directives for the compiler
+           * values can be strings or arrays.
+           * If no value is required use null
+           *
+           * The directive 'externs' is treated as a special case
+           * allowing a grunt file syntax (<config:...>, *)
+           *
+           * Following are some directive samples...
+           */
+           compilation_level: 'ADVANCED_OPTIMIZATIONS',
+           externs: ['js/nux/requires/**/*.js', 'js/nux/nux.js'],
+      
+           warning_level: 'verbose',
+           jscomp_off: ['checkTypes', 'fileoverviewTags'],
+           summary_detail_level: 3,
+           output_wrapper: '"(function(){%output%}).call(this);"'
+        },
+      },
     }
   });
 
+  // grunt.loadNpmTasks('grunt-devtools');
+  grunt.loadNpmTasks('grunt-closure-tools');
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-qunit');
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-contrib-concat');
-
   grunt.registerTask('test', ['jshint']);
 
   grunt.registerTask('default', ['jshint', 'concat', 'uglify']);

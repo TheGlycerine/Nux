@@ -165,13 +165,16 @@
 				console.log('GOT', listener.name)
 
 				// remove a listener based upon a passed sort method
+				
+				/*
 				Nux.stack.traverse('expected', function(name){
 					if(name == listener.name) {
 						console.log('SLICE', name)
 						this.remove(name);
 					}
 				});
-
+				*/
+			
 				while(len--) {
 					var importObject = Nux.listener.listeners[len];
 

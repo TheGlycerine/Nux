@@ -55,17 +55,31 @@
             // implement a an object set into
             // nux.
             var lf = function(){    
-                    console.log("implementing cached", this.paths)
+                    console.log("implementing cached", this.paths);
                     return [
                         this.paths, 
                         this.method(this.config, NuxConfig), 
                         this.config
                     ];
                 };
+
+            /*
+            FOUND BUG!
+
+            By reversing this method listing, the 
+            "implement shortcuts" bug occurs.
+            
+             */
             for (var i = 0; i < __nux.length; i++) {
                 var v = (lf).apply( __nux[i] );
                 this.implement.apply(this, v);
-            };
+            }
+            /*
+            for (var j = __nux.length - 1; j >= 0; j--) {
+                var y = (lf).apply( __nux[j] );
+                this.implement.apply(this, y);
+            }
+            */
 
         },
         implement: function(paths, method, config) {

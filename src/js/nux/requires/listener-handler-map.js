@@ -35,6 +35,8 @@
 				if(required) {
 					// Check the extension for required - push the allowed
 					// into the import array for this extension.
+					
+					if(Nux.hasOwnProperty('stack'))
 					Nux.stack.traverse('expected', function(name){
 						if(name == listener.name) {
 							console.log('Inserting required for', name, required)
