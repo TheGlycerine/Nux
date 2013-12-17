@@ -16,6 +16,46 @@ Nux provides a namespaced module loader. Smaller files are loaded from a specifi
 
 Covering all bases, Nux sits as a tiny loadout building a larger more complex javascript object without you needing to code the ropes.
 
+# Project Projects
+A lot of work is being put into a final product, of which will be married with Nux modules. Here is a list of open-source projects used and future project scoped:
+
+
++ https://github.com/Strangemother/infared
+communicate with infared using a simple python wrapper
+
++ http://strangemother.github.io/python-object-overload/
+convert dot notation string into python object mapping
+
++ https://github.com/Strangemother/crystal
+natural language question answering program
+
++ https://github.com/Strangemother/gravel2
+javascript popup handler
+
++ https://github.com/Strangemother/getterSetterJS
+Getter Setter functionality for your Javascript variables.
+
++ https://github.com/Strangemother/gridster.js
+gridster.js is a jQuery plugin that makes building intuitive draggable layouts
+
++ https://github.com/Strangemother/color-toner
+color-toner app presents all possible tone schemes based upon your provided color.
+
++ https://github.com/Strangemother/dictdiffer
+JS  diff and patch dictionaries
+
++ https://github.com/Strangemother/pocketsocket
+Plug and play Python / Javascript websockets
+
++ https://github.com/Strangemother/bridge-install
+Install script for standalone Bridge server
++ https://github.com/Strangemother/bridge-js
+Bridge for Javascript 
+
++ https://github.com/Strangemother/JS-Message-Notify
+
+
+
 ## Simply put.
 
 When building something complicated like a game or an application, You don't build a giant blob of FOO app; you create many individual elements and
