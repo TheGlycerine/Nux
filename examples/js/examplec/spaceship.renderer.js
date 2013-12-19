@@ -19,26 +19,6 @@ renderer.getCanvas = function(canvasId){
     return canvas;
 }
 
-renderer.setupSim = function(){
-	/*
-	Setup the entire simulator
-	 */
-	var canvas = this.getCanvas('canvas');
-	var sim = new VerletJS(canvas.width, canvas.height, canvas);
-	sim.friction = .1;
-	return sim
-}
-
-renderer.animationLoop = function(simulator){
-	// animation loop
-    var loop = function() {
-            simulator.frame(16);
-            simulator.draw();
-            requestAnimFrame(loop);
-    };
-
-    loop();
-}
 
 renderer.setup = function(){
 	this.simulator = this.setupSim();
@@ -49,17 +29,12 @@ renderer.setup = function(){
 }
 
 renderer._meta.main = function(){
+	debugger;
 	this.setup()
 	console.log("Spaceship renderer");
 }
 
-
-
 renderer._meta.required = [
-	'spaceship',
-	'basic.shape',
-]
-
-renderer._meta.assets = [
-	'./vendor/verlet-1.0.0.js',
+	'basic.renderer.verlet',
+	'basic.shape'
 ]

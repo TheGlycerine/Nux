@@ -7,6 +7,7 @@ _shape.polygon = function(points, simulator) {
 	polygon(1, [sim])
 	 */
 	var _sim = simulator || this.simulator();
+	debugger
 	if(!_sim) return Nux.errors.throw(101, _sim);
 
 	var _points 	= 3,
@@ -43,11 +44,8 @@ _shape.simulator = function(sim) {
 }
 
 _shape._meta.required = [
+	'basic.renderer.verlet',
 	'basic.shape.shortcut'
-]
-
-_shape._meta.assets = [
-	'./vendor/verlet-1.0.0.js',
 ]
 
 _shape._meta.errors = {

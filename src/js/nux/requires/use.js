@@ -34,9 +34,27 @@
 		if(Themis.of(handler, String) && path == ip) {
 			path = handler;
 			handler = Nux._F;
-		}
-		var hook = Nux.fetch.use(obj, handler, path, obj);
+		} 
 
-		return hook;
+		
+		var boundNux = (function(){
+			
+			var Bound = function(){};
+			Bound.prototype = Nux.fetch.use(obj, handler, path, obj);
+			var bound = new Bound();
+
+			bound.__rebind = Nux.once(function(data){
+				// integrate the content of the data to this listener
+				// when it's imported.
+
+			});
+			
+			bound.path = path;
+			bound.imports = obj
+			bound.handlers = [handler.bind(bound)];
+			return bound;
+		})();
+
+		return boundNux;
 	}
 })

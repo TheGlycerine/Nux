@@ -55,7 +55,7 @@
             // implement a an object set into
             // nux.
             var lf = function(){    
-                    console.log("implementing cached", this.paths);
+                    // console.log("implementing cached", this.paths);
                     return [
                         this.paths, 
                         this.method(this.config, NuxConfig), 
@@ -119,6 +119,7 @@
 
             // Map module into Nux.
             for(var key in config) {
+                // console.log('assign', key)
                 NuxConfig[key] = config[key];
             }
 

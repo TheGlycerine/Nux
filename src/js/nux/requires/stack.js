@@ -82,6 +82,7 @@
 		traverse: function(scope, func) {
 			for (var i = 0; i < stackSpace.length; i++) {
 				var stack = stackSpace[i];
+				if(stack.hasOwnProperty(scope))
 				var items = stack[scope].each(func);
 			};
 		},

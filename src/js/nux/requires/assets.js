@@ -80,9 +80,18 @@
 				var metaPc = (pc.hasOwnProperty('_meta'))? pc._meta.path: pc;
 
 				var relPaths = Nux.config.relatives(obj, metaPc);
-				console.log(paths, relPaths, metaPc)
-				ljs.load(relPaths, cb);
+
+				// console.log('Load', paths, relPaths, metaPc)
+				if(metaPc) {
+					for (var i = 0; i < relPaths.length; i++) {
+						if(metaPc[metaPc.length-1] == '/' || relPaths[i][0] == '/') {
+							relPaths[i] = metaPc + '' + relPaths[i];
+						}
+					};
+				}
 				try {
+
+					ljs.load(relPaths, cb);
 					// console.log('load', obj, pc)
 				} catch(e) {
 					console.log(e)
@@ -92,34 +101,35 @@
 }).chain({
 	'listener.handler': 'CHAIN'
 }, function(){
+
 	return {
 		listener: {
 			handler: function(listener){
+				// assets inhection
 				var ex = listener.item._meta;
 				var assets = (ex && ex.assets)? ex.assets: null;
 
-				if(assets) {
-					var assetsLoaded = (function(listener){
+				if(assets && assets.length > 0) {
+					// this.add(listener.name, 'assets', assets);
+					var importPath = (ex) ? ex.importObject.path: null;
+					
+					console.log("ASSETS", assets)
 
-						// This method will be called 
-						// when the assets have been loaded. If no
-						// assets are required, it will be called
-						// immediately.
-						var ext = listener.item
+					Nux.assets.load(assets, (function(ex){
+						var self = this;
+
 						return function(){
-							ext._meta.assetsLoaded = true;
-							ext._meta.boot('assets');
+							console.log("DONE ASSETS", assets);
 						}
-
-					})(listener);
-					ex.assetsLoaded = false
-					Nux.assets.load(assets, assetsLoaded, listener.item);
+					}).apply(this, [ex]), importPath)
 				} else {
 					if(listener.item.hasOwnProperty('_meta')){
 						ex.assetsLoaded = true;
 					}
 				}
-				
+
+				Nux.listener.newStyleStack.stripFromStack('required', listener.name)
+				Nux.listener.newStyleStack.handle(listener);
 			}
 		}
 	}

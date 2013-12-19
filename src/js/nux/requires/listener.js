@@ -34,17 +34,17 @@
 				var importObject = Nux.listener.importObject(hookChain, handler, path)
 
 				// Create a new stack to be monitored by the import framework.
-				var stackSpace = Nux.stack.create(hookChain, handler);
-
-				// Add data to be given to the handlers when called
-				stackSpace.data.path = path;
-
-				// Add a set of strings into array set
-				stackSpace.expected.add(hookChain);
-				stackSpace.handlers.add(handler);
+				if(Nux.hasOwnProperty('stack')) {
+					var stackSpace = Nux.stack.create(hookChain, handler);
+	
+					// Add data to be given to the handlers when called
+					stackSpace.data.path = path;
+	
+					// Add a set of strings into array set
+					stackSpace.expected.add(hookChain);
+					stackSpace.handlers.add(handler);
+				}
 				
-				console.log('add', names);
-
 				Nux.listener.listeners.push(importObject);
 				return true;
 			},
@@ -144,6 +144,98 @@
 					return this._stack.hasOwnProperty(index);
 				}
 			},
+			newStyleStack: {
+				_stacks: {},
+				addToStack: function(id, stack, values) {
+					console.log('add', id, stack)
+					if(!this._stacks.hasOwnProperty(id)) {
+						this._stacks[id] = {}
+					}
+
+					if(!this._stacks[id].hasOwnProperty(stack)) {
+						this._stacks[id][stack] = [];
+					}
+
+					this._stacks[id][stack] = this._stacks[id][stack].concat(values)
+					// console.log(id, this._stacks[id])
+					// console.log('this._stacks[', id, '][', stack, ']', values);
+					// console.log(this._stacks)
+
+				},
+				stripFromStack: function(_slice, value) {
+
+					var stackSize = 0,
+						ready = {};
+
+					for (var id in this._stacks) {
+						stackSize++;
+						var slice = this._stacks[id][_slice];
+						// if value in stack[slice] - remove it.
+						// console.log('looking at', slice)
+						if(!slice) {
+							console.warn("Missing slice for", id, this._stacks, '=', slice);
+						} else {
+							var i = slice.indexOf(value);
+
+							// console.log('finding slice', value, typeof(value), 'in', slice, 'for', id)
+							if(i > -1) {
+								// console.log('slice', value, 'from', _slice, slice, i)
+								slice.splice(i, 1);
+							}
+						}
+
+						if(slice.length == 0) {
+							// console.log(_slice, "done for slice", id)
+							if(!ready.hasOwnProperty(id)) ready[id] = []
+							ready[id].push(_slice);
+						}
+					}
+
+					return ready;
+				},
+				finished: function(id){
+					/*
+					If all elements within a stack entity is empty (all
+					elements within the slice array have been removed using
+					stripFromStack()) then true is returned.
+					 */
+					var dic = (id)? this._stacks[id]: this._stacks;
+					var v, t=0;
+					for (var prop in dic) {
+						v = this._stacks[id][prop];
+						t += v.length;
+					}
+
+					return Boolean(!t);
+				},
+				handle: function(listener){ 
+					var ex = listener.item._meta;
+					var map = (ex && ex.map)? ex.map: null,
+						required = (ex && ex.required)? ex.required: null,
+						errors = (ex && ex.errors)? ex.errors: null,
+						assets = (ex && ex.assets)? ex.assets: null;
+				},
+				has: function(id, stack) {
+
+					for (var prop in this._stacks[id]) {
+						if(this._stacks[prop] == stack) {
+							return true
+						}
+					}
+					return false;
+				},
+				expected: function(id) {
+					/*
+					Return an object defining arrays of elements needed.
+					if an element in an array is empty, all requested
+					items have been removed with stripFromStack
+					 */
+					if(id) {
+						return this._stacks[id]
+					}
+					return this._stacks;
+				}
+			},
 			handler: function(listener) {
 				/*
 				An extension was imported. The object passed is the 
@@ -162,10 +254,11 @@
 				// strip the listener names from expected listeners
 				var len = Nux.listener.listeners.length;
 				
-				console.log('GOT', listener.name)
+				// console.log('GOT', listener.name)
 
 				// remove a listener based upon a passed sort method
 				
+
 				/*
 				Nux.stack.traverse('expected', function(name){
 					if(name == listener.name) {
@@ -174,7 +267,7 @@
 					}
 				});
 				*/
-			
+				
 				while(len--) {
 					var importObject = Nux.listener.listeners[len];
 
@@ -209,7 +302,10 @@
 						Nux.listener.listeners.splice(len, 1);
 					}
 				};
-
+				
+				Nux.listener.newStyleStack.stripFromStack('required', listener.name)
+				Nux.listener.newStyleStack.handle(listener)
+			
 				Nux.listener.callListenerHook(handlers, listener.item, listener.item._meta)
 			},
 

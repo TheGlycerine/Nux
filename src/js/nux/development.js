@@ -16,18 +16,21 @@ var deps = [
 var components = [
 	'nx/_F',
 	'nx/init',
-	'nx/assets',
 	'nx/bootloader',
 	'nx/core',
 	'nx/config',
 	'nx/errors',
+	'nx/once',
 	'nx/events',
 	'nx/fetch',
 	'nx/listener',
 	'nx/settings',
-	'nx/stack',
+	'nx/indexchain',
 	'nx/signature',
 	'nx/use',
+	'nx/required',
+	'nx/assets',
+	'nx/data',
 	'nx/shortcuts',
     // <script src="../src/js/nux/nux.js"></script>
 	'nux'

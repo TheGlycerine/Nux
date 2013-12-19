@@ -33,7 +33,7 @@
 				 */
 				var handler = arg(arguments, 1, Nux._F);
 				var path = arg(arguments, 2, Nux.__config().extensionPath);
-	
+				
 				// Add to handler chain
 				// This method may throw an error is the asset has been refused.
 				
@@ -51,7 +51,7 @@
 				console.time(handlerHooks)
 				// Add removeListener (on name import list) handler to listeners
 				Nux.listener.add(handlerHooks, function(ext){
-					handler.apply(this, [ext])
+					handler(ext)
 					console.timeEnd(ext.name);
 				}, path);
 
