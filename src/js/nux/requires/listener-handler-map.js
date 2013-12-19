@@ -129,7 +129,6 @@
 					errors = (ex && ex.errors)? ex.errors: null,
 					assets = (ex && ex.assets)? ex.assets: null;
 
-				console.log("Handle expected", listener.name)
 				/*
 				if(ex) listener.item._meta._assets = false;
 

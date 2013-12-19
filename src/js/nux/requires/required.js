@@ -29,7 +29,7 @@ An extension can optionally provide a list of elements
 				if(required) {
 					// this.addToStack(listener.name, 'required', required);
 					var self = this;
-					console.log(listener.name, 'needs', required)
+					console.log('REQUIRED', listener.name, required)
 					Nux.fetch.use(required, function(){
 						console.log('REQUIRED received', required)
 					}, ex.path);

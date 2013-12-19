@@ -240,12 +240,16 @@
 				/*
 				An extension was imported. The object passed is the 
 				listener object containing the extension and the handler
+
 				 */
+				
 				// call all methods hooked
 				var ex = listener.item._meta;
 				// This will be filled with handlers expected to
 				// be called - 
 				var handlers = [];
+				
+				console.log("Handle expected", listener.name)
 
 				if(!ex && listener.name != 'com.iskitz.ajile') {
 					console.warn("Wooh! this extension has no _meta?", listener)
@@ -305,15 +309,13 @@
 				
 				Nux.listener.newStyleStack.stripFromStack('required', listener.name)
 				Nux.listener.newStyleStack.handle(listener)
-			
-				Nux.listener.callListenerHook(handlers, listener.item, listener.item._meta)
+				
+				if(handlers.length > 0) {
+					Nux.listener.callHandles(handlers, listener.item, listener.item._meta);
+				}
 			},
 
-			handleExpected: function(importObject, extension, meta) {
-
-			},
-
-			callListenerHook: function(handlers, extension, meta){
+			callHandles: function(handlers, extension, meta){
 				// Called for the listener hooks waiting on an extension and it's
 				// requirements to be called. Once all valid imports are
 				// successfull, this method is called
@@ -322,9 +324,17 @@
 
 				// Call each handler in the array
   				for (var i = 0; i < handlers.length; i++) {
-					var hook = handlers[i];
-					hook.apply(Nux, [extension]);
+					handlers[i].apply(Nux, [extension]);
 				};
+			},
+
+			callHandler: function(handler, extension, meta) {
+				/*
+				callHandles() method calls this repeately until all handlers
+				are called. Each handler is a method appled via use() or similar
+				to wait on an exention. 
+				 */
+				 handler.apply(Nux, [extension, meta])
 			}
 		}
 })

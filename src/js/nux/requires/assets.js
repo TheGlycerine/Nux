@@ -113,7 +113,7 @@
 					// this.add(listener.name, 'assets', assets);
 					var importPath = (ex) ? ex.importObject.path: null;
 					
-					console.log("ASSETS", assets)
+					console.log("ASSETS  ", listener.name, assets)
 
 					Nux.assets.load(assets, (function(ex){
 						var self = this;
