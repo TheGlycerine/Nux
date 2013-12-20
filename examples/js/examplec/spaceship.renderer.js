@@ -21,15 +21,15 @@ renderer.getCanvas = function(canvasId){
 
 
 renderer.setup = function(){
-	this.simulator = this.setupSim();
-	this.animationLoop(this.simulator);
+	this.simulator = basic.renderer.verlet.setupSim();
+	basic.renderer.verlet.animationLoop(this.simulator);
 	basic.shape.simulator(this.simulator);
 	this.polygon(4)
 	
 }
 
 renderer._meta.main = function(){
-	debugger;
+	;
 	this.setup()
 	console.log("Spaceship renderer");
 }

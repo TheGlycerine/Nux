@@ -13,6 +13,12 @@
 	
 	return {
 		spaceDefinitions: [],
+		metaSpace: function(name){
+			return {
+				name: name,
+				created: +(new Date)		
+			}
+		},
 		newSpace: function(name, space) {
 			/*
 			Write a new namespace for a preloading extension
@@ -25,10 +31,7 @@
 			}
 			
 			if(!space.hasOwnProperty('_meta')) {
-				space['_meta'] = {
-						name: name,
-						created: +(new Date)		
-					}
+				space['_meta'] = Nux.core.metaSpace(name)
 			}				
 
 			if(Nux.hasOwnProperty('signature'))

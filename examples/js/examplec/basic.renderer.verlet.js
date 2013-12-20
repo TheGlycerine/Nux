@@ -22,6 +22,7 @@ _verlet.animationLoop = function(simulator){
 }
 
 _verlet.setup = function(){
+	console.log("Verlet setup")
 	this.simulator = this.setupSim();
 	this.animationLoop(this.simulator);	
 }
@@ -42,7 +43,6 @@ _verlet.getCanvas = function(canvasId){
 }
 
 _verlet._meta.main = function(){
-	debugger;
 	this.setup(); 
 	console.log("Spaceship _verlet");
 }

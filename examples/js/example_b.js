@@ -1,4 +1,4 @@
-_nuxReady = function(){
+nuxReady = function(){
 	// This method will boot when nux is prepared
 
 	// lets build a car!

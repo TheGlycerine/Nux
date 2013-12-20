@@ -16,7 +16,7 @@ var deps = [
 var components = [
 	'nx/_F',
 	'nx/init',
-	'nx/bootloader',
+	// 'nx/bootloader',
 	'nx/core',
 	'nx/config',
 	'nx/errors',
@@ -28,6 +28,7 @@ var components = [
 	'nx/indexchain',
 	'nx/signature',
 	'nx/use',
+	'nx/stack',
 	'nx/required',
 	'nx/assets',
 	'nx/data',
@@ -37,8 +38,9 @@ var components = [
 ]
 
 var overrides = [
-	'nx/listener-handler-map',
-	'nx/use-ch'
+	'nx/boot',
+	//'nx/listener-handler-map',
+	// 'nx/use-ch'
 ]
 
 requirejs.config({

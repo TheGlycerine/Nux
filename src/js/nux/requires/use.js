@@ -40,13 +40,13 @@
 		var boundNux = (function(){
 			
 			var Bound = function(){};
+			// console.log(obj)
 			Bound.prototype = Nux.fetch.use(obj, handler, path, obj);
 			var bound = new Bound();
 
 			bound.__rebind = Nux.once(function(data){
 				// integrate the content of the data to this listener
 				// when it's imported.
-
 			});
 			
 			bound.path = path;

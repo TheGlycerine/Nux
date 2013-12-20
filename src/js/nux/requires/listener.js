@@ -33,18 +33,7 @@
 			
 				var importObject = Nux.listener.importObject(hookChain, handler, path)
 
-				// Create a new stack to be monitored by the import framework.
-				if(Nux.hasOwnProperty('stack')) {
-					var stackSpace = Nux.stack.create(hookChain, handler);
-	
-					// Add data to be given to the handlers when called
-					stackSpace.data.path = path;
-	
-					// Add a set of strings into array set
-					stackSpace.expected.add(hookChain);
-					stackSpace.handlers.add(handler);
-				}
-				
+							
 				Nux.listener.listeners.push(importObject);
 				return true;
 			},
@@ -248,8 +237,8 @@
 				// This will be filled with handlers expected to
 				// be called - 
 				var handlers = [];
-				
-				console.log("Handle expected", listener.name)
+
+				// console.log("Handle expected", listener.name)
 
 				if(!ex && listener.name != 'com.iskitz.ajile') {
 					console.warn("Wooh! this extension has no _meta?", listener)
@@ -291,7 +280,7 @@
 							ex.path = importObject.path;
 						}
 						// This item is expected and has listeners attached waiting.
-						Nux.listener.handleExpected(importObject, listener.item, ex);
+						// Nux.listener.handleExpected(importObject, listener.item, ex);
 					}
 
 					if(importObject.expectedListeners.length == 0) {
@@ -304,6 +293,7 @@
 						handlers = handlers.concat(importObject.listeners);
 
 						Nux.listener.listeners.splice(len, 1);
+						
 					}
 				};
 				
@@ -324,7 +314,7 @@
 
 				// Call each handler in the array
   				for (var i = 0; i < handlers.length; i++) {
-					handlers[i].apply(Nux, [extension]);
+					this.callHandler(handlers[i], extension, meta)
 				};
 			},
 
@@ -334,7 +324,9 @@
 				are called. Each handler is a method appled via use() or similar
 				to wait on an exention. 
 				 */
-				 handler.apply(Nux, [extension, meta])
+				
+					handler.apply(Nux, [extension, meta])
+				
 			}
 		}
 })

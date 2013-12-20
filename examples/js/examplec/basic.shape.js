@@ -7,7 +7,7 @@ _shape.polygon = function(points, simulator) {
 	polygon(1, [sim])
 	 */
 	var _sim = simulator || this.simulator();
-	debugger
+
 	if(!_sim) return Nux.errors.throw(101, _sim);
 
 	var _points 	= 3,

@@ -121,7 +121,7 @@
             for(var key in config) {
                 // console.log('assign', key)
                 NuxConfig[key] = config[key];
-            }
+            }   
 
             return assign(Nux, paths, method, config);
         },
