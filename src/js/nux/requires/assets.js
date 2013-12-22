@@ -100,17 +100,9 @@
 		}
 }).chain({
 	'listener.handler': 'CHAIN',
-	'core.metaSpace': 'CHAIN'
 }, function(){
 
 	return {
-		core: {
-			metaSpace: function() {
-				return {
-					foo:23
-				}
-			}
-		}, 
 		listener: {
 			handler: function(listener){
 				// assets inhection
@@ -122,14 +114,18 @@
 					var importPath = (ex) ? ex.importObject.path: null;
 					
 					console.log("ASSETS  ", listener.name, assets)
+					
 					Nux.stack.add(listener.name, 'assets', assets);
+					
 					Nux.assets.load(assets, (function(ex){
 						var self = this;
 						return function(){
 							Nux.stack.remove('assets', assets);
-							console.log("DONE ASSETS", this, assets);
-						}
-					}).apply(this, [ex]), importPath);
+						
+							console.log("DONE ASSETS", assets);
+						};
+
+					}).apply(listener.item, [ex]), importPath);
 
 				} else {
 

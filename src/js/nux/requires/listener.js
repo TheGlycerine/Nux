@@ -297,8 +297,8 @@
 					}
 				};
 				
-				Nux.listener.newStyleStack.stripFromStack('required', listener.name)
-				Nux.listener.newStyleStack.handle(listener)
+				//Nux.listener.newStyleStack.stripFromStack('required', listener.name)
+				//Nux.listener.newStyleStack.handle(listener)
 				
 				if(handlers.length > 0) {
 					Nux.listener.callHandles(handlers, listener.item, listener.item._meta);

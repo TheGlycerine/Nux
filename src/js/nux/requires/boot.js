@@ -25,14 +25,28 @@ will be executed.
 				var ex = listener.item._meta;
 				var map = (ex && ex.map)? ex.map: null,
 					required = (ex && ex.required)? ex.required: null,
-					errors = (ex && ex.errors)? ex.errors: null,
+					errors = (ex && ex.errors)? ex.erro]]]2q  rs: null,
 					assets = (ex && ex.assets)? ex.assets: null;
+				console.log("listener", listener.name);
+
+				if( Nux.stack.has(listener.name) ) {
+					debugger;
+					console.log('stack', listener.name, Nux.stack._stacks[listener.name])
+				}
+
 				if(ex) {
 					if(ex.hasOwnProperty('main')) {
-						Nux.stack.call(listener.name, function(){
-							ex.main.apply(listener.item, [Nux])
 
-							console.log("required and assets imported, boot", listener.name)
+
+						Nux.stack.callCollection(listener.name, function(stack, stacks){
+							
+							ex.main.apply(listener.item, [Nux]);
+							// A list of elements required
+							// before boot.
+							stack.sets()
+							console.log("required and assets imported, boot", listener.name);
+
+
 						})
 					}
 				}

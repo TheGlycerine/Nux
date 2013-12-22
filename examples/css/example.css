@@ -27,6 +27,14 @@ margin-left: 2em;
 text-transform: uppercase;
 }
 
+.navbar h2 {
+float: left;
+margin: 10px;
+font-size: 24px;
+border: none;
+padding: 0;
+}
+
 .dark span.code {
 color: #FFF;
 }

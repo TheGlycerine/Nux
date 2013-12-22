@@ -11,9 +11,10 @@ _example._meta.main = function(config) {
 	/*
 	should boot last
 	 */
-	console.log("3. BOOT: example C")
+	console.log("1. BOOT: example C - waited for chain")
 }
-
+/*
 _example._meta.required = [
 	'example.d'
 ]
+*/

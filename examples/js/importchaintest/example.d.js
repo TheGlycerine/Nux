@@ -11,5 +11,9 @@ _example._meta.main = function(config) {
 	/*
 	should boot last
 	 */
-	console.log("1. BOOT: example D")
+	console.log("3. BOOT: example D")
 }
+
+_example._meta.required = [
+	'example.e'
+]

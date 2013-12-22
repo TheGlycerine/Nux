@@ -31,11 +31,17 @@ An extension can optionally provide a list of elements
 					var self = this;
 
 					console.log('REQUIRED', listener.name, required)
-					Nux.stack.add(listener.name, 'required', required)
-					Nux.use(required, function(){
-						console.log('DONE REQUIRED', required)
-						Nux.stack.add('required', required)
-					}, ex.path);
+					// debugger;
+					Nux.stack.add(listener.name, 'required', required);
+					Nux.stack._stacks[listener.name].sets()
+					Nux.use(required, (function(){
+						var listener = this;
+						return function(){
+							Nux.stack.remove('required', required)
+							console.log('DONE REQUIRED', required)
+						}
+
+					}).call(listener), ex.path);
 				}
 			}
 		}
