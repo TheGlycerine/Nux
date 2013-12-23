@@ -31,13 +31,13 @@ To apply context to the framework - the components using the stack are 'required
 Conceptially, the Set is very simple. A set contains a 
 list of elements. When the list is emptied, a handler is called.
 
-Set +
- |- name: 'require'
- |- list: [
- |		'example.a', 
- |		'example.b'
- |	]
- |- handler: function(){ /* items imported */ }
+    Set +
+     |- name: 'require'
+     |- list: [
+     |		'example.a', 
+     |		'example.b'
+     |	]
+     |- handler: function(){ /* items imported */ }
 
 The Set is stored in a location accessible to all importing extensions. 
 when an extension imports, it's name is removed from a Set's list.
@@ -90,7 +90,7 @@ The handler would correct the stack and remove these elements when they turn up.
 
 ### Assets
 
-Assets work in the same method a requirements. A load list is received and assets are imported parallel to the extension imports. When these new javascript files turn up, they are trmoed from a Stack list.
+Assets work in the same method a requirements. A load list is received and assets are imported parallel to the extension imports. When these new javascript files turn up, they are removed from a Stack list.
 
 ### Wait
 
@@ -189,4 +189,95 @@ To Fix this the automaic waiting of cetain imports (i.e. 'Sets'), is applied to 
     Stack(B)
         Set('require', ['A'])
         Set('wait', [Stack(A)])
+    
+
+Lets take a look at a more complex example involving a deeper chain 
+and assets.
+Each stage is a snapshot of the resulting output for the Stacks. Many Stacks
+in this model is refered to as a collection or Stack Collection.
+
+    // Bigger example
+    Stack(D)
+            Set('require', ['C'])
+            Set('wait', [])
+    
+    // import C
+     
+    Stack(C)
+        Set('require', ['B'])
+        Set('wait', [])
+    
+    Stack(D)
+        Set('require', [])
+        Set('wait', [Stack(C)])
+    
+    // Import B
+    
+    Stack(B)
+        Set('require', ['A'])
+        Set('wait', [])
+    
+    Stack(C)
+        Set('require', [])
+        Set('wait', [Stack(B)])
+    
+    Stack(D)
+        Set('require', [])
+        Set('wait', [Stack(C)])
+    
+    // Import A
+    
+    Stack(A)
+        Set('require', [])
+        Set('wait', [])
+    
+    Stack(B)
+        Set('require', [])
+        Set('wait', [Stack(A)])
+    
+    Stack(C)
+        Set('require', [])
+        Set('wait', [Stack(B)])
+    
+    Stack(D)
+        Set('require', [])
+        Set('wait', [Stack(C)])
+      
+    // A Boots
+    
+    Stack(B)
+        Set('require', [])
+        Set('wait', [])
+    
+    Stack(C)
+        Set('require', [])
+        Set('wait', [Stack(B)])
+    
+    Stack(D)
+        Set('require', [])
+        Set('wait', [Stack(C)])
+     
+    // B Boots
+     
+    Stack(C)
+        Set('require', [])
+        Set('wait', [])
+    
+    Stack(D)
+        Set('require', [])
+        Set('wait', [Stack(C)])
+     
+    // C Boots
+    
+    Stack(D)
+        Set('require', [])
+        Set('wait', [])
+    
+    // D Boots
+
+
+
+
+
+
 
