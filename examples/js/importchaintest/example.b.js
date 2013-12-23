@@ -11,5 +11,5 @@ _example._meta.main = function(config) {
 	/*
 	should boot last
 	 */
-	console.log("1. BOOT: example B")
+	console.log("1. BOOT B: First to boot")
 }

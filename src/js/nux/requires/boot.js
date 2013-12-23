@@ -27,24 +27,31 @@ will be executed.
 					required = (ex && ex.required)? ex.required: null,
 					errors = (ex && ex.errors)? ex.errors: null,
 					assets = (ex && ex.assets)? ex.assets: null;
-					console.log("listener", listener.name);
+					// console.log("listener", listener.name);
 
 				if( Nux.stack.has(listener.name) ) {
 					console.warn('stack', listener.name, Nux.stack._stacks[listener.name])
 				}
 
 				if(ex) {
-					if(ex.hasOwnProperty('main')) {
-						Nux.stack.callCollection(listener.name, function(stack, stacks){
-							
-							ex.main.apply(listener.item, [Nux]);
-							// A list of elements required
-							// before boot.
-							stack.sets()
-							console.log("required and assets imported, boot", listener.name);
+					var stack = Nux.stack.createOrReturn(listener.name)
+					var bootMethod =  function(stack, stacks){
+				
+						ex.main.apply(listener.item, [Nux]);
+						// A list of elements required
+						// before boot.
+						// stack.sets()
+						console.log("required and assets imported, boot", listener.name);
 
-
-						})
+					}
+					if(ex.hasOwnProperty('main') && stack.ready()) {
+					
+						console.log('* BOOT Booting', listener.name)
+						Nux.stack.callCollection(listener.name, bootMethod)
+						console.log('* BOOT BOOTED', listener.name);
+						// Inform the stack this listener is done
+						Nux.stack.callCollection(bootMethod)
+						
 					}
 				}
 

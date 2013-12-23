@@ -11,7 +11,7 @@ _example._meta.main = function(config) {
 	/*
 	should boot last
 	 */
-	console.log("1. BOOT: example C - waited for chain")
+	console.log("1. BOOT C: First to boot")
 }
 /*
 _example._meta.required = [
