@@ -26,6 +26,7 @@ An extension can optionally provide a list of elements
 				var ex = listener.item._meta;
 				var required = (ex && ex.required)? ex.required: null;
 
+				// debugger;
 				if(required) {
 					// this.addToStack(listener.name, 'required', required);
 					var self = this;
@@ -33,7 +34,14 @@ An extension can optionally provide a list of elements
 					console.log('REQUIRED', listener.name, required)
 					// debugger;
 					Nux.stack.add(listener.name, 'required', required);
+					/*
+					Given is a list of Sets - elements to 
+					wait for empty before executing the final
+					handler
+					
 					Nux.stack._stacks[listener.name].sets()
+
+					 */
 					Nux.use(required, (function(){
 						var listener = this;
 						return function(){

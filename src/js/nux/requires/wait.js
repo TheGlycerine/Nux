@@ -11,9 +11,8 @@ will be executed.
  */
 ;(function(){
 	return NuxComponentHeader.apply(this, arguments)
-})('bootmain', {
+})('wait', {
 }, function(){
-	console.log("Boot")
 }).chain({
 	// global options
 	'listener.handler': 'CHAIN', // Ensure this occurs before chain occurs
@@ -27,26 +26,12 @@ will be executed.
 					required = (ex && ex.required)? ex.required: null,
 					errors = (ex && ex.errors)? ex.errors: null,
 					assets = (ex && ex.assets)? ex.assets: null;
-					console.log("listener", listener.name);
-
-				if( Nux.stack.has(listener.name) ) {
-					console.warn('stack', listener.name, Nux.stack._stacks[listener.name])
-				}
-
-				if(ex) {
-					if(ex.hasOwnProperty('main')) {
-						Nux.stack.callCollection(listener.name, function(stack, stacks){
-							
-							ex.main.apply(listener.item, [Nux]);
-							// A list of elements required
-							// before boot.
-							stack.sets()
-							console.log("required and assets imported, boot", listener.name);
-
-
-						})
-					}
-				}
+					console.log("wait listener", listener.name);					
+					
+					Nux.stack.add(listener.name, 'wait', []);
+					
+					var collection = Nux.stack._stacks[listener.name];
+					debugger;
 
 				// if boot
 				// add function to stacks

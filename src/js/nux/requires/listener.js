@@ -291,11 +291,11 @@
 						// Merge the listeners of the import handlers into the array
 						// of handlers to be called.
 						handlers = handlers.concat(importObject.listeners);
-
 						Nux.listener.listeners.splice(len, 1);
 						
 					}
 				};
+				
 				
 				//Nux.listener.newStyleStack.stripFromStack('required', listener.name)
 				//Nux.listener.newStyleStack.handle(listener)

@@ -48,8 +48,10 @@
 				this._handler;
 				this.handler = function(handler){
 					if(handler === undefined) {
-						console.log("Collection Handler", this)
-						var _h = this._handler.apply(this.scope() || Nux, [this]);
+						if(this._handler) {
+							console.log("Collection Handler", this)
+							var _h = this._handler.apply(this.scope() || Nux, [this]);	
+						}
 						handled = true;
 						return _h;
 					} else {
@@ -169,9 +171,9 @@
 				this.testHandler = function(){
 					// call the handler if the set is ready.
 					var _ready = this.ready()
-					if(_ready) debugger;
+					// if(_ready) debugger;
 					if(_ready && this.handler && !handled){
-						console.log('AUTO HANDLER', this._class, this.name, 'HANDLE')
+						console.log('  -', this.name, 'finished')
 						this.handler(this);
 
 						this.handled = true;
@@ -188,20 +190,26 @@
 
 				}
 
-
+				this.has = function(value) {
+					// return true/false
+					// if this Set has the value 
+					// within it's stack.
+					return (this.list.indexOf(value) > -1)
+				}
 
 				this.remove = function(values){
 					/* remove one or more elements from the list */
+					var self = this;
 					var _strip = function(value){
-
-						if(this.removeFilter) {
-							var r = this.removeFilter()(this, value);
+						var r = self.removeFilter();
+						if(r) {
+							r(this, value);
 						} else {
-							var j = this.list.indexOf(value);
+							var j = self.list.indexOf(value);
 							// console.log('finding slice', value, typeof(value), 'in', slice, 'for', id)
 							if(j > -1) {
 								console.log('slice', value)
-								this.list.splice(j, 1);
+								self.list.splice(j, 1);
 							}
 						}
 
@@ -246,9 +254,9 @@
 			Create a new boot stack to be given back
 			 */
 			var collection = this.createOrReturn(id);
-			
 			// This should be a collection element returned.
 			if(!collection.has(stack)) {
+				console.log("+ ", id)
 
 				// stack should be an array
 				set = this.Set(stack, values, function(){
@@ -257,7 +265,7 @@
 					the elements from the 'values' has been stripped from the
 					Sets list.
 					 */
-					console.log('SET HANDLER', this.name, ' handler')
+					console.log('  -', this.name, 'add() handler')
 				});
 
 				collection.add(set);
@@ -266,6 +274,13 @@
 				set = collection.set(stack)
 				set.add(values)
 			}
+
+			// Apply to other collection wait set - This
+			// extension must complete before the 
+			// referenced collection completes.
+			// debugger;
+
+			// Now apply this
 
 		},
 		remove: function(_slice, value){
@@ -285,7 +300,7 @@
 					collection.handler();
 
 				}else if(!collection.set(_slice)) {
-					console.warn("Missing slice for", id, this._stacks, '=', collection);
+					// console.warn("Missing slice for", id, this._stacks, '=', collection);
 				} else {
 					/* Remove this element from the stack Set */
 					//console.log("Slicing", _slice, value)
@@ -351,7 +366,7 @@
 			return comp;
 		},
 		has: function(id, stack) {
-
+			
 			for (var prop in this._stacks[id]) {
 				if(prop == stack) {
 					return true

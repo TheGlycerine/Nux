@@ -31,6 +31,7 @@ var components = [
 	'nx/stack',
 	'nx/required',
 	'nx/assets',
+	'nx/wait',
 	'nx/data',
 	'nx/shortcuts',
     // <script src="../src/js/nux/nux.js"></script>
