@@ -35,20 +35,11 @@ will be executed.
 						// At this point, This element should be sliced from
 						// other waits?
 					}).scope(listener)
-					Nux.stack.each(function(stack) {
-						// Nux.stack
-						// 	._stacks['example.a']
-						// 	.set('required')
-						// 	.has(listener.name)
-						stack.each(function(set){
-							var _s = stack;
-							var _c = collection;
-							// if(collection.name == 'example.c' && set.name == 'required') debugger
-							if( set.has(_c.name) ) {
-								// Push this stack into the wait
-								stack.set('wait').add(collection)
-							}							
-						})
+					Nux.stack.eachSet(function(set, stack) {
+						if( set.has(collection.name) ) {
+							// Push this stack into the wait
+							stack.set('wait').add(collection)
+						}
 					})
 
 				// if boot

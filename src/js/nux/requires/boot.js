@@ -29,10 +29,6 @@ will be executed.
 					assets = (ex && ex.assets)? ex.assets: null;
 					// console.log("listener", listener.name);
 
-				if( Nux.stack.has(listener.name) ) {
-					console.warn('stack', listener.name, Nux.stack._stacks[listener.name])
-				}
-
 				if(ex) {
 					var stack = Nux.stack.createOrReturn(listener.name)
 					var bootMethod =  function(stack, stacks){

@@ -359,7 +359,20 @@
 				}
 			}
 		},
-
+		eachSet: function(func){
+			// iter each Set in every
+			// Stack.
+			Nux.stack.each(function(stack) {
+				// Nux.stack
+				// 	._stacks['example.a']
+				// 	.set('required')
+				// 	.has(listener.name)
+				stack.each(function(set){
+					var _s = stack;
+					func(set, _s);
+				})
+			})
+		},
 		callCollection: function(id, f, s){
 			/*
 			return the chain handle method assigned to
@@ -450,7 +463,7 @@
 				})
 				return o;
 			}
-			
+
 			for (var prop in this._stacks[id]) {
 				if(prop == stack) {
 					return true
