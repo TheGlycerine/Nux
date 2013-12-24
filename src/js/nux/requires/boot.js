@@ -29,31 +29,45 @@ will be executed.
 					assets = (ex && ex.assets)? ex.assets: null;
 					// console.log("listener", listener.name);
 
-				if(ex) {
-					var stack = Nux.stack.createOrReturn(listener.name)
-					var bootMethod =  function(stack, stacks){
+				var stack = Nux.stack.createOrReturn(listener.name)
 				
+				var bootMethod =  function(ex){
+					if(ex.hasOwnProperty('main')) {
 						ex.main.apply(listener.item, [Nux]);
-						// A list of elements required
-						// before boot.
-						// stack.sets()
-						console.log("required and assets imported, boot", listener.name);
+					};
 
-					}
-					if(ex.hasOwnProperty('main') && stack.ready()) {
-					
-						console.log('* BOOT Booting', listener.name)
-						Nux.stack.callCollection(listener.name, bootMethod)
-						console.log('* BOOT BOOTED', listener.name);
-						// Inform the stack this listener is done
-						Nux.stack.callCollection(bootMethod)
-						
-					}
+					console.log("Boot method", listener.name);
+					Nux.stack.remove('boot', listener.name)
+					// A list of elements required
+					// before boot.
+					// stack.sets()
 				}
 
-				// if boot
-				// add function to stacks
-
+				// Nux.stack.report()
+				
+				if(ex && ex.hasOwnProperty('main')) {
+					var collection =  Nux.stack.add(listener.name, 'boot', [listener.name]);
+					
+					// Add this collection.boot to any other
+					// boot - therefore when a boot occurs - all
+					// elements waiting for it's boot is called.
+					Nux.stack.eachSet(function(set, collection){
+						if(set.has(listener.name) && (collection.name != listener.name) ) {
+							console.log('BOOT', listener.name, 'waits for', collection.name)
+							collection.set('boot').add(listener.name);
+						}
+					})
+					
+					collection.handler( (function(){
+						var ex = this;
+						return function(){
+							console.log('Boot');
+							bootMethod(ex);
+						}
+					}).apply(ex) )
+					// if boot
+					// add function to stacks
+				}
 			}
 		}
 	}

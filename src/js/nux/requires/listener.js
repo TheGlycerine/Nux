@@ -296,7 +296,7 @@
 					}
 				};
 				
-				
+
 				//Nux.listener.newStyleStack.stripFromStack('required', listener.name)
 				//Nux.listener.newStyleStack.handle(listener)
 				
@@ -325,7 +325,7 @@
 				to wait on an exention. 
 				 */
 				
-					handler.apply(Nux, [extension, meta])
+				handler.apply(Nux, [extension, meta])
 				
 			}
 		}

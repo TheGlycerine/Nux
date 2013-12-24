@@ -29,6 +29,7 @@ var components = [
 	'nx/signature',
 	'nx/use',
 	'nx/stack',
+	'nx/set',
 	'nx/required',
 	'nx/assets',
 	'nx/wait',

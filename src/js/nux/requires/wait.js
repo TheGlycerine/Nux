@@ -29,15 +29,11 @@ will be executed.
 					// console.log("!!  listener", listener.name);					
 					
 					var collection =  Nux.stack.add(listener.name, 'wait', []);
-					// var collection = Nux.stack._stacks[listener.name];
-					collection.handler(function(){
-						console.log("^ WAIT DONE collection(stack) handler", listener.name)
-						// At this point, This element should be sliced from
-						// other waits?
-					}).scope(listener)
+					
 					Nux.stack.eachSet(function(set, stack) {
 						if( set.has(collection.name) ) {
 							// Push this stack into the wait
+							console.log("Push (wait)", collection.name, 'to', stack.name)
 							stack.set('wait').add(collection)
 						}
 					})

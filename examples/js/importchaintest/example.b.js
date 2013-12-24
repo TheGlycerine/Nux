@@ -8,8 +8,6 @@ _example.myFoo = function(){
 /* Nux extension stuff below */
 
 _example._meta.main = function(config) {
-	/*
-	should boot last
-	 */
+	/* should boot last */
 	console.log("1. BOOT B: First to boot")
 }

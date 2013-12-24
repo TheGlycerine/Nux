@@ -1,5 +1,5 @@
 ;(function(){
-	NuxComponentHeader.apply(this, arguments)
+	return NuxComponentHeader.apply(this, arguments)
 })('stack', {
 	// global options
 },function(){
@@ -18,9 +18,11 @@
 				var handled = false;
 				this._class = 'Collection';
 				this.name = name;
+				var self = this;
 				this.add = function(set){
 					// add a set to the collection
 					sets.push(set);
+					// this.handleIfReady()
 					return this;
 				}
 
@@ -51,23 +53,35 @@
 					return (name)? this.has(name, true): sets;
 				}
 
-				this._handler;
+				this._handler = [];
 				this.handler = function(handler){
 
 					if(handler === undefined) {
 
-						if(this._handler) {
-							console.log("- Collection Handler")
-							var _h = this._handler.apply(this.scope() || Nux, [this]);	
+						if(this._handler.length > 0) {
+							var _h = (function(){
+								var self=this;
+								return function(){
+									handled = true;
+									var scope = self.scope()
+									for (var i = self._handler.length - 1; i >= 0; i--) {
+										var __handler = self._handler[i];
+										__handler.apply(scope || Nux, [self]);
+									};
+								}
+							}).call(this)
+
 						} else {
-							console.log("collection has no handler", this.name)
+							if(this.name == 'example.c') debugger;
+							console.warn("collection has no handler", this.name)
 						}
 
-						handled = true;
+						
 						return _h;
 
 					} else {
-						this._handler = handler;
+						this._handler.push(handler);
+						this.handleIfReady()
 						return this;
 					}
 				}
@@ -117,18 +131,39 @@
 					 */
 					return (this.ready() && handled);
 				}
-				this.remove = function(arr) {
+
+				this.remove = function(name, arr) {
 					// pass an array of elements to be removed
 					// from the inner sets. 
 					// The concept of a set collection, defines all 
 					// set.list()'s elements are globally deleted when
 					// an asset arrives; as all extensions (a stack) 
 					// share resources.
+					if(arr === undefined && Themis.of(name, Array))  {
+						arr = name;
+						name = undefined;
+					}
+
 					this.each(function(set){
-						
-						if(arr.length > 0) set.remove(arr);
-					})
+						if(arr.length > 0) {
+							if(name && set.name ==  name) {
+								set.remove(arr);
+							} else {
+								set.remove(arr);
+							}
+						}
+					});
+					this.handleIfReady()
 				};
+
+				this.handleIfReady = function(){
+					if(this._handler===false) return false;
+					if(this.ready() && !this.done()) {
+						var h = this.handler();
+						if(h) h()
+					}
+					return false;
+				}
 
 				return this;
 			}).apply({}, [name]);
@@ -150,7 +185,7 @@
 				}
 			}
 		},
-
+ 
 		Set: function(name, list, handler){
 			/*
 			A set defines a name and a list of elements.
@@ -240,9 +275,12 @@
 						if(r) {
 							r(this, value);
 						} else {
+							// if(value == 'example.c') debugger;
 							var j = self.list.indexOf(value);
 							// console.log('finding slice', value, typeof(value), 'in', slice, 'for', id)
 							if(j > -1) {
+								// if(Themis.of(value, Object)) debugger;
+								if(self.name == 'boot' && value == 'example.a')debugger;
 								console.log('slice', self.name, value)
 								self.list.splice(j, 1);
 							}
@@ -275,10 +313,24 @@
 		},
 		createOrReturn: function(name){
 			if(!this.hasSet(name)) {
+				console.log("MAKE", name);
+				if(name == 'example.c') debugger
 				this._stacks[name] = this.SetCollection(name);
 			} 
 			return this._stacks[name];
 		
+		},
+		create: function(name, handler) {
+			/* By using the create() method,
+			you can ensure a correct handler is 
+			applied to the collection stack */
+			
+			// A dummy collection evokes the createOrReturn
+			var collection =  Nux.stack.add(name, 'stack', []);
+
+			// A handler is added (in theory a boot method)
+			collection.handler(handler)
+			return collection
 		},
 		add: function(id, stack, values) {
 			/*
@@ -327,23 +379,25 @@
 				var collection = this._stacks[id]
 				// if value in stack[slice] - remove it.
 				if(collection.ready() && !collection.done()) {
-					console.log('- STACK Call collection(stack)', collection.name);
+					console.log('- STACK Call collection(stack)', collection.name, _slice);
 
 					// this should occur after the 
 					// required have booted.
-					collection.handler();
+					var _h = collection.handler();
+					console.log(_h)
 
 				}else if(!collection.set(_slice)) {
 					// console.warn("Missing slice for", id, this._stacks, '=', collection);
 				} else {
 					/* Remove this element from the stack Set */
 					//console.log("Slicing", _slice, value)
-					var i = collection.remove(value);
+					if(collection.name == _slice) {
+						var i = collection.remove(value);
+					}
 				}
 
 				if(this.finished(id)) {
-
-					this.call(id)
+					this.callCollection(id);
 				}
 				
 			}
@@ -382,7 +436,7 @@
 			
 			var _call = function(h){
 				if(h) {
-					return h.apply((collection)?collection.scope() || Nux: this, [collection, this._stacks])
+					return h.apply((collection)? collection.scope() || Nux: this, [collection, this._stacks])
 				};
 			}
 
@@ -399,8 +453,9 @@
 						// of creation.
 						// This should be a boot
 						// method (for a)
-						console.log('MAST BOOT')
-						 debugger;
+						
+						// console.log('Stack callCollection', stack.name)
+						// debugger;
 						
 						var _h = stack.handler() || f;
 
@@ -434,17 +489,21 @@
 			var setCount = 0;
 			for (var ext in this._stacks) {
 				setCollection = this._stacks[ext];
-
-				for (var name in setCollection) {
-					setCount++;
-					var set = setCollection[name];
-					this._stacks[ext][set]
-					if(set.hasOwnProperty('ready')) {
-						if( set.ready() ) {
-							ready += 1;
+				if(setCollection._class == 'Collection') {
+					if( setCollection.ready() ) {
+						ready += 1;
+					}
+				} else {
+					for (var name in setCollection) {
+						setCount++;
+						var set = setCollection[name];
+						this._stacks[ext][set]
+						if(set.hasOwnProperty('ready')) {
+							if( set.ready() ) {
+								ready += 1;
+							}
 						}
 					}
-
 				}
 			}
  
@@ -484,6 +543,23 @@
 				return this._stacks[id]
 			}
 			return this._stacks;
+		}
+	}
+}).chain({
+	// global options
+	'listener.handler': 'CHAIN_FIRST', // Ensure this occurs before chain occurs
+},function(){
+	return {
+		listener: {
+			handler: function(listener){
+				console.log("CREATE stack", listener.name)
+				
+				Nux.stack.create(listener.name, function() {
+					console.log("ERM Boot?!", listener.name);
+					Nux.stack.report()
+				})
+
+			}
 		}
 	}
 })

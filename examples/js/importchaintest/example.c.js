@@ -5,14 +5,11 @@ _example.myFoo = function(){
 	return true;
 }
 
-/* Nux extension stuff below */
-
 _example._meta.main = function(config) {
-	/*
-	should boot last
-	 */
+	/* should boot last */
 	console.log("1. BOOT C: First to boot")
 }
+
 /*
 _example._meta.required = [
 	'example.d'
