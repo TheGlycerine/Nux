@@ -36,6 +36,7 @@ var components = [
 	'nx/data',
 	'nx/shortcuts',
     // <script src="../src/js/nux/nux.js"></script>
+	'nx/debug-interface',
 	'nux'
 ]
 

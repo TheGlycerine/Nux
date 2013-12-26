@@ -58,7 +58,8 @@
 				for (var i = 0; i < handlerHooks.length; i++) {
 					var name = handlerHooks[i];
 					// begin import
-					Nux.fetch.get(name, path);
+						Nux.fetch.get(name, path);
+				
 				};
 
 				// Nux.fetch.get(Nux.space(name), path);
@@ -99,7 +100,7 @@
 				return Nux.fetch._import(name, path);
 			},
 			
-			_import: function(name){
+			_import: function(name, path){
 				/*
 				Performs an import to the referenced file.
 				This should be used internally in favour of the 
@@ -111,8 +112,8 @@
 				 */
 				var path = arg(arguments, 1, Nux.__config().extensionPath),
 					v 	 = Include(name, path);
-				
 				return v;
+			
 			}
 		}
 })

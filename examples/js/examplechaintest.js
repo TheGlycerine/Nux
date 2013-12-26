@@ -7,3 +7,7 @@ nuxReady = function(){
 	}, 'js/importchaintest/');
 
 }
+
+$(document).ready(function(){
+
+})

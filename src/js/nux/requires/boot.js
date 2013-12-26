@@ -46,6 +46,8 @@ will be executed.
 				// Nux.stack.report()
 				
 				if(ex && ex.hasOwnProperty('main')) {
+					// console.log("Has boot")
+					// Nux.stack.report(listener.name)
 					var collection =  Nux.stack.add(listener.name, 'boot', [listener.name]);
 					
 					// Add this collection.boot to any other
@@ -58,6 +60,7 @@ will be executed.
 						}
 					})
 					
+					// When the boot chain is called.
 					collection.handler( (function(){
 						var ex = this;
 						return function(){

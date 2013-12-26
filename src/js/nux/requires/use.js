@@ -53,6 +53,7 @@
 			bound.imports = obj
 			bound.handlers = [handler.bind(bound)];
 			return bound;
+			
 		})();
 
 		return boundNux;
